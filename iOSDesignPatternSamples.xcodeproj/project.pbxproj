@@ -26,6 +26,9 @@
 		37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */; };
 		37BE2AED1F3748D9003DC1F8 /* UIKeyboardWillHide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEC1F3748D9003DC1F8 /* UIKeyboardWillHide.swift */; };
 		37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */; };
+		37BE2AF11F37526F003DC1F8 /* SearchViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF01F37526F003DC1F8 /* SearchViewDataSource.swift */; };
+		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
+		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +53,9 @@
 		37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardInfo.swift; sourceTree = "<group>"; };
 		37BE2AEC1F3748D9003DC1F8 /* UIKeyboardWillHide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardWillHide.swift; sourceTree = "<group>"; };
 		37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardWillShow.swift; sourceTree = "<group>"; };
+		37BE2AF01F37526F003DC1F8 /* SearchViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewDataSource.swift; sourceTree = "<group>"; };
+		37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +133,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AB61F3745D0003DC1F8 /* Main.storyboard */,
+				37BE2AF31F3759D1003DC1F8 /* Common */,
 				37BE2AC41F374673003DC1F8 /* Favorite */,
 				37BE2AC51F374673003DC1F8 /* Repository */,
 				37BE2AC61F374673003DC1F8 /* Search */,
@@ -156,6 +163,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2ACA1F374699003DC1F8 /* SearchViewController.swift */,
+				37BE2AF01F37526F003DC1F8 /* SearchViewDataSource.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -190,6 +198,15 @@
 				37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */,
 			);
 			path = NotieObserver;
+			sourceTree = "<group>";
+		};
+		37BE2AF31F3759D1003DC1F8 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */,
+				37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -255,6 +272,7 @@
 				37BE2ACF1F3746E2003DC1F8 /* RepositoryViewController.xib in Resources */,
 				37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */,
 				37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */,
+				37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */,
 				37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */,
 				37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */,
 			);
@@ -289,7 +307,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
+				37BE2AF11F37526F003DC1F8 /* SearchViewDataSource.swift in Sources */,
 				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
+				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
 				37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
