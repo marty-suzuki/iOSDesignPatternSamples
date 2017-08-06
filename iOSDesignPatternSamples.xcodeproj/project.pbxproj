@@ -23,6 +23,9 @@
 		37BE2AE51F374790003DC1F8 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AE11F374790003DC1F8 /* RxSwift.framework */; };
 		37BE2AE61F374790003DC1F8 /* SwiftIconFont.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */; };
 		37BE2AE81F37480F003DC1F8 /* NoticeObserveKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */; };
+		37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */; };
+		37BE2AED1F3748D9003DC1F8 /* UIKeyboardWillHide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEC1F3748D9003DC1F8 /* UIKeyboardWillHide.swift */; };
+		37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +51,9 @@
 		37BE2AE11F374790003DC1F8 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
 		37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftIconFont.framework; path = Carthage/Build/iOS/SwiftIconFont.framework; sourceTree = "<group>"; };
 		37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NoticeObserveKit.framework; path = Carthage/Build/iOS/NoticeObserveKit.framework; sourceTree = "<group>"; };
+		37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardInfo.swift; sourceTree = "<group>"; };
+		37BE2AEC1F3748D9003DC1F8 /* UIKeyboardWillHide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardWillHide.swift; sourceTree = "<group>"; };
+		37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardWillShow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
+				37BE2AE91F374889003DC1F8 /* NotieObserver */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -181,6 +188,16 @@
 				37BE2AD51F37471B003DC1F8 /* SafariServices.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		37BE2AE91F374889003DC1F8 /* NotieObserver */ = {
+			isa = PBXGroup;
+			children = (
+				37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */,
+				37BE2AEC1F3748D9003DC1F8 /* UIKeyboardWillHide.swift */,
+				37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */,
+			);
+			path = NotieObserver;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -279,9 +296,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
 				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
+				37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
+				37BE2AED1F3748D9003DC1F8 /* UIKeyboardWillHide.swift in Sources */,
 				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
 				37BE2AC21F37460C003DC1F8 /* AppDelegate.swift in Sources */,
 			);
