@@ -42,10 +42,6 @@
 		37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewController.swift; sourceTree = "<group>"; };
 		37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserRepositoryViewController.xib; sourceTree = "<group>"; };
 		37BE2AD51F37471B003DC1F8 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
-		37BE2AD71F37477B003DC1F8 /* GithubKit.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = GithubKit.framework.dSYM; path = Carthage/Build/iOS/GithubKit.framework.dSYM; sourceTree = "<group>"; };
-		37BE2AD81F37477B003DC1F8 /* Nuke.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = Nuke.framework.dSYM; path = Carthage/Build/iOS/Nuke.framework.dSYM; sourceTree = "<group>"; };
-		37BE2AD91F37477B003DC1F8 /* RxSwift.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = RxSwift.framework.dSYM; path = Carthage/Build/iOS/RxSwift.framework.dSYM; sourceTree = "<group>"; };
-		37BE2ADA1F37477B003DC1F8 /* SwiftIconFont.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = SwiftIconFont.framework.dSYM; path = Carthage/Build/iOS/SwiftIconFont.framework.dSYM; sourceTree = "<group>"; };
 		37BE2ADF1F374790003DC1F8 /* GithubKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GithubKit.framework; path = Carthage/Build/iOS/GithubKit.framework; sourceTree = "<group>"; };
 		37BE2AE01F374790003DC1F8 /* Nuke.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Nuke.framework; path = Carthage/Build/iOS/Nuke.framework; sourceTree = "<group>"; };
 		37BE2AE11F374790003DC1F8 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
@@ -181,10 +177,6 @@
 				37BE2AE01F374790003DC1F8 /* Nuke.framework */,
 				37BE2AE11F374790003DC1F8 /* RxSwift.framework */,
 				37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */,
-				37BE2AD71F37477B003DC1F8 /* GithubKit.framework.dSYM */,
-				37BE2AD81F37477B003DC1F8 /* Nuke.framework.dSYM */,
-				37BE2AD91F37477B003DC1F8 /* RxSwift.framework.dSYM */,
-				37BE2ADA1F37477B003DC1F8 /* SwiftIconFont.framework.dSYM */,
 				37BE2AD51F37471B003DC1F8 /* SafariServices.framework */,
 			);
 			name = Frameworks;
