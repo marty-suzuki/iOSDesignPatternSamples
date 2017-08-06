@@ -1,0 +1,10 @@
+framework module NoticeObserveKit {
+  umbrella header "NoticeObserveKit-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module NoticeObserveKit.Swift {
+    header "NoticeObserveKit-Swift.h"
+}
