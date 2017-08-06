@@ -54,7 +54,7 @@ final class SearchViewController: UIViewController {
         }, users: { [weak self] in
             self?.users ?? []
         }, selectedUser: { [weak self] user in
-            
+            self?.showUserRepository(with: user)
         })
     }()
     fileprivate let debounce: (_ action: @escaping () -> ()) -> () = {
@@ -145,6 +145,11 @@ final class SearchViewController: UIViewController {
             }
             self?.task = nil
         }
+    }
+    
+    private func showUserRepository(with user: User) {
+        let vc = UserRepositoryViewController(user: user)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 

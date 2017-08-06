@@ -29,6 +29,7 @@
 		37BE2AF11F37526F003DC1F8 /* SearchViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF01F37526F003DC1F8 /* SearchViewDataSource.swift */; };
 		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
 		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
+		37BE2AF91F376B12003DC1F8 /* UserRepositoryViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF81F376B12003DC1F8 /* UserRepositoryViewDataSource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
 		37BE2AF01F37526F003DC1F8 /* SearchViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewDataSource.swift; sourceTree = "<group>"; };
 		37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
+		37BE2AF81F376B12003DC1F8 /* UserRepositoryViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewDataSource.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +175,7 @@
 			children = (
 				37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */,
 				37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */,
+				37BE2AF81F376B12003DC1F8 /* UserRepositoryViewDataSource.swift */,
 			);
 			path = UserRepository;
 			sourceTree = "<group>";
@@ -308,6 +311,7 @@
 			files = (
 				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
 				37BE2AF11F37526F003DC1F8 /* SearchViewDataSource.swift in Sources */,
+				37BE2AF91F376B12003DC1F8 /* UserRepositoryViewDataSource.swift in Sources */,
 				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
 				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
