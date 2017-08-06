@@ -14,7 +14,6 @@
 		37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AC81F37468C003DC1F8 /* FavoriteViewController.swift */; };
 		37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2ACA1F374699003DC1F8 /* SearchViewController.swift */; };
 		37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */; };
-		37BE2ACF1F3746E2003DC1F8 /* RepositoryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2ACD1F3746E2003DC1F8 /* RepositoryViewController.xib */; };
 		37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */; };
 		37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */; };
 		37BE2AD61F37471B003DC1F8 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AD51F37471B003DC1F8 /* SafariServices.framework */; };
@@ -42,7 +41,6 @@
 		37BE2AC81F37468C003DC1F8 /* FavoriteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteViewController.swift; sourceTree = "<group>"; };
 		37BE2ACA1F374699003DC1F8 /* SearchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepositoryViewController.swift; sourceTree = "<group>"; };
-		37BE2ACD1F3746E2003DC1F8 /* RepositoryViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RepositoryViewController.xib; sourceTree = "<group>"; };
 		37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewController.swift; sourceTree = "<group>"; };
 		37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserRepositoryViewController.xib; sourceTree = "<group>"; };
 		37BE2AD51F37471B003DC1F8 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
@@ -156,7 +154,6 @@
 			isa = PBXGroup;
 			children = (
 				37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */,
-				37BE2ACD1F3746E2003DC1F8 /* RepositoryViewController.xib */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -272,7 +269,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37BE2ACF1F3746E2003DC1F8 /* RepositoryViewController.xib in Resources */,
 				37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */,
 				37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */,
 				37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */,
