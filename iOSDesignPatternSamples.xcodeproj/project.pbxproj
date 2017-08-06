@@ -29,6 +29,7 @@
 		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
 		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
 		37BE2AF91F376B12003DC1F8 /* UserRepositoryViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF81F376B12003DC1F8 /* UserRepositoryViewDataSource.swift */; };
+		37BE2AFB1F3774F9003DC1F8 /* FavoriteViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AFA1F3774F9003DC1F8 /* FavoriteViewDataSource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
 		37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
 		37BE2AF81F376B12003DC1F8 /* UserRepositoryViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewDataSource.swift; sourceTree = "<group>"; };
+		37BE2AFA1F3774F9003DC1F8 /* FavoriteViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteViewDataSource.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +148,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AC81F37468C003DC1F8 /* FavoriteViewController.swift */,
+				37BE2AFA1F3774F9003DC1F8 /* FavoriteViewDataSource.swift */,
 			);
 			path = Favorite;
 			sourceTree = "<group>";
@@ -310,6 +313,7 @@
 				37BE2AF91F376B12003DC1F8 /* UserRepositoryViewDataSource.swift in Sources */,
 				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
 				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
+				37BE2AFB1F3774F9003DC1F8 /* FavoriteViewDataSource.swift in Sources */,
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
 				37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,

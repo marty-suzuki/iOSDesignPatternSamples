@@ -15,12 +15,12 @@ final class RepositoryViewController: SFSafariViewController {
         return UIApplication.shared.delegate as? AppDelegate
     }
     
-    private var bookmarks: [Repository] {
-        return appDelegate?.bookmarks ?? []
+    private var favorites: [Repository] {
+        return appDelegate?.favorites ?? []
     }
     
     private(set) lazy var favoriteButtonItem: UIBarButtonItem = {
-        let title = self.bookmarks.contains(where: { $0.url == self.repository.url }) ? "Remove" : "Add"
+        let title = self.favorites.contains(where: { $0.url == self.repository.url }) ? "Remove" : "Add"
         return UIBarButtonItem(title: title,
                                style: .plain,
                                target: self,
@@ -44,11 +44,11 @@ final class RepositoryViewController: SFSafariViewController {
     }
     
     @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
-        if bookmarks.contains(where: { $0.url == repository.url }) {
-            appDelegate?.removeBookmark(repository)
+        if favorites.contains(where: { $0.url == repository.url }) {
+            appDelegate?.removeFavorite(repository)
             favoriteButtonItem.title = "Add"
         } else {
-            appDelegate?.addBookmark(repository)
+            appDelegate?.addFavorite(repository)
             favoriteButtonItem.title = "Remove"
         }
     }

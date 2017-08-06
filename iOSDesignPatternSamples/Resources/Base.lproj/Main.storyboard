@@ -37,13 +37,28 @@
                     <view key="view" contentMode="scaleToFill" id="hJ0-BI-RUo">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="hXN-GY-eDF">
+                                <rect key="frame" x="0.0" y="64" width="375" height="554"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </tableView>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="hXN-GY-eDF" secondAttribute="trailing" id="3cd-vM-eQa"/>
+                            <constraint firstItem="hXN-GY-eDF" firstAttribute="leading" secondItem="hJ0-BI-RUo" secondAttribute="leading" id="64o-gN-lPo"/>
+                            <constraint firstItem="B9j-sc-3Zm" firstAttribute="top" secondItem="hXN-GY-eDF" secondAttribute="bottom" id="8wA-YL-go0"/>
+                            <constraint firstItem="hXN-GY-eDF" firstAttribute="top" secondItem="UDc-jT-V2X" secondAttribute="bottom" id="Obu-xQ-QgL"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="cVF-Oh-r4H"/>
+                    <connections>
+                        <outlet property="tableView" destination="hXN-GY-eDF" id="sYG-k0-yH3"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ldA-We-oud" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1265" y="413"/>
+            <point key="canvasLocation" x="1264.8" y="412.44377811094455"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="q8w-Hg-TXC">

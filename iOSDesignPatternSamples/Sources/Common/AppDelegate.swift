@@ -14,7 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    private(set) var bookmarks: [Repository] = []
+    private(set) var favorites: [Repository] = []
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -44,13 +44,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-    func addBookmark(_ bookmark: Repository) {
-        bookmarks.append(bookmark)
+    func addFavorite(_ repository: Repository) {
+        favorites.append(repository)
     }
     
-    func removeBookmark(_ bookmark: Repository) {
-        guard let index = bookmarks.index(where: { $0.url == bookmark.url }) else { return }
-        bookmarks.remove(at: index)
+    func removeFavorite(_ repository: Repository) {
+        guard let index = favorites.index(where: { $0.url == repository.url }) else { return }
+        favorites.remove(at: index)
     }
 }
 
