@@ -1,5 +1,5 @@
 github "0x73/SwiftIconFont" "2.7.0"
 github "ReactiveX/RxSwift" "3.6.1"
 github "kean/Nuke" "5.1.1"
-github "marty-suzuki/GithubKitForSample" "0.1.1"
+github "marty-suzuki/GithubKitForSample" "0.1.2"
 github "marty-suzuki/NoticeObserveKit" "0.3.0"

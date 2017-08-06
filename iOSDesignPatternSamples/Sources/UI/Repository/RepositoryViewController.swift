@@ -11,16 +11,9 @@ import SafariServices
 import GithubKit
 
 final class RepositoryViewController: SFSafariViewController {
-    private var appDelegate: AppDelegate? {
-        return UIApplication.shared.delegate as? AppDelegate
-    }
-    
-    private var favorites: [Repository] {
-        return appDelegate?.favorites ?? []
-    }
-    
     private(set) lazy var favoriteButtonItem: UIBarButtonItem = {
-        let title = self.favorites.contains(where: { $0.url == self.repository.url }) ? "Remove" : "Add"
+        let favorites = self.favoriteHandlable?.getFavorites() ?? []
+        let title = favorites.contains(where: { $0.url == self.repository.url }) ? "Remove" : "Add"
         return UIBarButtonItem(title: title,
                                style: .plain,
                                target: self,
@@ -28,10 +21,13 @@ final class RepositoryViewController: SFSafariViewController {
     }()
     
     private let repository: Repository
+    private weak var favoriteHandlable: FavoriteHandlable?
     
     init(repository: Repository,
+         favoriteHandlable: FavoriteHandlable?,
          entersReaderIfAvailable: Bool = true) {
         self.repository = repository
+        self.favoriteHandlable = favoriteHandlable
         
         super.init(url: repository.url, entersReaderIfAvailable: entersReaderIfAvailable)
         hidesBottomBarWhenPushed = true
@@ -44,12 +40,14 @@ final class RepositoryViewController: SFSafariViewController {
     }
     
     @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
-        if favorites.contains(where: { $0.url == repository.url }) {
-            appDelegate?.removeFavorite(repository)
+        var favorites = favoriteHandlable?.getFavorites() ?? []
+        if let index = favorites.index(where: { $0.url == repository.url }) {
+            favorites.remove(at: index)
             favoriteButtonItem.title = "Add"
         } else {
-            appDelegate?.addFavorite(repository)
+            favorites.append(repository)
             favoriteButtonItem.title = "Remove"
         }
+        favoriteHandlable?.setFavorites(favorites)
     }
 }
