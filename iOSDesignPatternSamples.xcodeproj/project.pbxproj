@@ -74,6 +74,7 @@
 				37817CFF1F373F8B00EC69C6 /* Sources */,
 				37817D001F373F8B00EC69C6 /* Frameworks */,
 				37817D011F373F8B00EC69C6 /* Resources */,
+				37BE2AB11F37433C003DC1F8 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -130,6 +131,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		37BE2AB11F37433C003DC1F8 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/Nuke.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/RxSwift.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/SwiftIconFont.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/GithubKit.framework",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		37817CFF1F373F8B00EC69C6 /* Sources */ = {
@@ -301,6 +322,7 @@
 				37817D171F373F8B00EC69C6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

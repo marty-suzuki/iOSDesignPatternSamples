@@ -1,0 +1,3 @@
+framework module RxTest {
+    header "RxTest-Swift.h"
+}
