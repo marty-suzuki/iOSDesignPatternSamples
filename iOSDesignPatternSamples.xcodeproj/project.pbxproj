@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372936AD1F54538A00762D15 /* FavoriteModel.swift */; };
 		37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */; };
 		37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */; };
 		37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB61F3745D0003DC1F8 /* Main.storyboard */; };
@@ -30,6 +31,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		372936AD1F54538A00762D15 /* FavoriteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteModel.swift; sourceTree = "<group>"; };
 		37817D031F373F8B00EC69C6 /* iOSDesignPatternSamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDesignPatternSamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		37BE2AB51F3745D0003DC1F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
+				372936AD1F54538A00762D15 /* FavoriteModel.swift */,
 				37BE2AE91F374889003DC1F8 /* NotieObserver */,
 			);
 			path = Common;
@@ -236,6 +239,7 @@
 				TargetAttributes = {
 					37817D021F373F8B00EC69C6 = {
 						CreatedOnToolsVersion = 8.3.3;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Manual;
 					};
 				};
@@ -300,6 +304,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
+				372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */,
 				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
 				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
@@ -443,7 +448,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.marty-suzuki.iOSDesignPatternSamples";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -461,7 +467,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.marty-suzuki.iOSDesignPatternSamples";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

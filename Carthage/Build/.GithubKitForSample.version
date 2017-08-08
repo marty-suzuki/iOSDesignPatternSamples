@@ -2,7 +2,7 @@
   "commitish" : "0.1.2",
   "iOS" : [
     {
-      "hash" : "12d06d72968ad263663fa4e4143d3a920f6c3dda931d514e75d981866ce3e741",
+      "hash" : "b540b4b3287914d25f3ff1adaacd697799f20717575802672148d3e0f9b4534e",
       "name" : "GithubKit"
     }
   ]

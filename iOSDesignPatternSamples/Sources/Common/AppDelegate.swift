@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let favoriteVC = viewControllers.flatMap({
                 ($0 as? UINavigationController)?.topViewController as? FavoriteViewController
             }).first {
-            searchVC.favoriteHandlable = favoriteVC
+            searchVC.favoriteModel = favoriteVC.favoriteModel
         }
         
         return true

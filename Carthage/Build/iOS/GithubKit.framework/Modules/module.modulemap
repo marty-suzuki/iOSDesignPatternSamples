@@ -7,4 +7,5 @@ framework module GithubKit {
 
 module GithubKit.Swift {
     header "GithubKit-Swift.h"
+    requires objc
 }

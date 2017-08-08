@@ -43,11 +43,11 @@ final class UserRepositoryViewController: UIViewController {
     private var task: URLSessionTask? = nil
     
     private let user: User
-    private weak var favoriteHandlable: FavoriteHandlable?
+    private let favoriteModel: FavoriteModel
     
-    init(user: User, favoriteHandlable: FavoriteHandlable?) {
+    init(user: User, favoriteModel: FavoriteModel) {
         self.user = user
-        self.favoriteHandlable = favoriteHandlable
+        self.favoriteModel = favoriteModel
         
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
@@ -100,7 +100,7 @@ final class UserRepositoryViewController: UIViewController {
     }
     
     fileprivate func showRepository(with repository: Repository) {
-        let vc = RepositoryViewController(repository: repository, favoriteHandlable: favoriteHandlable)
+        let vc = RepositoryViewController(repository: repository, favoriteModel: favoriteModel)
         navigationController?.pushViewController(vc, animated: true)
     }
 }

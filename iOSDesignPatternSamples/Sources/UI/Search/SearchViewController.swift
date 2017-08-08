@@ -80,7 +80,7 @@ final class SearchViewController: UIViewController {
         }
     }
     
-    weak var favoriteHandlable: FavoriteHandlable?
+    var favoriteModel: FavoriteModel?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -157,7 +157,8 @@ final class SearchViewController: UIViewController {
     }
     
     fileprivate func showUserRepository(with user: User) {
-        let vc = UserRepositoryViewController(user: user, favoriteHandlable: favoriteHandlable)
+        guard let favoriteModel = favoriteModel else { return }
+        let vc = UserRepositoryViewController(user: user, favoriteModel: favoriteModel)
         navigationController?.pushViewController(vc, animated: true)
     }
 }

@@ -1,3 +1,4 @@
 framework module RxBlocking {
     header "RxBlocking-Swift.h"
+    requires objc
 }

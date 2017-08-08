@@ -7,4 +7,5 @@ framework module NoticeObserveKit {
 
 module NoticeObserveKit.Swift {
     header "NoticeObserveKit-Swift.h"
+    requires objc
 }

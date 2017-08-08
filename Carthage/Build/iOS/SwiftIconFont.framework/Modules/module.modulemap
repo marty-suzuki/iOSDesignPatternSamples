@@ -7,4 +7,5 @@ framework module SwiftIconFont {
 
 module SwiftIconFont.Swift {
     header "SwiftIconFont-Swift.h"
+    requires objc
 }
