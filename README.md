@@ -17,6 +17,23 @@ This is Github user search demo app that made with MVC design pattern.
 
 You can add / remove favorite repositories in RepositoryViewController, but an Array of favorite repository is hold by FavoriteViewController.
 
+## Run
+
+To run this example, you need `carthage update`.
+
+In addition, you need to set `Github Personal Access Token` like this.
+
+```swift
+func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    // Override point for customization after application launch.
+
+    ApiSession.shared.token = "Your Github Personal Access Token" // <- here
+
+    //...
+    return true
+}
+```
+
 ## Other
 
 This sample uses [GithubKitForSample](https://github.com/marty-suzuki/GithubKitForSample) that makes to create demo app easily.
