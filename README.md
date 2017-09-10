@@ -1,6 +1,6 @@
-# iOSDesignPatternSamples (MVC)
+# iOSDesignPatternSamples (MVP)
 
-This is Github user search demo app that made with MVC design pattern.
+This is Github user search demo app that made with MVP design pattern.
 
 ## Application Structure
 
@@ -9,9 +9,24 @@ This is Github user search demo app that made with MVC design pattern.
 ## ViewControllers
 
 - [SearchViewController](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewController.swift) -> Search Github user and show user result list
+  - SearchView aaa
+  - SearchPresenter aaa
+  - SearchViewPresenter aaa
+
 - [FavoriteViewController](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewController.swift) -> Show local on memory favorite repositories
+  - SearchView aaa
+  - SearchPresenter aaa
+  - SearchViewPresenter aaa
+
 - [UserRepositoryViewController](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewController.swift) -> Show Github user's repositories
+  - SearchView aaa
+  - SearchPresenter aaa
+  - SearchViewPresenter aaa
+
 - [RepositoryViewController](./iOSDesignPatternSamples/Sources/UI/Repository/RepositoryViewController.swift) -> Show a repository and add / remove local on memory favorites
+  - SearchView aaa
+  - SearchPresenter aaa
+  - SearchViewPresenter aaa
 
 ## How to add / remove favorites
 

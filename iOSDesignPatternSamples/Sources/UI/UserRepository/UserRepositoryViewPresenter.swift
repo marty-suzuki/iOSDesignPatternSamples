@@ -9,8 +9,10 @@
 import Foundation
 import GithubKit
 
-protocol UserRepositoryPresenter {
-    init(view: UserRepositoryView, user: User)
+protocol UserRepositoryPresenter: class {
+    init(user: User)
+    weak var view: UserRepositoryView? { get set }
+    var title: String { get }
     var isFetchingRepositories: Bool { get }
     var numberOfRepositories: Int { get }
     func repository(at index: Int) -> Repository
@@ -21,7 +23,7 @@ protocol UserRepositoryPresenter {
 }
 
 final class UserRepositoryViewPresenter: UserRepositoryPresenter {
-    private weak var view: UserRepositoryView?
+    weak var view: UserRepositoryView?
     private let user: User
     
     private var pageInfo: PageInfo? = nil
@@ -62,9 +64,11 @@ final class UserRepositoryViewPresenter: UserRepositoryPresenter {
     var numberOfRepositories: Int {
         return repositories.count
     }
+    var title: String {
+        return "\(user.login)'s Repositories"
+    }
     
-    init(view: UserRepositoryView, user: User) {
-        self.view = view
+    init(user: User) {
         self.user = user
     }
     

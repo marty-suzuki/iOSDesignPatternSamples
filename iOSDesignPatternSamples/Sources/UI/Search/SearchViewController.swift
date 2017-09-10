@@ -32,7 +32,7 @@ final class SearchViewController: UIViewController, SearchView {
     
     var favoritePresenter: FavoritePresenter?
     
-    private lazy var presenter: SearchViewPresenter = .init(view: self)
+    private lazy var presenter: SearchPresenter = SearchViewPresenter(view: self)
     private lazy var dataSource: SearchViewDataSource = .init(presenter: self.presenter)
 
     override func viewDidLoad() {

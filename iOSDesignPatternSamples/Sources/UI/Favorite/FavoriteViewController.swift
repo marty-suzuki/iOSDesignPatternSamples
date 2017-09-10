@@ -17,7 +17,7 @@ protocol FavoriteView: class {
 final class FavoriteViewController: UIViewController, FavoriteView {
     @IBOutlet weak var tableView: UITableView!
     
-    private(set) lazy var presenter: FavoriteViewPresenter = .init(view: self)
+    private(set) lazy var presenter: FavoritePresenter = FavoriteViewPresenter(view: self)
     private lazy var dataSource: FavoriteViewDataSource = .init(presenter: self.presenter)
     
     override func viewDidLoad() {

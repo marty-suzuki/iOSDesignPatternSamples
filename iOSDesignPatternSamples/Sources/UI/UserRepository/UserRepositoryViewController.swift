@@ -21,18 +21,17 @@ final class UserRepositoryViewController: UIViewController, UserRepositoryView {
     @IBOutlet weak var totalCountLabel: UILabel!
 
     private let loadingView = LoadingView.makeFromNib()
-    private let user: User
     private let favoritePresenter: FavoritePresenter
+    private let presenter: UserRepositoryPresenter
     
-    private lazy var presenter: UserRepositoryViewPresenter = .init(view: self, user: self.user)
     private lazy var dataSource: UserRepositoryViewDataSource = .init(presenter: self.presenter)
     
     init(user: User, favoritePresenter: FavoritePresenter) {
-        self.user = user
         self.favoritePresenter = favoritePresenter
-        
+        self.presenter = UserRepositoryViewPresenter(user: user)
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
+        presenter.view = self
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -42,7 +41,7 @@ final class UserRepositoryViewController: UIViewController, UserRepositoryView {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        title = "\(user.login)'s Repositories"
+        title = presenter.title
         edgesForExtendedLayout = []
         
         dataSource.configure(with: tableView)

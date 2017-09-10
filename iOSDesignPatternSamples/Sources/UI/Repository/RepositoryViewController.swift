@@ -10,26 +10,27 @@ import UIKit
 import SafariServices
 import GithubKit
 
-final class RepositoryViewController: SFSafariViewController {
+protocol RepositoryView: class {
+    func updateFavoriteButtonTitle(_ title: String)
+}
+
+final class RepositoryViewController: SFSafariViewController, RepositoryView {
     private(set) lazy var favoriteButtonItem: UIBarButtonItem = {
-        let title = self.favoritePresenter.contains(self.repository) ? "Remove" : "Add"
-        return UIBarButtonItem(title: title,
+        return UIBarButtonItem(title: self.presenter.favoriteButtonTitle,
                                style: .plain,
                                target: self,
                                action: #selector(RepositoryViewController.favoriteButtonTap(_:)))
     }()
-    
-    private let repository: Repository
-    private let favoritePresenter: FavoritePresenter
+    private let presenter: RepositoryPresenter
     
     init(repository: Repository,
          favoritePresenter: FavoritePresenter,
          entersReaderIfAvailable: Bool = true) {
-        self.repository = repository
-        self.favoritePresenter = favoritePresenter
-        
+        self.presenter = RepositoryViewPresenter(repository: repository,
+                                                 favoritePresenter: favoritePresenter)
         super.init(url: repository.url, entersReaderIfAvailable: entersReaderIfAvailable)
         hidesBottomBarWhenPushed = true
+        self.presenter.view = self
     }
     
     override func viewDidLoad() {
@@ -39,12 +40,10 @@ final class RepositoryViewController: SFSafariViewController {
     }
     
     @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
-        if favoritePresenter.contains(repository) {
-            favoritePresenter.removeFavorite(repository)
-            favoriteButtonItem.title = "Add"
-        } else {
-            favoritePresenter.addFavorite(repository)
-            favoriteButtonItem.title = "Remove"
-        }
+        presenter.favoriteButtonTap()
+    }
+    
+    func updateFavoriteButtonTitle(_ title: String) {
+        favoriteButtonItem.title = title
     }
 }

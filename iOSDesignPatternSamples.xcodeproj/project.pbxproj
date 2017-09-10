@@ -33,6 +33,7 @@
 		37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */; };
 		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
 		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
+		37D5D20B1F6599A900FA46DF /* RepositoryViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D5D20A1F6599A900FA46DF /* RepositoryViewPresenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +65,7 @@
 		37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardWillShow.swift; sourceTree = "<group>"; };
 		37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
+		37D5D20A1F6599A900FA46DF /* RepositoryViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewPresenter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */,
+				37D5D20A1F6599A900FA46DF /* RepositoryViewPresenter.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -329,6 +332,7 @@
 				37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
 				375C54311F65454000310929 /* UserRepositoryViewPresenter.swift in Sources */,
+				37D5D20B1F6599A900FA46DF /* RepositoryViewPresenter.swift in Sources */,
 				37BE2AED1F3748D9003DC1F8 /* UIKeyboardWillHide.swift in Sources */,
 				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
 				375C54331F65455700310929 /* UserRepositoryViewDataSource.swift in Sources */,
