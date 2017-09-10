@@ -12,8 +12,7 @@ import GithubKit
 
 final class RepositoryViewController: SFSafariViewController {
     private(set) lazy var favoriteButtonItem: UIBarButtonItem = {
-        let favorites = self.favoriteModel.favorites
-        let title = favorites.contains(where: { $0.url == self.repository.url }) ? "Remove" : "Add"
+        let title = self.favoritePresenter.contains(self.repository) ? "Remove" : "Add"
         return UIBarButtonItem(title: title,
                                style: .plain,
                                target: self,
@@ -21,13 +20,13 @@ final class RepositoryViewController: SFSafariViewController {
     }()
     
     private let repository: Repository
-    private let favoriteModel: FavoriteModel
+    private let favoritePresenter: FavoritePresenter
     
     init(repository: Repository,
-         favoriteModel: FavoriteModel,
+         favoritePresenter: FavoritePresenter,
          entersReaderIfAvailable: Bool = true) {
         self.repository = repository
-        self.favoriteModel = favoriteModel
+        self.favoritePresenter = favoritePresenter
         
         super.init(url: repository.url, entersReaderIfAvailable: entersReaderIfAvailable)
         hidesBottomBarWhenPushed = true
@@ -40,12 +39,12 @@ final class RepositoryViewController: SFSafariViewController {
     }
     
     @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
-        if favoriteModel.favorites.index(where: { $0.url == repository.url }) == nil {
-            favoriteModel.addFavorite(repository)
-            favoriteButtonItem.title = "Remove"
-        } else {
-            favoriteModel.removeFavorite(repository)
+        if favoritePresenter.contains(repository) {
+            favoritePresenter.removeFavorite(repository)
             favoriteButtonItem.title = "Add"
+        } else {
+            favoritePresenter.addFavorite(repository)
+            favoriteButtonItem.title = "Remove"
         }
     }
 }

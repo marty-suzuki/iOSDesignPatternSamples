@@ -9,45 +9,27 @@
 import UIKit
 import GithubKit
 
-final class UserRepositoryViewController: UIViewController {
-    
+protocol UserRepositoryView: class {
+    func reloadData()
+    func showRepository(with repository: Repository)
+    func updateTotalCountLabel(_ countText: String)
+    func updateLoadingView(with view: UIView, isLoading: Bool)
+}
+
+final class UserRepositoryViewController: UIViewController, UserRepositoryView {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var totalCountLabel: UILabel!
 
-    fileprivate let loadingView = LoadingView.makeFromNib()
-    
-    fileprivate var isReachedBottom: Bool = false {
-        didSet {
-            if isReachedBottom && isReachedBottom != oldValue {
-                fetchRepositories()
-            }
-        }
-    }
-    fileprivate var isFetchingRepositories = false {
-        didSet {
-            tableView.reloadData()
-        }
-    }
-    private var totalCount: Int = 0 {
-        didSet {
-            totalCountLabel.text = "\(repositories.count) / \(totalCount)"
-        }
-    }
-    fileprivate var repositories: [Repository] = []  {
-        didSet {
-            totalCountLabel.text = "\(repositories.count) / \(totalCount)"
-            tableView.reloadData()
-        }
-    }
-    private var pageInfo: PageInfo? = nil
-    private var task: URLSessionTask? = nil
-    
+    private let loadingView = LoadingView.makeFromNib()
     private let user: User
-    private let favoriteModel: FavoriteModel
+    private let favoritePresenter: FavoritePresenter
     
-    init(user: User, favoriteModel: FavoriteModel) {
+    private lazy var presenter: UserRepositoryViewPresenter = .init(view: self, user: self.user)
+    private lazy var dataSource: UserRepositoryViewDataSource = .init(presenter: self.presenter)
+    
+    init(user: User, favoritePresenter: FavoritePresenter) {
         self.user = user
-        self.favoriteModel = favoriteModel
+        self.favoritePresenter = favoritePresenter
         
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
@@ -63,96 +45,26 @@ final class UserRepositoryViewController: UIViewController {
         title = "\(user.login)'s Repositories"
         edgesForExtendedLayout = []
         
-        configure(with: tableView)
-        
-        fetchRepositories()
+        dataSource.configure(with: tableView)
+        presenter.fetchRepositories()
     }
     
-    private func configure(with tableView: UITableView) {
-        tableView.dataSource = self
-        tableView.delegate = self
-        
-        tableView.registerCell(RepositoryViewCell.self)
-        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
-    }
-    
-    fileprivate func fetchRepositories() {
-        if task != nil { return }
-        if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
-        isFetchingRepositories = true
-        let request = UserNodeRequest(id: user.id, after: pageInfo?.endCursor)
-        self.task = ApiSession.shared.send(request) { [weak self] in
-            switch $0 {
-            case .success(let value):
-                DispatchQueue.main.async {
-                    self?.pageInfo = value.pageInfo
-                    self?.repositories.append(contentsOf: value.nodes)
-                    self?.totalCount = value.totalCount
-                }
-            case .failure(let error):
-                print(error)
-            }
-            DispatchQueue.main.async {
-                self?.isFetchingRepositories = false
-            }
-            self?.task = nil
-        }
-    }
-    
-    fileprivate func showRepository(with repository: Repository) {
-        let vc = RepositoryViewController(repository: repository, favoriteModel: favoriteModel)
+    func showRepository(with repository: Repository) {
+        let vc = RepositoryViewController(repository: repository, favoritePresenter: favoritePresenter)
         navigationController?.pushViewController(vc, animated: true)
     }
-}
-
-extension UserRepositoryViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return repositories.count
+    
+    func reloadData() {
+        tableView.reloadData()
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(RepositoryViewCell.self, for: indexPath)
-        cell.configure(with: repositories[indexPath.row])
-        return cell
+    func updateTotalCountLabel(_ countText: String) {
+        totalCountLabel.text = countText
     }
     
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return nil
-    }
-    
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
-            return nil
-        }
+    func updateLoadingView(with view: UIView, isLoading: Bool) {
         loadingView.removeFromSuperview()
-        loadingView.isLoading = isFetchingRepositories
+        loadingView.isLoading = isLoading
         loadingView.add(to: view)
-        return view
-    }
-}
-
-extension UserRepositoryViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: false)
-        
-        let repository = repositories[indexPath.row]
-        showRepository(with: repository)
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return RepositoryViewCell.calculateHeight(with: repositories[indexPath.row], and: tableView)
-    }
-    
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return .leastNormalMagnitude
-    }
-    
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return isFetchingRepositories ? LoadingView.defaultHeight : .leastNormalMagnitude
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        isReachedBottom = maxScrollDistance <= scrollView.contentOffset.y
     }
 }
