@@ -27,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }).first {
             searchVC.favoriteModel = favoriteVC.favoriteModel
         }
-        
+
         return true
     }
 

@@ -96,6 +96,18 @@ final class SearchViewController: UIViewController {
         observeKeyboard()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        let token = ApiSession.shared.token ?? ""
+        if token.isEmpty || token == "Your Github Personal Access Token" {
+            let alert = UIAlertController(title: "Access Token Error",
+                                          message: "\"Github Personal Access Token\" is Required.\n Please set it to ApiSession.shared.token in AppDelegate.",
+                                          preferredStyle: .alert)
+            present(alert, animated: false, completion: nil)
+        }
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         if searchBar.isFirstResponder {
