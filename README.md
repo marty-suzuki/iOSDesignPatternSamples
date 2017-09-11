@@ -1,6 +1,6 @@
-# iOSDesignPatternSamples (MVP)
+# iOSDesignPatternSamples (MVVM)
 
-This is Github user search demo app that made with MVP design pattern.
+This is Github user search demo app that made with MVVM design pattern.
 
 ## Application Structure
 
@@ -13,9 +13,7 @@ Search Github user and show user result list
 
 ![](./Images/search.png)
 
-- [SearchView](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewController.swift)
-- [SearchPresenter](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewPresenter.swift)
-- [SearchViewPresenter](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewPresenter.swift) <- Adapt SearchPresenter
+- [SearchViewModel](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewModel.swift)
 - [SearchViewDataSource](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewDataSource.swift) <- Adapt UITableViewDataSource and UITableViewDelegate
 
 ### [FavoriteViewController](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewController.swift)
@@ -23,19 +21,15 @@ Show local on memory favorite repositories
 
 ![](./Images/favorite.png)
 
-- [FavoriteView](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewController.swift)
-- [FavoritePresenter](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewPresenter.swift)
-- [FavoriteViewPresenter](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewPresenter.swift) <- Adapt FavoritePresenter
+- [FavoriteViewModel](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewModel.swift)
 - [FavoriteViewDataSource](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewDataSource.swift) <- Adapt UITableViewDataSource and UITableViewDelegate
 
 ### [UserRepositoryViewController](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewController.swift)
 Show Github user's repositories
 
-![](./Images/user_reposiroty.png)
+![](./Images/user_repository.png)
 
-- [UserRepositoryView](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewController.swift)
-- [UserRepositoryPresenter](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewPresenter.swift)
-- [UserRepositoryViewPresenter](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewPresenter.swift) <- Adapt UserRepositoryPresenter
+- [UserRepositoryViewModel](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewModel.swift)
 - [UserRepositoryViewDataSource](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewDataSource.swift) <- Adapt UITableViewDataSource and UITableViewDelegate
 
 ### [RepositoryViewController](./iOSDesignPatternSamples/Sources/UI/Repository/RepositoryViewController.swift)
@@ -43,9 +37,7 @@ Show a repository and add / remove local on memory favorites
 
 ![](./Images/repository.png)
 
-- [RepositoryView](./iOSDesignPatternSamples/Sources/UI/Repository/RepositoryViewController.swift)
-- [RepositoryPresenter](./iOSDesignPatternSamples/Sources/UI/Repository/RepositoryViewPresenter.swift)
-- [RepositoryViewPresenter](./iOSDesignPatternSamples/Sources/UI/Repository/RepositoryViewPresenter.swift) <- Adapt RepositoryPresenter
+- [RepositoryViewModel](./iOSDesignPatternSamples/Sources/UI/Repository/RepositoryViewModel.swift)
 
 ## How to add / remove favorites
 
