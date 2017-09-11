@@ -9,12 +9,24 @@
 import Foundation
 import UIKit
 import GithubKit
+import RxSwift
+import RxCocoa
 
 final class UserRepositoryViewDataSource: NSObject {
-    fileprivate let presenter: UserRepositoryPresenter
-    
-    init(presenter: UserRepositoryPresenter) {
-        self.presenter = presenter
+    private let viewModel: UserRepositoryViewModel
+
+    let selectedIndexPath: Observable<IndexPath>
+    private let _selectedIndexPath = PublishSubject<IndexPath>()
+    let isReachedBottom: Observable<Bool>
+    private let _isReachedBottom = PublishSubject<Bool>()
+    let headerFooterView: Observable<UIView>
+    private let _headerFooterView = PublishSubject<UIView>()
+
+    init(viewModel: UserRepositoryViewModel) {
+        self.viewModel = viewModel
+        self.selectedIndexPath = _selectedIndexPath
+        self.isReachedBottom = _isReachedBottom.distinctUntilChanged()
+        self.headerFooterView = _headerFooterView
     }
     
     func configure(with tableView: UITableView) {
@@ -28,12 +40,12 @@ final class UserRepositoryViewDataSource: NSObject {
 
 extension UserRepositoryViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presenter.numberOfRepositories
+        return viewModel.repositoriesValue.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(RepositoryViewCell.self, for: indexPath)
-        let repository = presenter.repository(at: indexPath.row)
+        let repository = viewModel.repositoriesValue[indexPath.row]
         cell.configure(with: repository)
         return cell
     }
@@ -46,7 +58,7 @@ extension UserRepositoryViewDataSource: UITableViewDataSource {
         guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
             return nil
         }
-        presenter.showLoadingView(on: view)
+        _headerFooterView.onNext(view)
         return view
     }
 }
@@ -54,11 +66,11 @@ extension UserRepositoryViewDataSource: UITableViewDataSource {
 extension UserRepositoryViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        presenter.showRepository(at: indexPath.row)
+        _selectedIndexPath.onNext(indexPath)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let repository = presenter.repository(at: indexPath.row)
+        let repository = viewModel.repositoriesValue[indexPath.row]
         return RepositoryViewCell.calculateHeight(with: repository, and: tableView)
     }
     
@@ -67,11 +79,11 @@ extension UserRepositoryViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return presenter.isFetchingRepositories ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return viewModel.isFetchingRepositoriesValue ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        presenter.setIsReachedBottom(maxScrollDistance <= scrollView.contentOffset.y)
+        _isReachedBottom.onNext(maxScrollDistance <= scrollView.contentOffset.y)
     }
 }

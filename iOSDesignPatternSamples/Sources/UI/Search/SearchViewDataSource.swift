@@ -9,12 +9,24 @@
 import Foundation
 import UIKit
 import GithubKit
+import RxSwift
+import RxCocoa
 
 final class SearchViewDataSource: NSObject {
-    fileprivate let presenter: SearchPresenter
-    
-    init(presenter: SearchPresenter) {
-        self.presenter = presenter
+    fileprivate let viewModel: SearchViewModel
+
+    let selectedIndexPath: Observable<IndexPath>
+    private let _selectedIndexPath = PublishSubject<IndexPath>()
+    let isReachedBottom: Observable<Bool>
+    private let _isReachedBottom = PublishSubject<Bool>()
+    let headerFooterView: Observable<UIView>
+    private let _headerFooterView = PublishSubject<UIView>()
+
+    init(viewModel: SearchViewModel) {
+        self.viewModel = viewModel
+        self.selectedIndexPath = _selectedIndexPath
+        self.isReachedBottom = _isReachedBottom.distinctUntilChanged()
+        self.headerFooterView = _headerFooterView
     }
     
     func configure(with tableView: UITableView) {
@@ -28,12 +40,12 @@ final class SearchViewDataSource: NSObject {
 
 extension SearchViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presenter.numberOfUsers
+        return viewModel.usersValue.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(UserViewCell.self, for: indexPath)
-        let user = presenter.user(at: indexPath.row)
+        let user = viewModel.usersValue[indexPath.row]
         cell.configure(with: user)
         return cell
     }
@@ -46,7 +58,7 @@ extension SearchViewDataSource: UITableViewDataSource {
         guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
             return nil
         }
-        presenter.showLoadingView(on: view)
+        _headerFooterView.onNext(view)
         return view
     }
 }
@@ -54,11 +66,11 @@ extension SearchViewDataSource: UITableViewDataSource {
 extension SearchViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        presenter.showUser(at: indexPath.row)
+        _selectedIndexPath.onNext(indexPath)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let user = presenter.user(at: indexPath.row)
+        let user = viewModel.usersValue[indexPath.row]
         return UserViewCell.calculateHeight(with: user, and: tableView)
     }
     
@@ -67,11 +79,11 @@ extension SearchViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return presenter.isFetchingUsers ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return viewModel.isFetchingUsersValue ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        presenter.setIsReachedBottom(maxScrollDistance <= scrollView.contentOffset.y)
+        _isReachedBottom.onNext(maxScrollDistance <= scrollView.contentOffset.y)
     }
 }
