@@ -7,4 +7,5 @@ framework module FluxCapacitor {
 
 module FluxCapacitor.Swift {
     header "FluxCapacitor-Swift.h"
+    requires objc
 }

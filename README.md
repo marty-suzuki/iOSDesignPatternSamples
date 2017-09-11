@@ -37,7 +37,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
 ## Requirements
 
 - Xcode 9.0 Beta 6 or later
-- iOS 11 beta 6 or later
+- iOS 11 Beta 6 or later
 - Swift 4 or later
 
 ## Other
