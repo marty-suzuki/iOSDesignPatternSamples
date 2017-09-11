@@ -1,0 +1,9 @@
+{
+  "commitish" : "0.3.1",
+  "iOS" : [
+    {
+      "hash" : "b0cd46dbe420569c47fa24b1dfe6eaad84ab42b8aa1605d23140675be88390f1",
+      "name" : "FluxCapacitor"
+    }
+  ]
+}
