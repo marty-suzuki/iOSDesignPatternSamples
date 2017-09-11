@@ -16,9 +16,8 @@ final class FavoriteViewModel {
     let relaodData: Observable<Void>
     let selectedRepository: Observable<Repository>
 
-    var favoritesValue: [Repository] {
-        return _favorites.value
-    }
+    var favoritesValue: [Repository] { return _favorites.value }
+    
     private let _favorites = Variable<[Repository]>([])
     private let disposeBag = DisposeBag()
 

@@ -16,12 +16,12 @@ final class SearchViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
 
-    private let searchBar = UISearchBar(frame: .zero)
-    private let loadingView = LoadingView.makeFromNib()
-    
     var favoritesInput: AnyObserver<[Repository]>?
     var favoritesOutput: Observable<[Repository]>?
 
+    private let searchBar = UISearchBar(frame: .zero)
+    private let loadingView = LoadingView.makeFromNib()
+    
     private lazy var dataSource: SearchViewDataSource = .init(viewModel: self.viewModel)
     private lazy var viewModel: SearchViewModel = {
         let viewWillAppear = self.rx
@@ -41,7 +41,7 @@ final class SearchViewController: UIViewController {
                      selectedIndexPath: self.selectedIndexPath,
                      headerFooterView: self.headerFooterView)
     }()
-
+    
     private let selectedIndexPath = PublishSubject<IndexPath>()
     private let isReachedBottom = PublishSubject<Bool>()
     private let headerFooterView = PublishSubject<UIView>()
@@ -52,45 +52,43 @@ final class SearchViewController: UIViewController {
 
         navigationItem.titleView = searchBar
         searchBar.placeholder = "Input user name"
-
         dataSource.configure(with: tableView)
 
+        // observe dataSource
         dataSource.selectedIndexPath
             .bind(to: selectedIndexPath)
             .disposed(by: disposeBag)
-
         dataSource.isReachedBottom
             .bind(to: isReachedBottom)
             .disposed(by: disposeBag)
-
         dataSource.headerFooterView
             .bind(to: headerFooterView)
             .disposed(by: disposeBag)
 
+        // observe viewModel
         viewModel.accessTokenAlert
             .bind(to: showAccessTokenAlert)
             .disposed(by: disposeBag)
-
         viewModel.keyboardWillShow
             .bind(to: keyboardWillShow)
             .disposed(by: disposeBag)
-
         viewModel.keyboardWillHide
             .bind(to: keyboardWillHide)
             .disposed(by: disposeBag)
-
         viewModel.countString
             .bind(to: totalCountLabel.rx.text)
             .disposed(by: disposeBag)
-
         viewModel.reloadData
             .bind(to: reloadData)
             .disposed(by: disposeBag)
-
         viewModel.selectedUser
             .bind(to: showUserRepository)
             .disposed(by: disposeBag)
+        viewModel.updateLoadingView
+            .bind(to: updateLoadingView)
+            .disposed(by: disposeBag)
 
+        // observe views
         Observable.merge(searchBar.rx.searchButtonClicked.asObservable(),
                          searchBar.rx.cancelButtonClicked.asObservable())
             .subscribe(onNext: { [weak self] in
@@ -98,19 +96,17 @@ final class SearchViewController: UIViewController {
                 self?.searchBar.showsCancelButton = false
             })
             .disposed(by: disposeBag)
-
         searchBar.rx.textDidBeginEditing
             .subscribe(onNext: { [weak self] in
                 self?.searchBar.showsCancelButton = true
             })
             .disposed(by: disposeBag)
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        if searchBar.isFirstResponder {
-            searchBar.resignFirstResponder()
-        }
+        rx.methodInvoked(#selector(SearchViewController.viewWillDisappear(_:)))
+            .map { _ in }
+            .subscribe(onNext: { [weak self] in
+                self?.searchBar.resignFirstResponder()
+            })
+            .disposed(by: disposeBag)
     }
 
     private var showAccessTokenAlert: AnyObserver<(String, String)> {

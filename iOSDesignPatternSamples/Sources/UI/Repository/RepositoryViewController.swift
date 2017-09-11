@@ -14,8 +14,8 @@ import RxCocoa
 
 final class RepositoryViewController: SFSafariViewController {
     private let favoriteButtonItem: UIBarButtonItem
-    private let viewModel: RepositoryViewModel
     private let disposeBag = DisposeBag()
+    private let viewModel: RepositoryViewModel
 
     init(repository: Repository,
          favoritesOutput: Observable<[Repository]>,

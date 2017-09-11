@@ -17,33 +17,34 @@ final class FavoriteViewController: UIViewController {
     var favoritesInput: AnyObserver<[Repository]> { return favorites.asObserver() }
     var favoritesOutput: Observable<[Repository]> { return viewModel.favorites }
 
-    private let disposeBag = DisposeBag()
-    private let favorites = PublishSubject<[Repository]>()
-    private let selectedIndexPath = PublishSubject<IndexPath>()
+    private lazy var dataSource: FavoriteViewDataSource = .init(viewModel: self.viewModel)
     private private(set) lazy var viewModel: FavoriteViewModel = {
         .init(favoritesObservable: self.favorites, selectedIndexPath: self.selectedIndexPath)
     }()
-    private lazy var dataSource: FavoriteViewDataSource = .init(viewModel: self.viewModel)
+    
+    private let favorites = PublishSubject<[Repository]>()
+    private let selectedIndexPath = PublishSubject<IndexPath>()
+    private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         title = "On Memory Favorite"
         automaticallyAdjustsScrollViewInsets = false
+        dataSource.configure(with: tableView)
 
+        // observe dataSource
         dataSource.selectedIndexPath
             .bind(to: selectedIndexPath)
             .disposed(by: disposeBag)
 
+        // observe viewModel
         viewModel.selectedRepository
             .bind(to: showRepository)
             .disposed(by: disposeBag)
-
         viewModel.relaodData
             .bind(to: reloadData)
             .disposed(by: disposeBag)
-
-        dataSource.configure(with: tableView)
     }
     
     private var showRepository: AnyObserver<Repository> {

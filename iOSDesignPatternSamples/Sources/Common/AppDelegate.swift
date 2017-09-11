@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        ApiSession.shared.token = "032227bb014bd183869d1578d31ed5aeabff885b"//"Your Github Personal Access Token"
+        ApiSession.shared.token = "Your Github Personal Access Token"
         
         if let viewControllers = (window?.rootViewController as? UITabBarController)?.viewControllers,
             let searchVC = viewControllers.flatMap({

@@ -13,15 +13,16 @@ import RxSwift
 import RxCocoa
 
 final class UserRepositoryViewDataSource: NSObject {
-    private let viewModel: UserRepositoryViewModel
-
     let selectedIndexPath: Observable<IndexPath>
-    private let _selectedIndexPath = PublishSubject<IndexPath>()
     let isReachedBottom: Observable<Bool>
-    private let _isReachedBottom = PublishSubject<Bool>()
     let headerFooterView: Observable<UIView>
+    
+    private let _selectedIndexPath = PublishSubject<IndexPath>()
+    private let _isReachedBottom = PublishSubject<Bool>()
     private let _headerFooterView = PublishSubject<UIView>()
 
+    private let viewModel: UserRepositoryViewModel
+    
     init(viewModel: UserRepositoryViewModel) {
         self.viewModel = viewModel
         self.selectedIndexPath = _selectedIndexPath
@@ -34,7 +35,8 @@ final class UserRepositoryViewDataSource: NSObject {
         tableView.delegate = self
         
         tableView.registerCell(RepositoryViewCell.self)
-        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
+        tableView.register(UITableViewHeaderFooterView.self,
+                           forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
     }
 }
 

@@ -12,11 +12,10 @@ import GithubKit
 import RxSwift
 
 final class FavoriteViewDataSource: NSObject {
-    fileprivate let viewModel: FavoriteViewModel
-
     let selectedIndexPath: Observable<IndexPath>
     private let _selectedIndexPath = PublishSubject<IndexPath>()
-
+    private let viewModel: FavoriteViewModel
+    
     init(viewModel: FavoriteViewModel) {
         self.viewModel = viewModel
         self.selectedIndexPath = _selectedIndexPath

@@ -16,8 +16,6 @@ final class UserRepositoryViewController: UIViewController {
     @IBOutlet weak var totalCountLabel: UILabel!
 
     private let loadingView = LoadingView.makeFromNib()
-    private let disposeBag = DisposeBag()
-    private let user: User
     
     private lazy var dataSource: UserRepositoryViewDataSource = .init(viewModel: self.viewModel)
     private lazy var viewModel: UserRepositoryViewModel = {
@@ -35,7 +33,10 @@ final class UserRepositoryViewController: UIViewController {
     private let isReachedBottom = PublishSubject<Bool>()
     private let headerFooterView = PublishSubject<UIView>()
     private let fetchRepositories = PublishSubject<Void>()
-
+    private let disposeBag = DisposeBag()
+    
+    private let user: User
+    
     init(user: User,
          favoritesOutput: Observable<[Repository]>,
          favoritesInput: AnyObserver<[Repository]>) {
@@ -54,37 +55,36 @@ final class UserRepositoryViewController: UIViewController {
         super.viewDidLoad()
 
         edgesForExtendedLayout = []
-        
         dataSource.configure(with: tableView)
 
+        // observe dataSource
         dataSource.selectedIndexPath
             .bind(to: selectedIndexPath)
             .disposed(by: disposeBag)
-
         dataSource.isReachedBottom
             .bind(to: isReachedBottom)
             .disposed(by: disposeBag)
-
         dataSource.headerFooterView
             .bind(to: headerFooterView)
             .disposed(by: disposeBag)
 
+        // observe viewModel
         viewModel.title
             .bind(to: rx.title)
             .disposed(by: disposeBag)
-
         viewModel.showRepository
             .bind(to: showRepository)
             .disposed(by: disposeBag)
-
         viewModel.reloadData
             .bind(to: reloadData)
             .disposed(by: disposeBag)
-
         viewModel.countString
             .bind(to: totalCountLabel.rx.text)
             .disposed(by: disposeBag)
-
+        viewModel.updateLoadingView
+            .bind(to: updateLoadingView)
+            .disposed(by: disposeBag)
+        
         fetchRepositories.onNext(())
     }
     

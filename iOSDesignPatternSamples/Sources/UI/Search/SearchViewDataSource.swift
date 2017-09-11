@@ -10,17 +10,17 @@ import Foundation
 import UIKit
 import GithubKit
 import RxSwift
-import RxCocoa
 
 final class SearchViewDataSource: NSObject {
-    fileprivate let viewModel: SearchViewModel
-
     let selectedIndexPath: Observable<IndexPath>
-    private let _selectedIndexPath = PublishSubject<IndexPath>()
     let isReachedBottom: Observable<Bool>
-    private let _isReachedBottom = PublishSubject<Bool>()
     let headerFooterView: Observable<UIView>
+    
+    private let _selectedIndexPath = PublishSubject<IndexPath>()
+    private let _isReachedBottom = PublishSubject<Bool>()
     private let _headerFooterView = PublishSubject<UIView>()
+    
+    private let viewModel: SearchViewModel
 
     init(viewModel: SearchViewModel) {
         self.viewModel = viewModel
@@ -34,7 +34,8 @@ final class SearchViewDataSource: NSObject {
         tableView.delegate = self
         
         tableView.registerCell(UserViewCell.self)
-        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
+        tableView.register(UITableViewHeaderFooterView.self,
+                           forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
     }
 }
 

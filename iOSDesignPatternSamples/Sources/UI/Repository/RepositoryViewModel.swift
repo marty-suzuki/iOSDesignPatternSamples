@@ -13,7 +13,6 @@ import RxCocoa
 
 final class RepositoryViewModel {
     let favoriteButtonTitle: Observable<String>
-
     private let disposeBag = DisposeBag()
 
     init(repository: Repository,
@@ -39,7 +38,7 @@ final class RepositoryViewModel {
                 favorites.append(repository)
                 return favorites
             }
-            // dispose時にobserverにdisposeを送らないために、onNext
+            // to use "onNext" because to avoid sending dispose
             .subscribe(onNext: { favoritesInput.onNext($0) })
             .disposed(by: disposeBag)
     }
