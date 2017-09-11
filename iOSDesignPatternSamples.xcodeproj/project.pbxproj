@@ -13,6 +13,12 @@
 		375C542F1F650EA900310929 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C542E1F650EA900310929 /* SearchViewModel.swift */; };
 		375C54311F65454000310929 /* UserRepositoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C54301F65454000310929 /* UserRepositoryViewModel.swift */; };
 		375C54331F65455700310929 /* UserRepositoryViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C54321F65455700310929 /* UserRepositoryViewDataSource.swift */; };
+		377C15541F66E3D900F25D8E /* Dispatcher.Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377C15531F66E3D900F25D8E /* Dispatcher.Repository.swift */; };
+		378D1A3D1F66E5A7007AD091 /* RepositoryAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A3C1F66E5A7007AD091 /* RepositoryAction.swift */; };
+		378D1A3F1F66E5BF007AD091 /* RepositoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A3E1F66E5BF007AD091 /* RepositoryStore.swift */; };
+		378D1A431F66E649007AD091 /* Dispatcher.User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A421F66E649007AD091 /* Dispatcher.User.swift */; };
+		378D1A451F66E65A007AD091 /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A441F66E65A007AD091 /* UserAction.swift */; };
+		378D1A471F66E66C007AD091 /* UserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A461F66E66C007AD091 /* UserStore.swift */; };
 		37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */; };
 		37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */; };
 		37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB61F3745D0003DC1F8 /* Main.storyboard */; };
@@ -44,7 +50,13 @@
 		375C542E1F650EA900310929 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		375C54301F65454000310929 /* UserRepositoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewModel.swift; sourceTree = "<group>"; };
 		375C54321F65455700310929 /* UserRepositoryViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewDataSource.swift; sourceTree = "<group>"; };
+		377C15531F66E3D900F25D8E /* Dispatcher.Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dispatcher.Repository.swift; sourceTree = "<group>"; };
 		37817D031F373F8B00EC69C6 /* iOSDesignPatternSamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDesignPatternSamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		378D1A3C1F66E5A7007AD091 /* RepositoryAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryAction.swift; sourceTree = "<group>"; };
+		378D1A3E1F66E5BF007AD091 /* RepositoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryStore.swift; sourceTree = "<group>"; };
+		378D1A421F66E649007AD091 /* Dispatcher.User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dispatcher.User.swift; sourceTree = "<group>"; };
+		378D1A441F66E65A007AD091 /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
+		378D1A461F66E66C007AD091 /* UserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStore.swift; sourceTree = "<group>"; };
 		37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		37BE2AB51F3745D0003DC1F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		37BE2AB71F3745D0003DC1F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -88,6 +100,35 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		377C15501F66E39800F25D8E /* Flux */ = {
+			isa = PBXGroup;
+			children = (
+				377C15511F66E39800F25D8E /* Repository */,
+				377C15521F66E39800F25D8E /* User */,
+			);
+			path = Flux;
+			sourceTree = "<group>";
+		};
+		377C15511F66E39800F25D8E /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				377C15531F66E3D900F25D8E /* Dispatcher.Repository.swift */,
+				378D1A3C1F66E5A7007AD091 /* RepositoryAction.swift */,
+				378D1A3E1F66E5BF007AD091 /* RepositoryStore.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
+		377C15521F66E39800F25D8E /* User */ = {
+			isa = PBXGroup;
+			children = (
+				378D1A421F66E649007AD091 /* Dispatcher.User.swift */,
+				378D1A441F66E65A007AD091 /* UserAction.swift */,
+				378D1A461F66E66C007AD091 /* UserStore.swift */,
+			);
+			path = User;
+			sourceTree = "<group>";
+		};
 		37817CFA1F373F8B00EC69C6 = {
 			isa = PBXGroup;
 			children = (
@@ -137,6 +178,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
+				377C15501F66E39800F25D8E /* Flux */,
 				37BE2AE91F374889003DC1F8 /* NotieObserver */,
 			);
 			path = Common;
@@ -327,18 +369,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
+				378D1A3F1F66E5BF007AD091 /* RepositoryStore.swift in Sources */,
 				375C542B1F65079A00310929 /* FavoriteViewModel.swift in Sources */,
 				375C542F1F650EA900310929 /* SearchViewModel.swift in Sources */,
 				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
+				378D1A471F66E66C007AD091 /* UserStore.swift in Sources */,
 				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
+				378D1A3D1F66E5A7007AD091 /* RepositoryAction.swift in Sources */,
 				375C542D1F6509E900310929 /* FavoriteViewDataSource.swift in Sources */,
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
 				375C54291F65073900310929 /* SearchViewDataSource.swift in Sources */,
 				37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
+				377C15541F66E3D900F25D8E /* Dispatcher.Repository.swift in Sources */,
 				375C54311F65454000310929 /* UserRepositoryViewModel.swift in Sources */,
 				37D5D20B1F6599A900FA46DF /* RepositoryViewModel.swift in Sources */,
 				37BE2AED1F3748D9003DC1F8 /* UIKeyboardWillHide.swift in Sources */,
+				378D1A431F66E649007AD091 /* Dispatcher.User.swift in Sources */,
+				378D1A451F66E65A007AD091 /* UserAction.swift in Sources */,
 				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
 				375C54331F65455700310929 /* UserRepositoryViewDataSource.swift in Sources */,
 				37BE2AC21F37460C003DC1F8 /* AppDelegate.swift in Sources */,

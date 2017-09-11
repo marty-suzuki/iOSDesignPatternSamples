@@ -68,7 +68,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
 
 ## Other
 
-This sample uses [GithubKitForSample](https://github.com/marty-suzuki/GithubKitForSample) that makes to create demo app easily.
+This sample uses [FluxCapacitor](https://github.com/marty-suzuki/FluxCapacitor) and  [GithubKitForSample](https://github.com/marty-suzuki/GithubKitForSample) that makes to create demo app easily.
 
 ## Author
 
