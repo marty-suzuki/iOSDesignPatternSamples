@@ -16,33 +16,22 @@ final class UserRepositoryViewController: UIViewController {
     @IBOutlet weak var totalCountLabel: UILabel!
 
     private let loadingView = LoadingView.makeFromNib()
-    
-    private lazy var dataSource: UserRepositoryViewDataSource = .init(viewModel: self.viewModel)
-    private lazy var viewModel: UserRepositoryViewModel = {
-        return .init(user: self.user,
-                     fetchRepositories: self.fetchRepositories,
-                     selectedIndexPath: self.selectedIndexPath,
-                     isReachedBottom: self.isReachedBottom,
-                     headerFooterView: self.headerFooterView)
-    }()
 
-    private let favoritesOutput: Observable<[Repository]>
-    private let favoritesInput: AnyObserver<[Repository]>
-
-    private let selectedIndexPath = PublishSubject<IndexPath>()
-    private let isReachedBottom = PublishSubject<Bool>()
-    private let headerFooterView = PublishSubject<UIView>()
-    private let fetchRepositories = PublishSubject<Void>()
+    private let dataSource = UserRepositoryViewDataSource()
+    private let userAction: UserAction
+    private let userStore: UserStore
+    private let repositoryAction: RepositoryAction
+    private let repositoryStore: RepositoryStore
     private let disposeBag = DisposeBag()
-    
-    private let user: User
-    
-    init(user: User,
-         favoritesOutput: Observable<[Repository]>,
-         favoritesInput: AnyObserver<[Repository]>) {
-        self.favoritesOutput = favoritesOutput
-        self.favoritesInput = favoritesInput
-        self.user = user
+
+    init(userAction: UserAction = .init(),
+         userStore: UserStore = .instantiate(),
+         repositoryAction: RepositoryAction = .init(),
+         repositoryStore: RepositoryStore = .instantiate()) {
+        self.userAction = userAction
+        self.userStore = userStore
+        self.repositoryAction = repositoryAction
+        self.repositoryStore = repositoryStore
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -50,49 +39,91 @@ final class UserRepositoryViewController: UIViewController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    deinit {
+        userAction.clearSelectedUser()
+        repositoryAction.removeAllRepositories()
+        repositoryAction.repositoryTotalCount(0)
+        repositoryAction.clearPageInfo()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         edgesForExtendedLayout = []
         dataSource.configure(with: tableView)
 
-        // observe dataSource
-        dataSource.selectedIndexPath
-            .bind(to: selectedIndexPath)
-            .disposed(by: disposeBag)
-        dataSource.isReachedBottom
-            .bind(to: isReachedBottom)
-            .disposed(by: disposeBag)
-        dataSource.headerFooterView
-            .bind(to: headerFooterView)
-            .disposed(by: disposeBag)
+        // observe store
+        let repositories = repositoryStore.repositories.asObservable()
+        let totalCount = repositoryStore.repositoryTotalCount.asObservable()
+        let isFetching = repositoryStore.isRepositoryFetching.asObservable()
 
-        // observe viewModel
-        viewModel.title
-            .bind(to: rx.title)
-            .disposed(by: disposeBag)
-        viewModel.showRepository
+        repositoryStore.selectedRepository
+            .filter { $0 != nil }
+            .map { _ in }
             .bind(to: showRepository)
             .disposed(by: disposeBag)
-        viewModel.reloadData
+
+        Observable.merge(repositories.map { _ in },
+                         totalCount.map { _ in },
+                         isFetching.map { _ in })
             .bind(to: reloadData)
             .disposed(by: disposeBag)
-        viewModel.countString
-            .bind(to: totalCountLabel.rx.text)
-            .disposed(by: disposeBag)
-        viewModel.updateLoadingView
+
+        Observable.combineLatest(dataSource.headerFooterView, isFetching)
             .bind(to: updateLoadingView)
             .disposed(by: disposeBag)
-        
+
+        Observable.combineLatest(repositories, totalCount)
+            { (repos, count) in "\(repos.count) / \(count)" }
+            .bind(to: totalCountLabel.rx.text)
+            .disposed(by: disposeBag)
+
+        let user = userStore.selectedUser
+            .filter { $0 != nil }
+            .map { $0! }
+        user
+            .map { "\($0.login)'s Repositories" }
+            .bind(to: rx.title)
+            .disposed(by: disposeBag)
+
+        // fetch repositories
+        let fetchRepositories = PublishSubject<Void>()
+        let endCousor = repositoryStore.lastPageInfo.asObservable()
+            .map { $0?.endCursor }
+        let params = Observable.combineLatest(user, endCousor)
+            .share(replay: 1, scope: .whileConnected)
+        let initialLoadRequest = fetchRepositories
+            .withLatestFrom(params)
+        let loadMoreRequest = dataSource.isReachedBottom
+            .filter { $0 }
+            .withLatestFrom(params)
+            .filter { $1 != nil }
+        let request = Observable.merge(initialLoadRequest, loadMoreRequest)
+            .map { UserNodeRequest(id: $0.id, after: $1) }
+            .withLatestFrom(isFetching) { ($0, $1) }
+            .filter { !$1 }
+            .map { $0.0 }
+            .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
+            .do(onNext: { [weak self] _ in
+                self?.repositoryAction.isRepositoriesFetching(true)
+            })
+        request
+            .flatMap { ApiSession.shared.rx.send($0) }
+            .subscribe(onNext: { [weak self] (response: Response<Repository>) in
+                self?.repositoryAction.pageInfo(response.pageInfo)
+                self?.repositoryAction.addRepositories(response.nodes)
+                self?.repositoryAction.repositoryTotalCount(response.totalCount)
+                self?.repositoryAction.isRepositoriesFetching(false)
+            })
+            .disposed(by: disposeBag)
+
         fetchRepositories.onNext(())
     }
     
-    private var showRepository: AnyObserver<Repository> {
+    private var showRepository: AnyObserver<Void> {
         return UIBindingObserver(UIElement: self) { me, repository in
-            let vc = RepositoryViewController(repository: repository,
-                                              favoritesOutput: me.favoritesOutput,
-                                              favoritesInput: me.favoritesInput)
+            guard let vc = RepositoryViewController() else { return }
             me.navigationController?.pushViewController(vc, animated: true)
         }.asObserver()
     }

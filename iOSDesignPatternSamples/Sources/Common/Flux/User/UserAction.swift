@@ -37,4 +37,36 @@ final class UserAction: Actionable {
             })
             .disposed(by: disposeBag)
     }
+
+    func selectUser(_ user: User) {
+        invoke(.selectedUser(user))
+    }
+
+    func clearSelectedUser() {
+        invoke(.selectedUser(nil))
+    }
+
+    func addUsers(_ users: [User]) {
+        invoke(.addUsers(users))
+    }
+
+    func removeAllUsers() {
+        invoke(.removeAllUsers)
+    }
+
+    func pageInfo(_ pageInfo: PageInfo) {
+        invoke(.lastPageInfo(pageInfo))
+    }
+
+    func clearPageInfo() {
+        invoke(.lastPageInfo(nil))
+    }
+
+    func userTotalCount(_ count: Int) {
+        invoke(.userTotalCount(count))
+    }
+
+    func isUserFetching(_ isFetching: Bool) {
+        invoke(.isUserFetching(isFetching))
+    }
 }

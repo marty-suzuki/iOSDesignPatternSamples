@@ -10,42 +10,21 @@ import UIKit
 import GithubKit
 import RxSwift
 import RxCocoa
+import NoticeObserveKit
 
 final class SearchViewController: UIViewController {
     @IBOutlet weak var totalCountLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
 
-    var favoritesInput: AnyObserver<[Repository]>?
-    var favoritesOutput: Observable<[Repository]>?
-
     private let searchBar = UISearchBar(frame: .zero)
     private let loadingView = LoadingView.makeFromNib()
     
-    private lazy var dataSource: SearchViewDataSource = .init(viewModel: self.viewModel)
-    private lazy var viewModel: SearchViewModel = {
-        let viewWillAppear = self.rx
-            .methodInvoked(#selector(SearchViewController.viewWillAppear(_:)))
-            .map { _ in }
-        let viewWillDisappear = self.rx
-            .methodInvoked(#selector(SearchViewController.viewWillDisappear(_:)))
-            .map { _ in }
-        let viewDidAppear = self.rx
-            .methodInvoked(#selector(SearchViewController.viewDidAppear(_:)))
-            .map { _ in }
-        return .init(viewWillAppear: viewWillAppear,
-                     viewWillDisappear: viewWillDisappear,
-                     viewDidAppear: viewDidAppear,
-                     searchText: self.searchBar.rx.text.orEmpty,
-                     isReachedBottom: self.isReachedBottom,
-                     selectedIndexPath: self.selectedIndexPath,
-                     headerFooterView: self.headerFooterView)
-    }()
-    
-    private let selectedIndexPath = PublishSubject<IndexPath>()
-    private let isReachedBottom = PublishSubject<Bool>()
-    private let headerFooterView = PublishSubject<UIView>()
+    private let dataSource = SearchViewDataSource()
+    private let action = UserAction()
+    private let store: UserStore = .instantiate()
     private let disposeBag = DisposeBag()
+    private var pool = NoticeObserverPool()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,38 +33,30 @@ final class SearchViewController: UIViewController {
         searchBar.placeholder = "Input user name"
         dataSource.configure(with: tableView)
 
-        // observe dataSource
-        dataSource.selectedIndexPath
-            .bind(to: selectedIndexPath)
-            .disposed(by: disposeBag)
-        dataSource.isReachedBottom
-            .bind(to: isReachedBottom)
-            .disposed(by: disposeBag)
-        dataSource.headerFooterView
-            .bind(to: headerFooterView)
-            .disposed(by: disposeBag)
+        // observe store
+        let users = store.users.asObservable()
+        let totalCount = store.userTotalCount.asObservable()
+        let isFetching = store.isUserFetching.asObservable()
 
-        // observe viewModel
-        viewModel.accessTokenAlert
-            .bind(to: showAccessTokenAlert)
-            .disposed(by: disposeBag)
-        viewModel.keyboardWillShow
-            .bind(to: keyboardWillShow)
-            .disposed(by: disposeBag)
-        viewModel.keyboardWillHide
-            .bind(to: keyboardWillHide)
-            .disposed(by: disposeBag)
-        viewModel.countString
-            .bind(to: totalCountLabel.rx.text)
-            .disposed(by: disposeBag)
-        viewModel.reloadData
-            .bind(to: reloadData)
-            .disposed(by: disposeBag)
-        viewModel.selectedUser
+        store.selectedUser
+            .filter { $0 != nil }
+            .map { _ in }
             .bind(to: showUserRepository)
             .disposed(by: disposeBag)
-        viewModel.updateLoadingView
+
+        Observable.merge(users.map { _ in },
+                         totalCount.map { _ in },
+                         isFetching.map { _ in })
+            .bind(to: reloadData)
+            .disposed(by: disposeBag)
+
+        Observable.combineLatest(dataSource.headerFooterView, isFetching)
             .bind(to: updateLoadingView)
+            .disposed(by: disposeBag)
+
+        Observable.zip(totalCount, users)
+            { "\($1.count) / \($0)" }
+            .bind(to: totalCountLabel.rx.text)
             .disposed(by: disposeBag)
 
         // observe views
@@ -102,9 +73,85 @@ final class SearchViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         rx.methodInvoked(#selector(SearchViewController.viewWillDisappear(_:)))
-            .map { _ in }
-            .subscribe(onNext: { [weak self] in
+            .subscribe(onNext: { [weak self] _ in
                 self?.searchBar.resignFirstResponder()
+                self?.pool = NoticeObserverPool()
+            })
+            .disposed(by: disposeBag)
+        rx.methodInvoked(#selector(SearchViewController.viewDidAppear(_:)))
+            .flatMap { _ -> Observable<(String, String)> in
+                let token = ApiSession.shared.token ?? ""
+                guard token.isEmpty || token == "Your Github Personal Access Token" else { return .empty() }
+                let title = "Access Token Error"
+                let message = "\"Github Personal Access Token\" is Required.\n Please set it to ApiSession.shared.token in AppDelegate."
+                return .just((title, message))
+            }
+            .bind(to: showAccessTokenAlert)
+            .disposed(by: disposeBag)
+
+         // keyboard notification
+        let viewWillAppear = rx.methodInvoked(#selector(SearchViewController.viewWillAppear(_:)))
+        viewWillAppear
+            .flatMap { [weak self] _ -> Observable<UIKeyboardInfo> in
+                Observable.create { observer in
+                    let disposable = Disposables.create()
+                    guard let me = self else { return disposable }
+                    UIKeyboardWillShow.observe {
+                        observer.onNext($0)
+                    }.addObserverTo(me.pool)
+                    return disposable
+                }
+            }
+            .bind(to: keyboardWillShow)
+            .disposed(by: disposeBag)
+        viewWillAppear
+            .flatMap { [weak self] _ -> Observable<UIKeyboardInfo> in
+                Observable.create { observer in
+                    let disposable = Disposables.create()
+                    guard let me = self else { return disposable }
+                    UIKeyboardWillHide.observe {
+                        observer.onNext($0)
+                    }.addObserverTo(me.pool)
+                    return disposable
+                }
+            }
+            .bind(to: keyboardWillHide)
+            .disposed(by: disposeBag)
+
+        // search
+        let nonEmptyQuery = searchBar.rx.text.orEmpty
+            .debounce(0.3, scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .do(onNext: { [weak self] _ in
+                self?.action.removeAllUsers()
+                self?.action.clearPageInfo()
+                self?.action.userTotalCount(0)
+            })
+            .filter { !$0.isEmpty }
+            .share(replay: 1, scope: .whileConnected)
+        let endCousor = store.lastPageInfo.asObservable()
+            .map { $0?.endCursor }
+        let initialLoad = nonEmptyQuery.withLatestFrom(endCousor) { ($0, $1) }
+        let loadMore = dataSource.isReachedBottom
+            .filter { $0 }
+            .withLatestFrom(Observable.combineLatest(nonEmptyQuery, endCousor)) { $1 }
+            .filter { $1 != nil }
+        let request = Observable.merge(initialLoad, loadMore)
+            .map { SearchUserRequest(query: $0, after: $1) }
+            .withLatestFrom(isFetching) { ($0 , $1) }
+            .filter { !$1 }
+            .map { $0.0 }
+            .distinctUntilChanged { $0.query == $1.query && $0.after == $1.after }
+            .do(onNext: { [weak self] _ in
+                self?.action.isUserFetching(true)
+            })
+        request
+            .flatMap { ApiSession.shared.rx.send($0) }
+            .subscribe(onNext: { [weak self] (response: Response<User>) in
+                self?.action.pageInfo(response.pageInfo)
+                self?.action.addUsers(response.nodes)
+                self?.action.userTotalCount(response.totalCount)
+                self?.action.isUserFetching(false)
             })
             .disposed(by: disposeBag)
     }
@@ -147,12 +194,9 @@ final class SearchViewController: UIViewController {
         }.asObserver()
     }
     
-    private var showUserRepository: AnyObserver<User> {
-        return UIBindingObserver(UIElement: self) { me, user in
-            guard let favoritesOutput = me.favoritesOutput, let favoritesInput = me.favoritesInput else { return }
-            let vc = UserRepositoryViewController(user: user,
-                                                  favoritesOutput: favoritesOutput,
-                                                  favoritesInput: favoritesInput)
+    private var showUserRepository: AnyObserver<Void> {
+        return UIBindingObserver(UIElement: self) { me, _ in
+            let vc = UserRepositoryViewController()
             me.navigationController?.pushViewController(vc, animated: true)
         }.asObserver()
     }

@@ -14,18 +14,11 @@ import RxCocoa
 final class FavoriteViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    var favoritesInput: AnyObserver<[Repository]> { return favorites.asObserver() }
-    var favoritesOutput: Observable<[Repository]> { return viewModel.favorites }
-
-    private lazy var dataSource: FavoriteViewDataSource = .init(viewModel: self.viewModel)
-    private private(set) lazy var viewModel: FavoriteViewModel = {
-        .init(favoritesObservable: self.favorites, selectedIndexPath: self.selectedIndexPath)
-    }()
-    
-    private let favorites = PublishSubject<[Repository]>()
-    private let selectedIndexPath = PublishSubject<IndexPath>()
+    private let dataSource = FavoriteViewDataSource()
     private let disposeBag = DisposeBag()
-    
+    private let store: RepositoryStore = .instantiate()
+    private let action = RepositoryAction()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -33,25 +26,29 @@ final class FavoriteViewController: UIViewController {
         automaticallyAdjustsScrollViewInsets = false
         dataSource.configure(with: tableView)
 
-        // observe dataSource
-        dataSource.selectedIndexPath
-            .bind(to: selectedIndexPath)
-            .disposed(by: disposeBag)
-
-        // observe viewModel
-        viewModel.selectedRepository
+        // observe store
+        rx.methodInvoked(#selector(FavoriteViewController.viewDidAppear(_:)))
+            .flatMapLatest { [weak self] _ -> Observable<Void> in
+                guard let me = self else { return .empty() }
+                let viewWillDisappear = me.rx
+                    .sentMessage(#selector(FavoriteViewController.viewDidDisappear(_:)))
+                return me.store.selectedRepository
+                    .takeUntil(viewWillDisappear)
+                    .filter { $0 != nil }
+                    .map { _ in }
+            }
             .bind(to: showRepository)
             .disposed(by: disposeBag)
-        viewModel.relaodData
+
+        Observable.merge(store.isRepositoryFetching.map { _ in },
+                         store.favorites.map { _ in })
             .bind(to: reloadData)
             .disposed(by: disposeBag)
     }
     
-    private var showRepository: AnyObserver<Repository> {
-        return UIBindingObserver(UIElement: self) { me, repository in
-            let vc = RepositoryViewController(repository: repository,
-                                              favoritesOutput: me.favoritesOutput,
-                                              favoritesInput: me.favoritesInput)
+    private var showRepository: AnyObserver<Void> {
+        return UIBindingObserver(UIElement: self) { me, _ in
+            guard let vc = RepositoryViewController() else { return }
             me.navigationController?.pushViewController(vc, animated: true)
         }.asObserver()
     }

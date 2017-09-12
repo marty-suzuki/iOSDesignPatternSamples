@@ -12,19 +12,18 @@ import GithubKit
 import RxSwift
 
 final class SearchViewDataSource: NSObject {
-    let selectedIndexPath: Observable<IndexPath>
     let isReachedBottom: Observable<Bool>
     let headerFooterView: Observable<UIView>
-    
-    private let _selectedIndexPath = PublishSubject<IndexPath>()
+
     private let _isReachedBottom = PublishSubject<Bool>()
     private let _headerFooterView = PublishSubject<UIView>()
-    
-    private let viewModel: SearchViewModel
 
-    init(viewModel: SearchViewModel) {
-        self.viewModel = viewModel
-        self.selectedIndexPath = _selectedIndexPath
+    private let store: UserStore
+    private let action: UserAction
+
+    init(action: UserAction = .init(), store: UserStore = .instantiate()) {
+        self.action = action
+        self.store = store
         self.isReachedBottom = _isReachedBottom.distinctUntilChanged()
         self.headerFooterView = _headerFooterView
     }
@@ -41,12 +40,12 @@ final class SearchViewDataSource: NSObject {
 
 extension SearchViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.usersValue.count
+        return store.usersValue.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(UserViewCell.self, for: indexPath)
-        let user = viewModel.usersValue[indexPath.row]
+        let user = store.usersValue[indexPath.row]
         cell.configure(with: user)
         return cell
     }
@@ -67,11 +66,12 @@ extension SearchViewDataSource: UITableViewDataSource {
 extension SearchViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        _selectedIndexPath.onNext(indexPath)
+        let user = store.usersValue[indexPath.row]
+        action.selectUser(user)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let user = viewModel.usersValue[indexPath.row]
+        let user = store.usersValue[indexPath.row]
         return UserViewCell.calculateHeight(with: user, and: tableView)
     }
     
@@ -80,7 +80,7 @@ extension SearchViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return viewModel.isFetchingUsersValue ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return store.isUserFetchingValue ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

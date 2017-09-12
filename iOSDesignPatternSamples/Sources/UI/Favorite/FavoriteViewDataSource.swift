@@ -12,13 +12,13 @@ import GithubKit
 import RxSwift
 
 final class FavoriteViewDataSource: NSObject {
-    let selectedIndexPath: Observable<IndexPath>
-    private let _selectedIndexPath = PublishSubject<IndexPath>()
-    private let viewModel: FavoriteViewModel
-    
-    init(viewModel: FavoriteViewModel) {
-        self.viewModel = viewModel
-        self.selectedIndexPath = _selectedIndexPath
+    private let store: RepositoryStore
+    private let action: RepositoryAction
+
+    init(store: RepositoryStore = .instantiate(),
+         action: RepositoryAction = .init()) {
+        self.store = store
+        self.action = action
     }
     
     func configure(with tableView: UITableView) {
@@ -31,12 +31,12 @@ final class FavoriteViewDataSource: NSObject {
 
 extension FavoriteViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.favoritesValue.count
+        return store.favoritesValue.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(RepositoryViewCell.self, for: indexPath)
-        let repository = viewModel.favoritesValue[indexPath.row]
+        let repository = store.favoritesValue[indexPath.row]
         cell.configure(with: repository)
         return cell
     }
@@ -45,11 +45,12 @@ extension FavoriteViewDataSource: UITableViewDataSource {
 extension FavoriteViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        _selectedIndexPath.onNext(indexPath)
+        let repository = store.favoritesValue[indexPath.row]
+        action.selectRepository(repository)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let repository = viewModel.favoritesValue[indexPath.row]
+        let repository = store.favoritesValue[indexPath.row]
         return RepositoryViewCell.calculateHeight(with: repository, and: tableView)
     }
 }

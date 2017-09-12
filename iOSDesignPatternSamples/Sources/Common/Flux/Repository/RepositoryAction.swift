@@ -34,4 +34,44 @@ final class RepositoryAction: Actionable {
             })
             .disposed(by: disposeBag)
     }
+
+    func selectRepository(_ repository: Repository) {
+        invoke(.selectedRepository(repository))
+    }
+
+    func clearSelectedRepository() {
+        invoke(.selectedRepository(nil))
+    }
+
+    func addFavorite(_ repository: Repository) {
+        invoke(.addFavorite(repository))
+    }
+
+    func removeFavorite(_ repository: Repository) {
+        invoke(.removeFavorite(repository))
+    }
+
+    func pageInfo(_ pageInfo: PageInfo) {
+        invoke(.lastPageInfo(pageInfo))
+    }
+
+    func clearPageInfo() {
+        invoke(.lastPageInfo(nil))
+    }
+
+    func addRepositories(_ repositories: [Repository]) {
+        invoke(.addRepositories(repositories))
+    }
+
+    func removeAllRepositories() {
+        invoke(.removeAllRepositories)
+    }
+
+    func repositoryTotalCount(_ count: Int) {
+        invoke(.repositoryTotalCount(count))
+    }
+
+    func isRepositoriesFetching(_ isFetching: Bool) {
+        invoke(.isRepositoryFetching(isFetching))
+    }
 }

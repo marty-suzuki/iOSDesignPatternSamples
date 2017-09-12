@@ -18,17 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         ApiSession.shared.token = "Your Github Personal Access Token"
         
-        if let viewControllers = (window?.rootViewController as? UITabBarController)?.viewControllers,
-            let searchVC = viewControllers.flatMap({
-                ($0 as? UINavigationController)?.topViewController as? SearchViewController
-            }).first,
-            let favoriteVC = viewControllers.flatMap({
-                ($0 as? UINavigationController)?.topViewController as? FavoriteViewController
-            }).first {
-            searchVC.favoritesInput = favoriteVC.favoritesInput
-            searchVC.favoritesOutput = favoriteVC.favoritesOutput
-        }
-
         return true
     }
 
