@@ -136,22 +136,15 @@ final class SearchViewController: UIViewController {
             .filter { $0 }
             .withLatestFrom(Observable.combineLatest(nonEmptyQuery, endCousor)) { $1 }
             .filter { $1 != nil }
-        let request = Observable.merge(initialLoad, loadMore)
+        let request: Observable<SearchUserRequest> = Observable.merge(initialLoad, loadMore)
             .map { SearchUserRequest(query: $0, after: $1) }
             .withLatestFrom(isFetching) { ($0 , $1) }
             .filter { !$1 }
             .map { $0.0 }
             .distinctUntilChanged { $0.query == $1.query && $0.after == $1.after }
-            .do(onNext: { [weak self] _ in
-                self?.action.isUserFetching(true)
-            })
         request
-            .flatMap { ApiSession.shared.rx.send($0) }
-            .subscribe(onNext: { [weak self] (response: Response<User>) in
-                self?.action.pageInfo(response.pageInfo)
-                self?.action.addUsers(response.nodes)
-                self?.action.userTotalCount(response.totalCount)
-                self?.action.isUserFetching(false)
+            .subscribe(onNext: { [weak self] request in
+                self?.action.fetchUsers(withQuery: request.query, after: request.after)
             })
             .disposed(by: disposeBag)
     }

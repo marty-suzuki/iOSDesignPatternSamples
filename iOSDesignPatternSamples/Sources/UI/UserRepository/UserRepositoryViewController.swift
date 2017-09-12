@@ -99,22 +99,17 @@ final class UserRepositoryViewController: UIViewController {
             .filter { $0 }
             .withLatestFrom(params)
             .filter { $1 != nil }
-        let request = Observable.merge(initialLoadRequest, loadMoreRequest)
+        let request: Observable<UserNodeRequest> = Observable.merge(initialLoadRequest,
+                                                                    loadMoreRequest)
             .map { UserNodeRequest(id: $0.id, after: $1) }
             .withLatestFrom(isFetching) { ($0, $1) }
             .filter { !$1 }
             .map { $0.0 }
             .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
-            .do(onNext: { [weak self] _ in
-                self?.repositoryAction.isRepositoriesFetching(true)
-            })
         request
-            .flatMap { ApiSession.shared.rx.send($0) }
-            .subscribe(onNext: { [weak self] (response: Response<Repository>) in
-                self?.repositoryAction.pageInfo(response.pageInfo)
-                self?.repositoryAction.addRepositories(response.nodes)
-                self?.repositoryAction.repositoryTotalCount(response.totalCount)
-                self?.repositoryAction.isRepositoriesFetching(false)
+            .subscribe(onNext: { [weak self] request in
+                self?.repositoryAction.fetchRepositories(withUserId: request.id,
+                                                         after: request.after)
             })
             .disposed(by: disposeBag)
 
