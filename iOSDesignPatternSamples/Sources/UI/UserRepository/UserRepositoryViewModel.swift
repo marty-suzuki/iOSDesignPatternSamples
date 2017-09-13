@@ -65,9 +65,6 @@ final class UserRepositoryViewModel {
             .filter { $1 != nil }
         Observable.merge(initialLoadRequest, loadMoreRequest)
             .map { UserNodeRequest(id: $0.id, after: $1) }
-            .withLatestFrom(_isFetchingRepositories.asObservable()) { ($0, $1) }
-            .filter { !$1 }
-            .map { $0.0 }
             .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
             .do(onNext: { [weak self] _ in
                 self?._isFetchingRepositories.value = true

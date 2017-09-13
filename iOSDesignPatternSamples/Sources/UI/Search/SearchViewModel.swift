@@ -110,14 +110,11 @@ final class SearchViewModel {
             .filter { $1 != nil }
         Observable.merge(initialLoad, loadMore)
             .map { SearchUserRequest(query: $0, after: $1) }
-            .withLatestFrom(_isFetchingUsers.asObservable()) { ($0 , $1) }
-            .filter { !$1 }
-            .map { $0.0 }
             .distinctUntilChanged { $0.query == $1.query && $0.after == $1.after }
             .do(onNext: { [weak self] _ in
                 self?._isFetchingUsers.value = true
             })
-            .flatMap { ApiSession.shared.rx.send($0) }
+            .flatMapLatest { ApiSession.shared.rx.send($0) }
             .subscribe(onNext: { [weak self] (response: Response<User>) in
                 self?.pageInfo.value = response.pageInfo
                 self?._users.value.append(contentsOf: response.nodes)
