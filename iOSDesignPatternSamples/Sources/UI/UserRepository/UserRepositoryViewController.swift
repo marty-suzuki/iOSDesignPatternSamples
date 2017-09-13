@@ -99,14 +99,9 @@ final class UserRepositoryViewController: UIViewController {
             .filter { $0 }
             .withLatestFrom(params)
             .filter { $1 != nil }
-        let request: Observable<UserNodeRequest> = Observable.merge(initialLoadRequest,
-                                                                    loadMoreRequest)
+        Observable.merge(initialLoadRequest, loadMoreRequest)
             .map { UserNodeRequest(id: $0.id, after: $1) }
-            .withLatestFrom(isFetching) { ($0, $1) }
-            .filter { !$1 }
-            .map { $0.0 }
             .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
-        request
             .subscribe(onNext: { [weak self] request in
                 self?.repositoryAction.fetchRepositories(withUserId: request.id,
                                                          after: request.after)
