@@ -40,8 +40,7 @@ final class FavoriteViewController: UIViewController {
             .bind(to: showRepository)
             .disposed(by: disposeBag)
 
-        Observable.merge(store.isRepositoryFetching.map { _ in },
-                         store.favorites.map { _ in })
+        store.favorites.map { _ in }
             .bind(to: reloadData)
             .disposed(by: disposeBag)
     }
