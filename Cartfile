@@ -1,3 +1,3 @@
-github "marty-suzuki/GithubKitForSample"
-github "marty-suzuki/NoticeObserveKit"
-github "marty-suzuki/FluxCapacitor"
+github "marty-suzuki/GithubKitForSample" "0.1.2"
+github "marty-suzuki/NoticeObserveKit" "0.3.0"
+github "marty-suzuki/FluxCapacitor" "0.3.1"
