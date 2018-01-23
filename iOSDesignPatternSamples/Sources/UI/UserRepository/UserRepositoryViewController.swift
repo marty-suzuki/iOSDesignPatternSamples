@@ -8,30 +8,49 @@
 
 import UIKit
 import GithubKit
+import RxSwift
+import RxCocoa
 
-protocol UserRepositoryView: class {
-    func reloadData()
-    func showRepository(with repository: Repository)
-    func updateTotalCountLabel(_ countText: String)
-    func updateLoadingView(with view: UIView, isLoading: Bool)
-}
-
-final class UserRepositoryViewController: UIViewController, UserRepositoryView {
+final class UserRepositoryViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var totalCountLabel: UILabel!
 
     private let loadingView = LoadingView.makeFromNib()
-    private let favoritePresenter: FavoritePresenter
-    private let presenter: UserRepositoryPresenter
+
+    private let _selectedIndexPath = PublishSubject<IndexPath>()
+    private let _isReachedBottom = PublishSubject<Bool>()
+    private let _headerFooterView = PublishSubject<UIView>()
+    private let _fetchRepositories = PublishSubject<Void>()
+
+    private lazy var dataSource: UserRepositoryViewDataSource = {
+        return .init(viewModel: self.viewModel,
+                     selectedIndexPath: self._selectedIndexPath.asObserver(),
+                     isReachedBottom: self._isReachedBottom.asObserver(),
+                     headerFooterView: self._headerFooterView.asObserver())
+    }()
+    private lazy var viewModel: UserRepositoryViewModel = {
+        return .init(user: self.user,
+                     fetchRepositories: self._fetchRepositories,
+                     selectedIndexPath: self._selectedIndexPath,
+                     isReachedBottom: self._isReachedBottom,
+                     headerFooterView: self._headerFooterView)
+    }()
+
+    private let favoritesOutput: Observable<[Repository]>
+    private let favoritesInput: AnyObserver<[Repository]>
+
+    private let disposeBag = DisposeBag()
     
-    private lazy var dataSource: UserRepositoryViewDataSource = .init(presenter: self.presenter)
+    private let user: User
     
-    init(user: User, favoritePresenter: FavoritePresenter) {
-        self.favoritePresenter = favoritePresenter
-        self.presenter = UserRepositoryViewPresenter(user: user)
+    init(user: User,
+         favoritesOutput: Observable<[Repository]>,
+         favoritesInput: AnyObserver<[Repository]>) {
+        self.favoritesOutput = favoritesOutput
+        self.favoritesInput = favoritesInput
+        self.user = user
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
-        presenter.view = self
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -40,30 +59,51 @@ final class UserRepositoryViewController: UIViewController, UserRepositoryView {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        title = presenter.title
+
         edgesForExtendedLayout = []
-        
         dataSource.configure(with: tableView)
-        presenter.fetchRepositories()
+        title = viewModel.title
+
+        // observe viewModel
+        viewModel.showRepository
+            .bind(to: showRepository)
+            .disposed(by: disposeBag)
+
+        viewModel.reloadData
+            .bind(to: reloadData)
+            .disposed(by: disposeBag)
+
+        viewModel.countString
+            .bind(to: totalCountLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        viewModel.updateLoadingView
+            .bind(to: updateLoadingView)
+            .disposed(by: disposeBag)
+        
+        _fetchRepositories.onNext(())
     }
     
-    func showRepository(with repository: Repository) {
-        let vc = RepositoryViewController(repository: repository, favoritePresenter: favoritePresenter)
-        navigationController?.pushViewController(vc, animated: true)
+    private var showRepository: AnyObserver<Repository> {
+        return Binder(self) { me, repository in
+            let vc = RepositoryViewController(repository: repository,
+                                              favoritesOutput: me.favoritesOutput,
+                                              favoritesInput: me.favoritesInput)
+            me.navigationController?.pushViewController(vc, animated: true)
+        }.asObserver()
     }
     
-    func reloadData() {
-        tableView.reloadData()
+    private var reloadData: AnyObserver<Void> {
+        return Binder(self) { me, _ in
+            me.tableView.reloadData()
+        }.asObserver()
     }
     
-    func updateTotalCountLabel(_ countText: String) {
-        totalCountLabel.text = countText
-    }
-    
-    func updateLoadingView(with view: UIView, isLoading: Bool) {
-        loadingView.removeFromSuperview()
-        loadingView.isLoading = isLoading
-        loadingView.add(to: view)
+    private var updateLoadingView: AnyObserver<(UIView, Bool)> {
+        return Binder(self) { (me, value: (view: UIView, isLoading: Bool)) in
+            me.loadingView.removeFromSuperview()
+            me.loadingView.isLoading = value.isLoading
+            me.loadingView.add(to: value.view)
+        }.asObserver()
     }
 }
