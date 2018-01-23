@@ -13,20 +13,20 @@ import RxSwift
 import RxCocoa
 
 final class UserRepositoryViewDataSource: NSObject {
-    private let selectedIndexPath: AnyObserver<IndexPath>
-    private let isReachedBottom: AnyObserver<Bool>
-    private let headerFooterView: AnyObserver<UIView>
+    let isReachedBottom: Observable<Bool>
+    let headerFooterView: Observable<UIView>
 
-    private let viewModel: UserRepositoryViewModel
-    
-    init(viewModel: UserRepositoryViewModel,
-         selectedIndexPath: AnyObserver<IndexPath>,
-         isReachedBottom: AnyObserver<Bool>,
-         headerFooterView: AnyObserver<UIView>) {
-        self.viewModel = viewModel
-        self.selectedIndexPath = selectedIndexPath
-        self.isReachedBottom = isReachedBottom
-        self.headerFooterView = headerFooterView
+    private let _isReachedBottom = PublishRelay<Bool>()
+    private let _headerFooterView = PublishRelay<UIView>()
+
+    private let action: RepositoryAction
+    private let store: RepositoryStore
+
+    init(action: RepositoryAction = .init(), store: RepositoryStore = .instantiate()) {
+        self.action = action
+        self.store = store
+        self.isReachedBottom = _isReachedBottom.distinctUntilChanged()
+        self.headerFooterView = _headerFooterView.asObservable()
     }
     
     func configure(with tableView: UITableView) {
@@ -41,12 +41,12 @@ final class UserRepositoryViewDataSource: NSObject {
 
 extension UserRepositoryViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.value.repositories.count
+        return store.value.repositories.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(RepositoryViewCell.self, for: indexPath)
-        let repository = viewModel.value.repositories[indexPath.row]
+        let repository = store.value.repositories[indexPath.row]
         cell.configure(with: repository)
         return cell
     }
@@ -59,7 +59,7 @@ extension UserRepositoryViewDataSource: UITableViewDataSource {
         guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
             return nil
         }
-        headerFooterView.onNext(view)
+        _headerFooterView.accept(view)
         return view
     }
 }
@@ -67,11 +67,12 @@ extension UserRepositoryViewDataSource: UITableViewDataSource {
 extension UserRepositoryViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        selectedIndexPath.onNext(indexPath)
+        let repository = store.value.repositories[indexPath.row]
+        action.selectRepository(repository)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let repository = viewModel.value.repositories[indexPath.row]
+        let repository = store.value.repositories[indexPath.row]
         return RepositoryViewCell.calculateHeight(with: repository, and: tableView)
     }
     
@@ -80,11 +81,11 @@ extension UserRepositoryViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return viewModel.value.isFetchingRepositories ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return store.value.isRepositoryFetching ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        isReachedBottom.onNext(maxScrollDistance <= scrollView.contentOffset.y)
+        _isReachedBottom.accept(maxScrollDistance <= scrollView.contentOffset.y)
     }
 }

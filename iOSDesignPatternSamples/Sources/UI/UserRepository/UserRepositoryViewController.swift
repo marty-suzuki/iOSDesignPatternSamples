@@ -17,38 +17,21 @@ final class UserRepositoryViewController: UIViewController {
 
     private let loadingView = LoadingView.makeFromNib()
 
-    private let _selectedIndexPath = PublishSubject<IndexPath>()
-    private let _isReachedBottom = PublishSubject<Bool>()
-    private let _headerFooterView = PublishSubject<UIView>()
-    private let _fetchRepositories = PublishSubject<Void>()
-
-    private lazy var dataSource: UserRepositoryViewDataSource = {
-        return .init(viewModel: self.viewModel,
-                     selectedIndexPath: self._selectedIndexPath.asObserver(),
-                     isReachedBottom: self._isReachedBottom.asObserver(),
-                     headerFooterView: self._headerFooterView.asObserver())
-    }()
-    private lazy var viewModel: UserRepositoryViewModel = {
-        return .init(user: self.user,
-                     fetchRepositories: self._fetchRepositories,
-                     selectedIndexPath: self._selectedIndexPath,
-                     isReachedBottom: self._isReachedBottom,
-                     headerFooterView: self._headerFooterView)
-    }()
-
-    private let favoritesOutput: Observable<[Repository]>
-    private let favoritesInput: AnyObserver<[Repository]>
-
+    private let dataSource = UserRepositoryViewDataSource()
+    private let userAction: UserAction
+    private let userStore: UserStore
+    private let repositoryAction: RepositoryAction
+    private let repositoryStore: RepositoryStore
     private let disposeBag = DisposeBag()
-    
-    private let user: User
-    
-    init(user: User,
-         favoritesOutput: Observable<[Repository]>,
-         favoritesInput: AnyObserver<[Repository]>) {
-        self.favoritesOutput = favoritesOutput
-        self.favoritesInput = favoritesInput
-        self.user = user
+
+    init(userAction: UserAction = .init(),
+         userStore: UserStore = .instantiate(),
+         repositoryAction: RepositoryAction = .init(),
+         repositoryStore: RepositoryStore = .instantiate()) {
+        self.userAction = userAction
+        self.userStore = userStore
+        self.repositoryAction = repositoryAction
+        self.repositoryStore = repositoryStore
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -56,39 +39,88 @@ final class UserRepositoryViewController: UIViewController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    deinit {
+        userAction.clearSelectedUser()
+        repositoryAction.removeAllRepositories()
+        repositoryAction.repositoryTotalCount(0)
+        repositoryAction.clearPageInfo()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         edgesForExtendedLayout = []
         dataSource.configure(with: tableView)
-        title = viewModel.title
 
-        // observe viewModel
-        viewModel.showRepository
+        // observe store
+        let repositories = repositoryStore.repositories.asObservable()
+        let totalCount = repositoryStore.repositoryTotalCount.asObservable()
+        let isFetching = repositoryStore.isRepositoryFetching.asObservable()
+
+        repositoryStore.selectedRepository
+            .filter { $0 != nil }
+            .map { _ in }
             .bind(to: showRepository)
             .disposed(by: disposeBag)
 
-        viewModel.reloadData
+        Observable.merge(repositories.map { _ in },
+                         totalCount.map { _ in },
+                         isFetching.map { _ in })
             .bind(to: reloadData)
             .disposed(by: disposeBag)
 
-        viewModel.countString
-            .bind(to: totalCountLabel.rx.text)
-            .disposed(by: disposeBag)
-        
-        viewModel.updateLoadingView
+        Observable.combineLatest(dataSource.headerFooterView, isFetching)
             .bind(to: updateLoadingView)
             .disposed(by: disposeBag)
+
+        Observable.combineLatest(repositories, totalCount)
+            .map { (repos, count) in "\(repos.count) / \(count)" }
+            .bind(to: totalCountLabel.rx.text)
+            .disposed(by: disposeBag)
+
+        let user = userStore.selectedUser
+            .flatMap { $0.map(Observable.just) ?? .empty() }
+
+        user
+            .map { "\($0.login)'s Repositories" }
+            .bind(to: rx.title)
+            .disposed(by: disposeBag)
+
+        // fetch repositories
+        let fetchRepositories = PublishSubject<Void>()
+        let _fetchTrigger = PublishSubject<(User, String?)>()
+
+        let initialLoadRequest = fetchRepositories
+            .withLatestFrom(_fetchTrigger)
+
+        let loadMoreRequest = dataSource.isReachedBottom
+            .filter { $0 }
+            .withLatestFrom(_fetchTrigger)
+            .filter { $1 != nil }
         
-        _fetchRepositories.onNext(())
+        Observable.merge(initialLoadRequest, loadMoreRequest)
+            .map { UserNodeRequest(id: $0.id, after: $1) }
+            .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
+            .subscribe(onNext: { [weak self] request in
+                self?.repositoryAction.fetchRepositories(withUserId: request.id,
+                                                         after: request.after)
+            })
+            .disposed(by: disposeBag)
+
+        let endCousor = repositoryStore.lastPageInfo.asObservable()
+            .map { $0?.endCursor }
+
+        Observable.combineLatest(user, endCousor)
+            .bind(to: _fetchTrigger)
+            .disposed(by: disposeBag)
+
+        fetchRepositories.onNext(())
     }
     
-    private var showRepository: AnyObserver<Repository> {
+    private var showRepository: AnyObserver<Void> {
         return Binder(self) { me, repository in
-            let vc = RepositoryViewController(repository: repository,
-                                              favoritesOutput: me.favoritesOutput,
-                                              favoritesInput: me.favoritesInput)
+            guard let vc = RepositoryViewController() else { return }
             me.navigationController?.pushViewController(vc, animated: true)
         }.asObserver()
     }
