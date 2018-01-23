@@ -7,9 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */; };
-		37086C212017850600D625CA /* ApiSession.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C202017850600D625CA /* ApiSession.extension.swift */; };
-		372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372936AD1F54538A00762D15 /* FavoriteModel.swift */; };
+		37086C2620178F1C00D625CA /* ApiSession.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C2320178F1C00D625CA /* ApiSession.extension.swift */; };
+		37086C2820178F1C00D625CA /* NSObjectProtocol.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C2520178F1C00D625CA /* NSObjectProtocol.extension.swift */; };
+		375C54291F65073900310929 /* SearchViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C54281F65073900310929 /* SearchViewDataSource.swift */; };
+		375C542B1F65079A00310929 /* FavoriteViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C542A1F65079A00310929 /* FavoriteViewPresenter.swift */; };
+		375C542D1F6509E900310929 /* FavoriteViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C542C1F6509E900310929 /* FavoriteViewDataSource.swift */; };
+		375C542F1F650EA900310929 /* SearchViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C542E1F650EA900310929 /* SearchViewPresenter.swift */; };
+		375C54311F65454000310929 /* UserRepositoryViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C54301F65454000310929 /* UserRepositoryViewPresenter.swift */; };
+		375C54331F65455700310929 /* UserRepositoryViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375C54321F65455700310929 /* UserRepositoryViewDataSource.swift */; };
 		37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */; };
 		37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */; };
 		37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB61F3745D0003DC1F8 /* Main.storyboard */; };
@@ -30,12 +35,18 @@
 		37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */; };
 		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
 		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
+		37D5D20B1F6599A900FA46DF /* RepositoryViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D5D20A1F6599A900FA46DF /* RepositoryViewPresenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSObjectProtocol.extension.swift; sourceTree = "<group>"; };
-		37086C202017850600D625CA /* ApiSession.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiSession.extension.swift; sourceTree = "<group>"; };
-		372936AD1F54538A00762D15 /* FavoriteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteModel.swift; sourceTree = "<group>"; };
+		37086C2320178F1C00D625CA /* ApiSession.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiSession.extension.swift; sourceTree = "<group>"; };
+		37086C2520178F1C00D625CA /* NSObjectProtocol.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSObjectProtocol.extension.swift; sourceTree = "<group>"; };
+		375C54281F65073900310929 /* SearchViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewDataSource.swift; sourceTree = "<group>"; };
+		375C542A1F65079A00310929 /* FavoriteViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewPresenter.swift; sourceTree = "<group>"; };
+		375C542C1F6509E900310929 /* FavoriteViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewDataSource.swift; sourceTree = "<group>"; };
+		375C542E1F650EA900310929 /* SearchViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewPresenter.swift; sourceTree = "<group>"; };
+		375C54301F65454000310929 /* UserRepositoryViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewPresenter.swift; sourceTree = "<group>"; };
+		375C54321F65455700310929 /* UserRepositoryViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewDataSource.swift; sourceTree = "<group>"; };
 		37817D031F373F8B00EC69C6 /* iOSDesignPatternSamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDesignPatternSamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		37BE2AB51F3745D0003DC1F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -58,6 +69,7 @@
 		37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardWillShow.swift; sourceTree = "<group>"; };
 		37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
+		37D5D20A1F6599A900FA46DF /* RepositoryViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewPresenter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,11 +89,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		37086C1D2017847A00D625CA /* Extension */ = {
+		37086C2220178F1C00D625CA /* Extension */ = {
 			isa = PBXGroup;
 			children = (
-				37086C202017850600D625CA /* ApiSession.extension.swift */,
-				37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */,
+				37086C2320178F1C00D625CA /* ApiSession.extension.swift */,
+				37086C2520178F1C00D625CA /* NSObjectProtocol.extension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -135,8 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
-				372936AD1F54538A00762D15 /* FavoriteModel.swift */,
-				37086C1D2017847A00D625CA /* Extension */,
+				37086C2220178F1C00D625CA /* Extension */,
 				37BE2AE91F374889003DC1F8 /* NotieObserver */,
 			);
 			path = Common;
@@ -159,6 +170,8 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AC81F37468C003DC1F8 /* FavoriteViewController.swift */,
+				375C542A1F65079A00310929 /* FavoriteViewPresenter.swift */,
+				375C542C1F6509E900310929 /* FavoriteViewDataSource.swift */,
 			);
 			path = Favorite;
 			sourceTree = "<group>";
@@ -167,6 +180,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */,
+				37D5D20A1F6599A900FA46DF /* RepositoryViewPresenter.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -175,6 +189,8 @@
 			isa = PBXGroup;
 			children = (
 				37BE2ACA1F374699003DC1F8 /* SearchViewController.swift */,
+				375C542E1F650EA900310929 /* SearchViewPresenter.swift */,
+				375C54281F65073900310929 /* SearchViewDataSource.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -183,6 +199,8 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */,
+				375C54301F65454000310929 /* UserRepositoryViewPresenter.swift */,
+				375C54321F65455700310929 /* UserRepositoryViewDataSource.swift */,
 				37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */,
 			);
 			path = UserRepository;
@@ -318,16 +336,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
-				372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */,
-				37086C212017850600D625CA /* ApiSession.extension.swift in Sources */,
+				375C542B1F65079A00310929 /* FavoriteViewPresenter.swift in Sources */,
+				375C542F1F650EA900310929 /* SearchViewPresenter.swift in Sources */,
 				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
 				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
+				375C542D1F6509E900310929 /* FavoriteViewDataSource.swift in Sources */,
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
+				375C54291F65073900310929 /* SearchViewDataSource.swift in Sources */,
 				37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
+				37086C2620178F1C00D625CA /* ApiSession.extension.swift in Sources */,
+				375C54311F65454000310929 /* UserRepositoryViewPresenter.swift in Sources */,
+				37D5D20B1F6599A900FA46DF /* RepositoryViewPresenter.swift in Sources */,
 				37BE2AED1F3748D9003DC1F8 /* UIKeyboardWillHide.swift in Sources */,
-				37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */,
 				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
+				37086C2820178F1C00D625CA /* NSObjectProtocol.extension.swift in Sources */,
+				375C54331F65455700310929 /* UserRepositoryViewDataSource.swift in Sources */,
 				37BE2AC21F37460C003DC1F8 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
