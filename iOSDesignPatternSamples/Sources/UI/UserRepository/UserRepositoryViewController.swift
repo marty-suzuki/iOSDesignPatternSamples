@@ -72,7 +72,7 @@ final class UserRepositoryViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         
-        tableView.registerCell(RepositoryViewCell.self)
+        tableView.register(RepositoryViewCell.self)
         tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
     }
     
@@ -111,7 +111,7 @@ extension UserRepositoryViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(RepositoryViewCell.self, for: indexPath)
+        let cell = tableView.dequeue(RepositoryViewCell.self, for: indexPath)
         cell.configure(with: repositories[indexPath.row])
         return cell
     }

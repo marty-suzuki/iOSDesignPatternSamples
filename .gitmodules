@@ -1,0 +1,18 @@
+[submodule "Carthage/Checkouts/GithubKitForSample"]
+	path = Carthage/Checkouts/GithubKitForSample
+	url = https://github.com/marty-suzuki/GithubKitForSample.git
+[submodule "Carthage/Checkouts/FluxCapacitor"]
+	path = Carthage/Checkouts/FluxCapacitor
+	url = https://github.com/marty-suzuki/FluxCapacitor.git
+[submodule "Carthage/Checkouts/NoticeObserveKit"]
+	path = Carthage/Checkouts/NoticeObserveKit
+	url = https://github.com/marty-suzuki/NoticeObserveKit.git
+[submodule "Carthage/Checkouts/RxSwift"]
+	path = Carthage/Checkouts/RxSwift
+	url = https://github.com/ReactiveX/RxSwift.git
+[submodule "Carthage/Checkouts/SwiftIconFont"]
+	path = Carthage/Checkouts/SwiftIconFont
+	url = https://github.com/0x73/SwiftIconFont.git
+[submodule "Carthage/Checkouts/Nuke"]
+	path = Carthage/Checkouts/Nuke
+	url = https://github.com/kean/Nuke.git

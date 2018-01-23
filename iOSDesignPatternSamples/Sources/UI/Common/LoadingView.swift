@@ -10,6 +10,8 @@ import UIKit
 import GithubKit
 
 final class LoadingView: UIView, Nibable {
+    typealias RegisterType = RegisterNib
+
     static let defaultHeight: CGFloat = 44
     
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!

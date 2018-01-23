@@ -24,25 +24,28 @@ To run this example, you need `carthage update`.
 In addition, you need to set `Github Personal Access Token` like this.
 
 ```swift
-func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    // Override point for customization after application launch.
-
-    ApiSession.shared.token = "Your Github Personal Access Token" // <- here
-
-    //...
-    return true
+extension ApiSession {
+    static let shared: ApiSession = {
+        let token = "" // <- Your Github Personal Access Token
+        return ApiSession(injectToken: { InjectableToken(token: token) })
+    }()
 }
 ```
 
 ## Requirements
 
-- Xcode 9 GM seed or later
-- iOS 11 GM seed or later
+- Xcode 9.2 or later
+- iOS 11 or later
 - Swift 4 or later
 
-## Other
+## Special Thanks
 
-This sample uses [GithubKitForSample](https://github.com/marty-suzuki/GithubKitForSample) that makes to create demo app easily.
+- [RxSwift](https://github.com/ReactiveX/RxSwift)
+- [Nuke](https://github.com/kean/Nuke)
+- [SwiftIconFont](https://github.com/0x73/SwiftIconFont)
+- [FluxCapacitor](https://github.com/marty-suzuki/FluxCapacitor)
+- [GithubKitForSample](https://github.com/marty-suzuki/GithubKitForSample)
+- [NoticeObserveKit](https://github.com/marty-suzuki/NoticeObserveKit)
 
 ## Author
 

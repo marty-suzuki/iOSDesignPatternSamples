@@ -96,18 +96,6 @@ final class SearchViewController: UIViewController {
         observeKeyboard()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        let token = ApiSession.shared.token ?? ""
-        if token.isEmpty || token == "Your Github Personal Access Token" {
-            let alert = UIAlertController(title: "Access Token Error",
-                                          message: "\"Github Personal Access Token\" is Required.\n Please set it to ApiSession.shared.token in AppDelegate.",
-                                          preferredStyle: .alert)
-            present(alert, animated: false, completion: nil)
-        }
-    }
-    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         if searchBar.isFirstResponder {
@@ -120,7 +108,7 @@ final class SearchViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         
-        tableView.registerCell(UserViewCell.self)
+        tableView.register(UserViewCell.self)
         tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
     }
     
@@ -133,7 +121,7 @@ final class SearchViewController: UIViewController {
                 self?.view.layoutIfNeeded()
             }, completion: nil)
         }
-        .addObserverTo(pool)
+        .disposed(by: pool)
         
         UIKeyboardWillHide.observe { [weak self] in
             self?.view.layoutIfNeeded()
@@ -142,7 +130,7 @@ final class SearchViewController: UIViewController {
                 self?.view.layoutIfNeeded()
             }, completion: nil)
         }
-        .addObserverTo(pool)
+        .disposed(by: pool)
     }
     
     private func fetchUsers() {
@@ -159,7 +147,16 @@ final class SearchViewController: UIViewController {
                     self?.totalCount = value.totalCount
                 }
             case .failure(let error):
-                print(error)
+                if case .emptyToken? = (error as? ApiSession.Error) {
+                    DispatchQueue.main.async {
+                        guard let me = self else { return }
+                        let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
+                        let alert = UIAlertController(title: "Access Token Error",
+                                                      message: message,
+                                                      preferredStyle: .alert)
+                        me.present(alert, animated: false, completion: nil)
+                    }
+                }
             }
             DispatchQueue.main.async {
                 self?.isFetchingUsers = false
@@ -203,7 +200,7 @@ extension SearchViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(UserViewCell.self, for: indexPath)
+        let cell = tableView.dequeue(UserViewCell.self, for: indexPath)
         cell.configure(with: users[indexPath.row])
         return cell
     }

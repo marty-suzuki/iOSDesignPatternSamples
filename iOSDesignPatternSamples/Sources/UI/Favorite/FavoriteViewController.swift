@@ -28,7 +28,7 @@ final class FavoriteViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         
-        tableView.registerCell(RepositoryViewCell.self)
+        tableView.register(RepositoryViewCell.self)
     }
     
     fileprivate func showRepository(with repository: Repository) {
@@ -49,7 +49,7 @@ extension FavoriteViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(RepositoryViewCell.self, for: indexPath)
+        let cell = tableView.dequeue(RepositoryViewCell.self, for: indexPath)
         cell.configure(with: favoriteModel.favorites[indexPath.row])
         return cell
     }
