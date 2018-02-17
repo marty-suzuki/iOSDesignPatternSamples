@@ -11,7 +11,7 @@ import FluxCapacitor
 import GithubKit
 
 extension Dispatcher {
-    enum User: DispatchValue {
+    enum User: DispatchState {
         typealias RelatedStoreType = UserStore
         typealias RelatedActionType = UserAction
 

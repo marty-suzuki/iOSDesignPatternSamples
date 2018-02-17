@@ -13,8 +13,6 @@ import RxSwift
 import RxCocoa
 
 final class UserStore: Storable {
-    typealias DispatchValueType = Dispatcher.User
-    
     let isUserFetching: Observable<Bool>
     fileprivate let _isUserFetching = BehaviorRelay<Bool>(value: false)
     
@@ -36,7 +34,7 @@ final class UserStore: Storable {
     let fetchError: Observable<Error>
     private let _fetchError = PublishRelay<Error>()
     
-    init(dispatcher: Dispatcher) {
+    init() {
         self.isUserFetching = _isUserFetching.asObservable()
         self.users = _users.asObservable()
         self.selectedUser = _selectedUser.asObservable()
@@ -44,27 +42,26 @@ final class UserStore: Storable {
         self.lastSearchQuery = _lastSearchQuery.asObservable()
         self.userTotalCount = _userTotalCount.asObservable()
         self.fetchError = _fetchError.asObservable()
-        
-        register { [weak self] in
-            guard let me = self else { return }
-            switch $0 {
-            case .isUserFetching(let value):
-                me._isUserFetching.accept(value)
-            case .addUsers(let value):
-                me._users.accept(me._users.value + value)
-            case .removeAllUsers:
-                me._users.accept([])
-            case .selectedUser(let value):
-                me._selectedUser.accept(value)
-            case .lastPageInfo(let value):
-                me._lastPageInfo.accept(value)
-            case .lastSearchQuery(let value):
-                me._lastSearchQuery.accept(value)
-            case .userTotalCount(let value):
-                me._userTotalCount.accept(value)
-            case .fetchError(let value):
-                me._fetchError.accept(value)
-            }
+    }
+
+    func reduce(with state: Dispatcher.User) {
+        switch state {
+        case .isUserFetching(let value):
+            _isUserFetching.accept(value)
+        case .addUsers(let value):
+            _users.accept(_users.value + value)
+        case .removeAllUsers:
+            _users.accept([])
+        case .selectedUser(let value):
+            _selectedUser.accept(value)
+        case .lastPageInfo(let value):
+            _lastPageInfo.accept(value)
+        case .lastSearchQuery(let value):
+            _lastSearchQuery.accept(value)
+        case .userTotalCount(let value):
+            _userTotalCount.accept(value)
+        case .fetchError(let value):
+            _fetchError.accept(value)
         }
     }
 }

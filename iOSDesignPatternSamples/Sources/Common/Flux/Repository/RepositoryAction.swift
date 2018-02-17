@@ -12,7 +12,7 @@ import GithubKit
 import RxSwift
 
 final class RepositoryAction: Actionable {
-    typealias DispatchValueType = Dispatcher.Repository
+    typealias DispatchStateType = Dispatcher.Repository
     
     private let session: ApiSession
     private var disposeBag = DisposeBag()
