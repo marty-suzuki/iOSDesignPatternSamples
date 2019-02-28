@@ -28,72 +28,11 @@ final class SearchViewController: UIViewController, SearchView {
         searchBar.delegate = self
         return searchBar
     }()
-    
-<<<<<<< HEAD
+
     fileprivate let loadingView = LoadingView.makeFromNib()
-    
+
     var favoritePresenter: FavoritePresenter?
-=======
-    private var query: String = "" {
-        didSet {
-            if query != oldValue {
-                users.removeAll()
-                pageInfo = nil
-                totalCount = 0
-            }
-            task?.cancel()
-            task = nil
-            fetchUsers()
-        }
-    }
-    private var task: URLSessionTask? = nil
-    private var pageInfo: PageInfo? = nil
-    private var totalCount: Int = 0 {
-        didSet {
-            totalCountLabel.text = "\(users.count) / \(totalCount)"
-        }
-    }
-    private var users: [User] = [] {
-        didSet {
-            totalCountLabel.text = "\(users.count) / \(totalCount)"
-            tableView.reloadData()
-        }
-    }
-    private let debounce: (_ action: @escaping () -> ()) -> () = {
-        var lastFireTime: DispatchTime = .now()
-        let delay: DispatchTimeInterval = .milliseconds(500)
-        return { [delay] action in
-            let deadline: DispatchTime = .now() + delay
-            lastFireTime = .now()
-            DispatchQueue.global().asyncAfter(deadline: deadline) { [delay] in
-                let now: DispatchTime = .now()
-                let when: DispatchTime = lastFireTime + delay
-                if now < when { return }
-                lastFireTime = .now()
-                DispatchQueue.main.async {
-                    action()
-                }
-            }
-        }
-    }()
-    private var isFetchingUsers = false {
-        didSet {
-            tableView.reloadData()
-        }
-    }
-    private var pool = Notice.ObserverPool()
-    
-    private let loadingView = LoadingView.makeFromNib()
-    
-    private var isReachedBottom: Bool = false {
-        didSet {
-            if isReachedBottom && isReachedBottom != oldValue {
-                fetchUsers()
-            }
-        }
-    }
->>>>>>> mvc
-    
+
     private lazy var presenter: SearchPresenter = SearchViewPresenter(view: self)
     private lazy var dataSource: SearchViewDataSource = .init(presenter: self.presenter)
 
@@ -102,32 +41,27 @@ final class SearchViewController: UIViewController, SearchView {
 
         navigationItem.titleView = searchBar
         searchBar.placeholder = "Input user name"
-        
+
         dataSource.configure(with: tableView)
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         presenter.viewWillAppear()
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         if searchBar.isFirstResponder {
             searchBar.resignFirstResponder()
         }
-<<<<<<< HEAD
         presenter.viewWillDisappear()
-=======
-        pool = Notice.ObserverPool()
->>>>>>> mvc
     }
-    
+
     func reloadData() {
         tableView.reloadData()
     }
-    
-<<<<<<< HEAD
+
     func keyboardWillShow(with keyboardInfo: UIKeyboardInfo) {
         view.layoutIfNeeded()
         let extra = tabBarController?.tabBar.bounds.height ?? 0
@@ -137,29 +71,8 @@ final class SearchViewController: UIViewController, SearchView {
                        options: keyboardInfo.animationCurve,
                        animations: { self.view.layoutIfNeeded() },
                        completion: nil)
-=======
-    private func observeKeyboard() {
-        NotificationCenter.default.nok.observe(name: .keyboardWillShow) { [weak self] in
-            self?.view.layoutIfNeeded()
-            let extra = self?.tabBarController?.tabBar.bounds.height ?? 0
-            self?.tableViewBottomConstraint.constant = $0.frame.size.height - extra
-            UIView.animate(withDuration: $0.animationDuration, delay: 0, options: $0.animationCurve, animations: {
-                self?.view.layoutIfNeeded()
-            }, completion: nil)
-        }
-        .invalidated(by: pool)
-
-        NotificationCenter.default.nok.observe(name: .keyboardWillHide) { [weak self] in
-            self?.view.layoutIfNeeded()
-            self?.tableViewBottomConstraint.constant = 0
-            UIView.animate(withDuration: $0.animationDuration, delay: 0, options: $0.animationCurve, animations: {
-                self?.view.layoutIfNeeded()
-            }, completion: nil)
-        }
-        .invalidated(by: pool)
->>>>>>> mvc
     }
-    
+
     func keyboardWillHide(with keyboardInfo: UIKeyboardInfo) {
         view.layoutIfNeeded()
         tableViewBottomConstraint.constant = 0
@@ -169,23 +82,17 @@ final class SearchViewController: UIViewController, SearchView {
                        animations: { self.view.layoutIfNeeded() },
                        completion: nil)
     }
-    
-<<<<<<< HEAD
+
     func showUserRepository(with user: User) {
         guard let presenter = favoritePresenter else { return }
         let vc = UserRepositoryViewController(user: user, favoritePresenter: presenter)
-=======
-    private func showUserRepository(with user: User) {
-        guard let favoriteModel = favoriteModel else { return }
-        let vc = UserRepositoryViewController(user: user, favoriteModel: favoriteModel)
->>>>>>> mvc
         navigationController?.pushViewController(vc, animated: true)
     }
-    
+
     func updateTotalCountLabel(_ countText: String) {
         totalCountLabel.text = countText
     }
-    
+
     func updateLoadingView(with view: UIView, isLoading: Bool) {
         loadingView.removeFromSuperview()
         loadingView.isLoading = isLoading
@@ -205,16 +112,16 @@ extension SearchViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
         searchBar.showsCancelButton = false
     }
-    
+
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
         searchBar.showsCancelButton = false
     }
-    
+
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         searchBar.showsCancelButton = true
     }
-    
+
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         presenter.search(queryIfNeeded: searchText)
     }

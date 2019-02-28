@@ -11,7 +11,7 @@ import GithubKit
 
 protocol UserRepositoryPresenter: class {
     init(user: User)
-    weak var view: UserRepositoryView? { get set }
+    var view: UserRepositoryView? { get set }
     var title: String { get }
     var isFetchingRepositories: Bool { get }
     var numberOfRepositories: Int { get }

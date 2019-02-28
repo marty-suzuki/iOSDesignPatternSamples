@@ -16,28 +16,23 @@ protocol FavoriteView: class {
 
 final class FavoriteViewController: UIViewController, FavoriteView {
     @IBOutlet weak var tableView: UITableView!
-    
+
     private(set) lazy var presenter: FavoritePresenter = FavoriteViewPresenter(view: self)
     private lazy var dataSource: FavoriteViewDataSource = .init(presenter: self.presenter)
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         title = "On Memory Favorite"
-        
+
         dataSource.configure(with: tableView)
     }
-    
-<<<<<<< HEAD
+
     func showRepository(with repository: Repository) {
         let vc = RepositoryViewController(repository: repository, favoritePresenter: presenter)
-=======
-    private func showRepository(with repository: Repository) {
-        let vc = RepositoryViewController(repository: repository, favoriteModel: favoriteModel)
->>>>>>> mvc
         navigationController?.pushViewController(vc, animated: true)
     }
-    
+
     func reloadData() {
         tableView?.reloadData()
     }

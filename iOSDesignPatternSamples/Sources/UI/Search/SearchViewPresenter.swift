@@ -88,7 +88,7 @@ final class SearchViewPresenter: SearchPresenter {
             }
         }
     }
-    private var pool = NoticeObserverPool()
+    private var pool = Notice.ObserverPool()
     
     var numberOfUsers: Int {
         return users.count
@@ -142,19 +142,19 @@ final class SearchViewPresenter: SearchPresenter {
     }
     
     func viewWillAppear() {
-        UIKeyboardWillShow.observe { [weak self] in
+        NotificationCenter.default.nok.observe(name: .keyboardWillShow) { [weak self] in
             self?.view?.keyboardWillShow(with: $0)
         }
-        .disposed(by: pool)
-        
-        UIKeyboardWillHide.observe { [weak self] in
+        .invalidated(by: pool)
+
+        NotificationCenter.default.nok.observe(name: .keyboardWillHide) { [weak self] in
             self?.view?.keyboardWillHide(with: $0)
         }
-        .disposed(by: pool)
+        .invalidated(by: pool)
     }
     
     func viewWillDisappear() {
-        pool = NoticeObserverPool()
+        pool = Notice.ObserverPool()
     }
     
     func showLoadingView(on view: UIView) {
