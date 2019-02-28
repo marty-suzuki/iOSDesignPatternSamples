@@ -60,8 +60,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37BE2AD61F37471B003DC1F8 /* SafariServices.framework in Frameworks */,
 				0F0703AA9AE659ED5E4E87EF /* Pods_iOSDesignPatternSamples.framework in Frameworks */,
+				37BE2AD61F37471B003DC1F8 /* SafariServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,10 +80,10 @@
 		37817CFA1F373F8B00EC69C6 = {
 			isa = PBXGroup;
 			children = (
-				37817D051F373F8B00EC69C6 /* iOSDesignPatternSamples */,
-				37817D041F373F8B00EC69C6 /* Products */,
 				37BE2AD41F37471B003DC1F8 /* Frameworks */,
+				37817D051F373F8B00EC69C6 /* iOSDesignPatternSamples */,
 				C72F81EC67A22FD83004732D /* Pods */,
+				37817D041F373F8B00EC69C6 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
@@ -108,8 +108,8 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */,
-				37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */,
 				37BE2AB81F3745D0003DC1F8 /* Info.plist */,
+				37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -126,10 +126,10 @@
 		37BE2AC01F37460C003DC1F8 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
-				372936AD1F54538A00762D15 /* FavoriteModel.swift */,
 				37086C1D2017847A00D625CA /* Extension */,
 				37BE2AE91F374889003DC1F8 /* NotieObserver */,
+				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
+				372936AD1F54538A00762D15 /* FavoriteModel.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -137,12 +137,12 @@
 		37BE2AC31F37461E003DC1F8 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				37BE2AB61F3745D0003DC1F8 /* Main.storyboard */,
 				37BE2AF31F3759D1003DC1F8 /* Common */,
 				37BE2AC41F374673003DC1F8 /* Favorite */,
 				37BE2AC51F374673003DC1F8 /* Repository */,
 				37BE2AC61F374673003DC1F8 /* Search */,
 				37BE2AC71F374673003DC1F8 /* UserRepository */,
+				37BE2AB61F3745D0003DC1F8 /* Main.storyboard */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -183,13 +183,13 @@
 		37BE2AD41F37471B003DC1F8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */,
 				37BE2ADF1F374790003DC1F8 /* GithubKit.framework */,
+				37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */,
 				37BE2AE01F374790003DC1F8 /* Nuke.framework */,
-				37BE2AE11F374790003DC1F8 /* RxSwift.framework */,
-				37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */,
-				37BE2AD51F37471B003DC1F8 /* SafariServices.framework */,
 				86A9C053DE1021D9CB7BFF98 /* Pods_iOSDesignPatternSamples.framework */,
+				37BE2AE11F374790003DC1F8 /* RxSwift.framework */,
+				37BE2AD51F37471B003DC1F8 /* SafariServices.framework */,
+				37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -283,10 +283,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */,
-				37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */,
+				37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */,
 				37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */,
 				37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */,
-				37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */,
+				37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,7 +301,6 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FluxCapacitor/FluxCapacitor.framework",
 				"${BUILT_PRODUCTS_DIR}/GithubKit/GithubKit.framework",
 				"${BUILT_PRODUCTS_DIR}/NoticeObserveKit/NoticeObserveKit.framework",
@@ -310,6 +309,7 @@
 				"${BUILT_PRODUCTS_DIR}/RxCocoa/RxCocoa.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftIconFont/SwiftIconFont.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples-frameworks.sh",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
@@ -358,16 +358,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
-				372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */,
 				37086C212017850600D625CA /* ApiSession.extension.swift in Sources */,
-				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
-				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
-				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
-				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
-				37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */,
-				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
 				37BE2AC21F37460C003DC1F8 /* AppDelegate.swift in Sources */,
+				372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */,
+				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
+				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
+				37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */,
+				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
+				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
+				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
+				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
