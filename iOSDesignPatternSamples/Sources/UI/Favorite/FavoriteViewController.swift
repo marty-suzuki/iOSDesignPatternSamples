@@ -24,13 +24,17 @@ final class FavoriteViewController: UIViewController, FavoriteView {
         super.viewDidLoad()
 
         title = "On Memory Favorite"
-        automaticallyAdjustsScrollViewInsets = false
         
         dataSource.configure(with: tableView)
     }
     
+<<<<<<< HEAD
     func showRepository(with repository: Repository) {
         let vc = RepositoryViewController(repository: repository, favoritePresenter: presenter)
+=======
+    private func showRepository(with repository: Repository) {
+        let vc = RepositoryViewController(repository: repository, favoriteModel: favoriteModel)
+>>>>>>> mvc
         navigationController?.pushViewController(vc, animated: true)
     }
     

@@ -23,12 +23,20 @@ final class RepositoryViewController: SFSafariViewController, RepositoryView {
     }()
     private let presenter: RepositoryPresenter
     
+<<<<<<< HEAD
     init(repository: Repository,
          favoritePresenter: FavoritePresenter,
          entersReaderIfAvailable: Bool = true) {
         self.presenter = RepositoryViewPresenter(repository: repository,
                                                  favoritePresenter: favoritePresenter)
         super.init(url: repository.url, entersReaderIfAvailable: entersReaderIfAvailable)
+=======
+    init(repository: Repository, favoriteModel: FavoriteModel) {
+        self.repository = repository
+        self.favoriteModel = favoriteModel
+
+        super.init(url: repository.url, configuration: .init())
+>>>>>>> mvc
         hidesBottomBarWhenPushed = true
         self.presenter.view = self
     }
