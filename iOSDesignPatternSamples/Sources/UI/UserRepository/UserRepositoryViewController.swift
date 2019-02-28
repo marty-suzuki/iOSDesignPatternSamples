@@ -14,16 +14,16 @@ final class UserRepositoryViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var totalCountLabel: UILabel!
 
-    fileprivate let loadingView = LoadingView.makeFromNib()
+    private let loadingView = LoadingView.makeFromNib()
     
-    fileprivate var isReachedBottom: Bool = false {
+    private var isReachedBottom: Bool = false {
         didSet {
             if isReachedBottom && isReachedBottom != oldValue {
                 fetchRepositories()
             }
         }
     }
-    fileprivate var isFetchingRepositories = false {
+    private var isFetchingRepositories = false {
         didSet {
             tableView.reloadData()
         }
@@ -33,7 +33,7 @@ final class UserRepositoryViewController: UIViewController {
             totalCountLabel.text = "\(repositories.count) / \(totalCount)"
         }
     }
-    fileprivate var repositories: [Repository] = []  {
+    private var repositories: [Repository] = []  {
         didSet {
             totalCountLabel.text = "\(repositories.count) / \(totalCount)"
             tableView.reloadData()
@@ -61,7 +61,6 @@ final class UserRepositoryViewController: UIViewController {
         super.viewDidLoad()
         
         title = "\(user.login)'s Repositories"
-        edgesForExtendedLayout = []
         
         configure(with: tableView)
         
@@ -76,7 +75,7 @@ final class UserRepositoryViewController: UIViewController {
         tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
     }
     
-    fileprivate func fetchRepositories() {
+    private func fetchRepositories() {
         if task != nil { return }
         if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
         isFetchingRepositories = true
@@ -99,7 +98,7 @@ final class UserRepositoryViewController: UIViewController {
         }
     }
     
-    fileprivate func showRepository(with repository: Repository) {
+    private func showRepository(with repository: Repository) {
         let vc = RepositoryViewController(repository: repository, favoriteModel: favoriteModel)
         navigationController?.pushViewController(vc, animated: true)
     }

@@ -21,7 +21,7 @@ final class SearchViewController: UIViewController {
         return searchBar
     }()
     
-    fileprivate var query: String = "" {
+    private var query: String = "" {
         didSet {
             if query != oldValue {
                 users.removeAll()
@@ -40,13 +40,13 @@ final class SearchViewController: UIViewController {
             totalCountLabel.text = "\(users.count) / \(totalCount)"
         }
     }
-    fileprivate var users: [User] = [] {
+    private var users: [User] = [] {
         didSet {
             totalCountLabel.text = "\(users.count) / \(totalCount)"
             tableView.reloadData()
         }
     }
-    fileprivate let debounce: (_ action: @escaping () -> ()) -> () = {
+    private let debounce: (_ action: @escaping () -> ()) -> () = {
         var lastFireTime: DispatchTime = .now()
         let delay: DispatchTimeInterval = .milliseconds(500)
         return { [delay] action in
@@ -63,16 +63,16 @@ final class SearchViewController: UIViewController {
             }
         }
     }()
-    fileprivate var isFetchingUsers = false {
+    private var isFetchingUsers = false {
         didSet {
             tableView.reloadData()
         }
     }
-    private var pool = NoticeObserverPool()
+    private var pool = Notice.ObserverPool()
     
-    fileprivate let loadingView = LoadingView.makeFromNib()
+    private let loadingView = LoadingView.makeFromNib()
     
-    fileprivate var isReachedBottom: Bool = false {
+    private var isReachedBottom: Bool = false {
         didSet {
             if isReachedBottom && isReachedBottom != oldValue {
                 fetchUsers()
@@ -101,7 +101,7 @@ final class SearchViewController: UIViewController {
         if searchBar.isFirstResponder {
             searchBar.resignFirstResponder()
         }
-        pool = NoticeObserverPool()
+        pool = Notice.ObserverPool()
     }
     
     private func configure(with tableView: UITableView) {
@@ -113,7 +113,7 @@ final class SearchViewController: UIViewController {
     }
     
     private func observeKeyboard() {
-        UIKeyboardWillShow.observe { [weak self] in
+        NotificationCenter.default.nok.observe(name: .keyboardWillShow) { [weak self] in
             self?.view.layoutIfNeeded()
             let extra = self?.tabBarController?.tabBar.bounds.height ?? 0
             self?.tableViewBottomConstraint.constant = $0.frame.size.height - extra
@@ -121,16 +121,16 @@ final class SearchViewController: UIViewController {
                 self?.view.layoutIfNeeded()
             }, completion: nil)
         }
-        .disposed(by: pool)
-        
-        UIKeyboardWillHide.observe { [weak self] in
+        .invalidated(by: pool)
+
+        NotificationCenter.default.nok.observe(name: .keyboardWillHide) { [weak self] in
             self?.view.layoutIfNeeded()
             self?.tableViewBottomConstraint.constant = 0
             UIView.animate(withDuration: $0.animationDuration, delay: 0, options: $0.animationCurve, animations: {
                 self?.view.layoutIfNeeded()
             }, completion: nil)
         }
-        .disposed(by: pool)
+        .invalidated(by: pool)
     }
     
     private func fetchUsers() {
@@ -165,7 +165,7 @@ final class SearchViewController: UIViewController {
         }
     }
     
-    fileprivate func showUserRepository(with user: User) {
+    private func showUserRepository(with user: User) {
         guard let favoriteModel = favoriteModel else { return }
         let vc = UserRepositoryViewController(user: user, favoriteModel: favoriteModel)
         navigationController?.pushViewController(vc, animated: true)

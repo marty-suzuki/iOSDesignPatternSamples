@@ -23,13 +23,11 @@ final class RepositoryViewController: SFSafariViewController {
     private let repository: Repository
     private let favoriteModel: FavoriteModel
     
-    init(repository: Repository,
-         favoriteModel: FavoriteModel,
-         entersReaderIfAvailable: Bool = true) {
+    init(repository: Repository, favoriteModel: FavoriteModel) {
         self.repository = repository
         self.favoriteModel = favoriteModel
-        
-        super.init(url: repository.url, entersReaderIfAvailable: entersReaderIfAvailable)
+
+        super.init(url: repository.url, configuration: .init())
         hidesBottomBarWhenPushed = true
     }
     
