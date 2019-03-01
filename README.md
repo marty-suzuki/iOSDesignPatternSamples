@@ -45,7 +45,7 @@ You can add / remove favorite repositories in RepositoryViewController, but an A
 
 ## Run
 
-To run this example, you need `carthage update`.
+To run this example, you need `make install`.
 
 In addition, you need to set `Github Personal Access Token` like this.
 
@@ -60,9 +60,9 @@ extension ApiSession {
 
 ## Requirements
 
-- Xcode 9.2 or later
+- Xcode 10.1 or later
 - iOS 11 or later
-- Swift 4 or later
+- Swift 4.2 or later
 
 ## Special Thanks
 

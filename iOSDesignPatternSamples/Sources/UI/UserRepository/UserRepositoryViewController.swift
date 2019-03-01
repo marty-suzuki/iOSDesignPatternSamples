@@ -11,6 +11,7 @@ import GithubKit
 import RxSwift
 import RxCocoa
 
+<<<<<<< HEAD
 final class UserRepositoryViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var totalCountLabel: UILabel!
@@ -49,6 +50,31 @@ final class UserRepositoryViewController: UIViewController {
         self.favoritesOutput = favoritesOutput
         self.favoritesInput = favoritesInput
         self.user = user
+=======
+protocol UserRepositoryView: class {
+    func reloadData()
+    func showRepository(with repository: Repository)
+    func updateTotalCountLabel(_ countText: String)
+    func updateLoadingView(with view: UIView, isLoading: Bool)
+}
+
+final class UserRepositoryViewController: UIViewController, UserRepositoryView {
+
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
+
+    let loadingView = LoadingView.makeFromNib()
+
+    let favoritePresenter: FavoritePresenter
+    let userRepositoryPresenter: UserRepositoryPresenter
+    let dataSource: UserRepositoryViewDataSource
+    
+    init(userRepositoryPresenter: UserRepositoryPresenter, favoritePresenter: FavoritePresenter) {
+        self.favoritePresenter = favoritePresenter
+        self.userRepositoryPresenter = userRepositoryPresenter
+        self.dataSource = UserRepositoryViewDataSource(presenter: userRepositoryPresenter)
+        
+>>>>>>> mvp
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -59,6 +85,7 @@ final class UserRepositoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+<<<<<<< HEAD
 
         edgesForExtendedLayout = []
         dataSource.configure(with: tableView)
@@ -82,6 +109,21 @@ final class UserRepositoryViewController: UIViewController {
             .disposed(by: disposeBag)
         
         _fetchRepositories.onNext(())
+=======
+        
+        title = userRepositoryPresenter.title
+        
+        dataSource.configure(with: tableView)
+
+        userRepositoryPresenter.view = self
+        userRepositoryPresenter.fetchRepositories()
+    }
+    
+    func showRepository(with repository: Repository) {
+        let repositoryPresenter = RepositoryViewPresenter(repository: repository, favoritePresenter: favoritePresenter)
+        let vc = RepositoryViewController(presenter: repositoryPresenter)
+        navigationController?.pushViewController(vc, animated: true)
+>>>>>>> mvp
     }
     
     private var showRepository: AnyObserver<Repository> {
