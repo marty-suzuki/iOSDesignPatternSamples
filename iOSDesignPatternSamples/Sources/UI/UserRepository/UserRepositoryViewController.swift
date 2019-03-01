@@ -19,34 +19,16 @@ final class UserRepositoryViewController: UIViewController {
     private var isReachedBottom: Bool = false {
         didSet {
             if isReachedBottom && isReachedBottom != oldValue {
-                fetchRepositories()
+                repositoryModel.fetchRepositories()
             }
         }
     }
-    private var isFetchingRepositories = false {
-        didSet {
-            tableView.reloadData()
-        }
-    }
-    private var totalCount: Int = 0 {
-        didSet {
-            totalCountLabel.text = "\(repositories.count) / \(totalCount)"
-        }
-    }
-    private var repositories: [Repository] = []  {
-        didSet {
-            totalCountLabel.text = "\(repositories.count) / \(totalCount)"
-            tableView.reloadData()
-        }
-    }
-    private var pageInfo: PageInfo? = nil
-    private var task: URLSessionTask? = nil
-    
-    private let user: User
+
     private let favoriteModel: FavoriteModel
+    private let repositoryModel: RepositoryModel
     
     init(user: User, favoriteModel: FavoriteModel) {
-        self.user = user
+        self.repositoryModel = RepositoryModel(user: user)
         self.favoriteModel = favoriteModel
         
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
@@ -60,11 +42,12 @@ final class UserRepositoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        title = "\(user.login)'s Repositories"
+        title = "\(repositoryModel.user.login)'s Repositories"
         
         configure(with: tableView)
-        
-        fetchRepositories()
+
+        repositoryModel.delegate = self
+        repositoryModel.fetchRepositories()
     }
     
     private func configure(with tableView: UITableView) {
@@ -75,43 +58,43 @@ final class UserRepositoryViewController: UIViewController {
         tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
     }
     
-    private func fetchRepositories() {
-        if task != nil { return }
-        if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
-        isFetchingRepositories = true
-        let request = UserNodeRequest(id: user.id, after: pageInfo?.endCursor)
-        self.task = ApiSession.shared.send(request) { [weak self] in
-            switch $0 {
-            case .success(let value):
-                DispatchQueue.main.async {
-                    self?.pageInfo = value.pageInfo
-                    self?.repositories.append(contentsOf: value.nodes)
-                    self?.totalCount = value.totalCount
-                }
-            case .failure(let error):
-                print(error)
-            }
-            DispatchQueue.main.async {
-                self?.isFetchingRepositories = false
-            }
-            self?.task = nil
-        }
-    }
-    
     private func showRepository(with repository: Repository) {
         let vc = RepositoryViewController(repository: repository, favoriteModel: favoriteModel)
         navigationController?.pushViewController(vc, animated: true)
     }
 }
 
+extension UserRepositoryViewController: RepositoryModelDelegate {
+    func repositoryModel(_ repositoryModel: RepositoryModel, didChange isFetchingRepositories: Bool) {
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
+    }
+
+    func repositoryModel(_ repositoryModel: RepositoryModel, didChange repositories: [Repository]) {
+        let totalCount = repositoryModel.totalCount
+        DispatchQueue.main.async {
+            self.totalCountLabel.text = "\(repositories.count) / \(totalCount)"
+            self.tableView.reloadData()
+        }
+    }
+
+    func repositoryModel(_ repositoryModel: RepositoryModel, didChange totalCount: Int) {
+        let repositories = repositoryModel.repositories
+        DispatchQueue.main.async {
+            self.totalCountLabel.text = "\(repositories.count) / \(totalCount)"
+        }
+    }
+}
+
 extension UserRepositoryViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return repositories.count
+        return repositoryModel.repositories.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(RepositoryViewCell.self, for: indexPath)
-        cell.configure(with: repositories[indexPath.row])
+        cell.configure(with: repositoryModel.repositories[indexPath.row])
         return cell
     }
     
@@ -124,7 +107,7 @@ extension UserRepositoryViewController: UITableViewDataSource {
             return nil
         }
         loadingView.removeFromSuperview()
-        loadingView.isLoading = isFetchingRepositories
+        loadingView.isLoading = repositoryModel.isFetchingRepositories
         loadingView.add(to: view)
         return view
     }
@@ -134,12 +117,12 @@ extension UserRepositoryViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         
-        let repository = repositories[indexPath.row]
+        let repository = repositoryModel.repositories[indexPath.row]
         showRepository(with: repository)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return RepositoryViewCell.calculateHeight(with: repositories[indexPath.row], and: tableView)
+        return RepositoryViewCell.calculateHeight(with: repositoryModel.repositories[indexPath.row], and: tableView)
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -147,7 +130,7 @@ extension UserRepositoryViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return isFetchingRepositories ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return repositoryModel.isFetchingRepositories ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

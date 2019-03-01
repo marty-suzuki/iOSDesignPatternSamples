@@ -24,6 +24,8 @@
 		37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */; };
 		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
 		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
+		ED6EEE68222973CE007C3129 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE67222973CE007C3129 /* SearchModel.swift */; };
+		ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +55,8 @@
 		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
 		86A9C053DE1021D9CB7BFF98 /* Pods_iOSDesignPatternSamples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOSDesignPatternSamples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7683412D64555F8497709C2 /* Pods-iOSDesignPatternSamples.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOSDesignPatternSamples.release.xcconfig"; path = "Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples.release.xcconfig"; sourceTree = "<group>"; };
+		ED6EEE67222973CE007C3129 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
+		ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +134,8 @@
 				37BE2AE91F374889003DC1F8 /* NotieObserver */,
 				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
 				372936AD1F54538A00762D15 /* FavoriteModel.swift */,
+				ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */,
+				ED6EEE67222973CE007C3129 /* SearchModel.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -364,7 +370,9 @@
 				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
 				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
 				37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */,
+				ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */,
 				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
+				ED6EEE68222973CE007C3129 /* SearchModel.swift in Sources */,
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
 				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
