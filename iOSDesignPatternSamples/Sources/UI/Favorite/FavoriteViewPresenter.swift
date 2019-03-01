@@ -10,7 +10,7 @@ import Foundation
 import GithubKit
 
 protocol FavoritePresenter: class {
-    init(view: FavoriteView)
+    var view: FavoriteView? { get set }
     var numberOfFavorites: Int { get }
     func addFavorite(_ repository: Repository)
     func removeFavorite(_ repository: Repository)
@@ -20,45 +20,42 @@ protocol FavoritePresenter: class {
 }
 
 final class FavoriteViewPresenter: FavoritePresenter {
-    private weak var view: FavoriteView?
-    private var favorites: [Repository] = [] {
-        didSet {
-            view?.reloadData()
-        }
-    }
-    
+    weak var view: FavoriteView?
+
     var numberOfFavorites: Int {
-        return favorites.count
+        return model.favorites.count
     }
-    
-    init(view: FavoriteView) {
-        self.view = view
+
+    private let model = FavoriteModel()
+
+    init() {
+        self.model.delegate = self
     }
     
     func favoriteRepository(at index: Int) -> Repository {
-        return favorites[index]
+        return model.favorites[index]
     }
     
     func addFavorite(_ repository: Repository) {
-        if favorites.lazy.index(where: { $0.url == repository.url }) != nil {
-            return
-        }
-        favorites.append(repository)
+        model.addFavorite(repository)
     }
     
     func removeFavorite(_ repository: Repository) {
-        guard let index = favorites.lazy.index(where: { $0.url == repository.url }) else {
-            return
-        }
-        favorites.remove(at: index)
+        model.removeFavorite(repository)
     }
     
     func contains(_ repository: Repository) -> Bool {
-        return favorites.lazy.index { $0.url == repository.url } != nil
+        return model.favorites.lazy.index { $0.url == repository.url } != nil
     }
     
     func showFavoriteRepository(at index: Int) {
-        let repository = favorites[index]
+        let repository = model.favorites[index]
         view?.showRepository(with: repository)
+    }
+}
+
+extension FavoriteViewPresenter: FavoriteModelDelegate {
+    func favoriteDidChange() {
+        view?.reloadData()
     }
 }

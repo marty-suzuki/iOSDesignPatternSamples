@@ -21,38 +21,27 @@ final class RepositoryViewController: SFSafariViewController, RepositoryView {
                                target: self,
                                action: #selector(RepositoryViewController.favoriteButtonTap(_:)))
     }()
-<<<<<<< HEAD
     private let presenter: RepositoryPresenter
-=======
     
-    let repository: Repository
-    let favoriteModel: FavoriteModel
-    
-    init(repository: Repository, favoriteModel: FavoriteModel) {
-        self.repository = repository
-        self.favoriteModel = favoriteModel
->>>>>>> mvc
-
-    init(repository: Repository,
-         favoritePresenter: FavoritePresenter,
-         entersReaderIfAvailable: Bool = true) {
-        self.presenter = RepositoryViewPresenter(repository: repository,
-                                                 favoritePresenter: favoritePresenter)
-        super.init(url: repository.url, configuration: .init())
+    init(presenter: RepositoryPresenter) {
+        self.presenter = presenter
+        super.init(url: presenter.url, configuration: .init())
         hidesBottomBarWhenPushed = true
-        self.presenter.view = self
-    }
 
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         navigationItem.rightBarButtonItem = favoriteButtonItem
-    }
 
+        presenter.view = self
+    }
+    
     @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
         presenter.favoriteButtonTap()
     }
-
+    
     func updateFavoriteButtonTitle(_ title: String) {
         favoriteButtonItem.title = title
     }

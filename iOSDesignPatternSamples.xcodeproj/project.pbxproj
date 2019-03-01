@@ -11,7 +11,11 @@
 		37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */; };
 		37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */; };
 		37BE2AD61F37471B003DC1F8 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AD51F37471B003DC1F8 /* SafariServices.framework */; };
-<<<<<<< HEAD
+		ED17C784222986A500FF4277 /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED17C783222986A500FF4277 /* SearchViewController.xib */; };
+		ED17C786222986AD00FF4277 /* FavoriteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED17C785222986AD00FF4277 /* FavoriteViewController.xib */; };
+		ED17C78A2229889E00FF4277 /* RepositoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED17C7872229889E00FF4277 /* RepositoryModel.swift */; };
+		ED17C78B2229889E00FF4277 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED17C7882229889E00FF4277 /* SearchModel.swift */; };
+		ED17C78C2229889E00FF4277 /* FavoriteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED17C7892229889E00FF4277 /* FavoriteModel.swift */; };
 		ED57BA8F22285873004CD15B /* RepositoryViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED57BA7622285873004CD15B /* RepositoryViewPresenter.swift */; };
 		ED57BA9022285873004CD15B /* RepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED57BA7722285873004CD15B /* RepositoryViewController.swift */; };
 		ED57BA9122285873004CD15B /* UserRepositoryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED57BA7922285873004CD15B /* UserRepositoryViewController.xib */; };
@@ -31,15 +35,6 @@
 		ED57BA9F22285873004CD15B /* NSObjectProtocol.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED57BA8D22285873004CD15B /* NSObjectProtocol.extension.swift */; };
 		ED57BAA022285873004CD15B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED57BA8E22285873004CD15B /* AppDelegate.swift */; };
 		ED57BAA622285B4A004CD15B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED57BAA422285B4A004CD15B /* Main.storyboard */; };
-=======
-		37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */; };
-		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
-		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
-		ED6EEE68222973CE007C3129 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE67222973CE007C3129 /* SearchModel.swift */; };
-		ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */; };
-		ED6EEE6C22297D95007C3129 /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6EEE6B22297D95007C3129 /* SearchViewController.xib */; };
-		ED6EEE6E22297E05007C3129 /* FavoriteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */; };
->>>>>>> mvc
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,7 +52,11 @@
 		37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NoticeObserveKit.framework; path = Carthage/Build/iOS/NoticeObserveKit.framework; sourceTree = "<group>"; };
 		86A9C053DE1021D9CB7BFF98 /* Pods_iOSDesignPatternSamples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOSDesignPatternSamples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7683412D64555F8497709C2 /* Pods-iOSDesignPatternSamples.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOSDesignPatternSamples.release.xcconfig"; path = "Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples.release.xcconfig"; sourceTree = "<group>"; };
-<<<<<<< HEAD
+		ED17C783222986A500FF4277 /* SearchViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchViewController.xib; sourceTree = "<group>"; };
+		ED17C785222986AD00FF4277 /* FavoriteViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FavoriteViewController.xib; sourceTree = "<group>"; };
+		ED17C7872229889E00FF4277 /* RepositoryModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepositoryModel.swift; sourceTree = "<group>"; };
+		ED17C7882229889E00FF4277 /* SearchModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
+		ED17C7892229889E00FF4277 /* FavoriteModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteModel.swift; sourceTree = "<group>"; };
 		ED57BA7622285873004CD15B /* RepositoryViewPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepositoryViewPresenter.swift; sourceTree = "<group>"; };
 		ED57BA7722285873004CD15B /* RepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepositoryViewController.swift; sourceTree = "<group>"; };
 		ED57BA7922285873004CD15B /* UserRepositoryViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserRepositoryViewController.xib; sourceTree = "<group>"; };
@@ -77,12 +76,8 @@
 		ED57BA8D22285873004CD15B /* NSObjectProtocol.extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSObjectProtocol.extension.swift; sourceTree = "<group>"; };
 		ED57BA8E22285873004CD15B /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ED57BAA522285B4A004CD15B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = iOSDesignPatternSamples/Resources/Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
-=======
 		ED6EEE67222973CE007C3129 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
 		ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryModel.swift; sourceTree = "<group>"; };
-		ED6EEE6B22297D95007C3129 /* SearchViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchViewController.xib; sourceTree = "<group>"; };
-		ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FavoriteViewController.xib; sourceTree = "<group>"; };
->>>>>>> mvc
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,17 +148,10 @@
 		C72F81EC67A22FD83004732D /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-<<<<<<< HEAD
 				12A585EA9BD1550442F668A2 /* Pods-iOSDesignPatternSamples.debug.xcconfig */,
 				E7683412D64555F8497709C2 /* Pods-iOSDesignPatternSamples.release.xcconfig */,
-=======
-				37086C1D2017847A00D625CA /* Extension */,
-				37BE2AE91F374889003DC1F8 /* NotieObserver */,
-				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
-				372936AD1F54538A00762D15 /* FavoriteModel.swift */,
 				ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */,
 				ED6EEE67222973CE007C3129 /* SearchModel.swift */,
->>>>>>> mvc
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -179,13 +167,8 @@
 		ED57BA7322285873004CD15B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-<<<<<<< HEAD
 				ED57BA8822285873004CD15B /* Common */,
 				ED57BA7422285873004CD15B /* UI */,
-=======
-				37BE2AC81F37468C003DC1F8 /* FavoriteViewController.swift */,
-				ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */,
->>>>>>> mvc
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -206,13 +189,8 @@
 		ED57BA7522285873004CD15B /* Repository */ = {
 			isa = PBXGroup;
 			children = (
-<<<<<<< HEAD
 				ED57BA7722285873004CD15B /* RepositoryViewController.swift */,
 				ED57BA7622285873004CD15B /* RepositoryViewPresenter.swift */,
-=======
-				37BE2ACA1F374699003DC1F8 /* SearchViewController.swift */,
-				ED6EEE6B22297D95007C3129 /* SearchViewController.xib */,
->>>>>>> mvc
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -232,6 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				ED57BA7F22285873004CD15B /* FavoriteViewController.swift */,
+				ED17C785222986AD00FF4277 /* FavoriteViewController.xib */,
 				ED57BA8022285873004CD15B /* FavoriteViewDataSource.swift */,
 				ED57BA7E22285873004CD15B /* FavoriteViewPresenter.swift */,
 			);
@@ -242,6 +221,7 @@
 			isa = PBXGroup;
 			children = (
 				ED57BA8322285873004CD15B /* SearchViewController.swift */,
+				ED17C783222986A500FF4277 /* SearchViewController.xib */,
 				ED57BA8422285873004CD15B /* SearchViewDataSource.swift */,
 				ED57BA8222285873004CD15B /* SearchViewPresenter.swift */,
 			);
@@ -263,6 +243,9 @@
 				ED57BA8B22285873004CD15B /* Extension */,
 				ED57BA8922285873004CD15B /* NotieObserver */,
 				ED57BA8E22285873004CD15B /* AppDelegate.swift */,
+				ED17C7892229889E00FF4277 /* FavoriteModel.swift */,
+				ED17C7872229889E00FF4277 /* RepositoryModel.swift */,
+				ED17C7882229889E00FF4277 /* SearchModel.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -347,18 +330,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */,
-				ED6EEE6E22297E05007C3129 /* FavoriteViewController.xib in Resources */,
+				ED17C786222986AD00FF4277 /* FavoriteViewController.xib in Resources */,
 				37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */,
-<<<<<<< HEAD
 				ED57BA9B22285873004CD15B /* LoadingView.xib in Resources */,
 				ED57BAA622285B4A004CD15B /* Main.storyboard in Resources */,
+				ED17C784222986A500FF4277 /* SearchViewController.xib in Resources */,
 				ED57BA9122285873004CD15B /* UserRepositoryViewController.xib in Resources */,
-=======
-				37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */,
-				37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */,
-				ED6EEE6C22297D95007C3129 /* SearchViewController.xib in Resources */,
-				37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */,
->>>>>>> mvc
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -373,6 +350,7 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FluxCapacitor/FluxCapacitor.framework",
 				"${BUILT_PRODUCTS_DIR}/GithubKit/GithubKit.framework",
 				"${BUILT_PRODUCTS_DIR}/NoticeObserveKit/NoticeObserveKit.framework",
@@ -381,7 +359,6 @@
 				"${BUILT_PRODUCTS_DIR}/RxCocoa/RxCocoa.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftIconFont/SwiftIconFont.framework",
-				"${PODS_ROOT}/Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples-frameworks.sh",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
@@ -430,16 +407,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-<<<<<<< HEAD
 				ED57BA9E22285873004CD15B /* ApiSession.extension.swift in Sources */,
 				ED57BAA022285873004CD15B /* AppDelegate.swift in Sources */,
+				ED17C78C2229889E00FF4277 /* FavoriteModel.swift in Sources */,
 				ED57BA9622285873004CD15B /* FavoriteViewController.swift in Sources */,
 				ED57BA9722285873004CD15B /* FavoriteViewDataSource.swift in Sources */,
 				ED57BA9522285873004CD15B /* FavoriteViewPresenter.swift in Sources */,
 				ED57BA9C22285873004CD15B /* LoadingView.swift in Sources */,
 				ED57BA9F22285873004CD15B /* NSObjectProtocol.extension.swift in Sources */,
+				ED17C78A2229889E00FF4277 /* RepositoryModel.swift in Sources */,
 				ED57BA9022285873004CD15B /* RepositoryViewController.swift in Sources */,
 				ED57BA8F22285873004CD15B /* RepositoryViewPresenter.swift in Sources */,
+				ED17C78B2229889E00FF4277 /* SearchModel.swift in Sources */,
 				ED57BA9922285873004CD15B /* SearchViewController.swift in Sources */,
 				ED57BA9A22285873004CD15B /* SearchViewDataSource.swift in Sources */,
 				ED57BA9822285873004CD15B /* SearchViewPresenter.swift in Sources */,
@@ -447,20 +426,6 @@
 				ED57BA9222285873004CD15B /* UserRepositoryViewController.swift in Sources */,
 				ED57BA9322285873004CD15B /* UserRepositoryViewDataSource.swift in Sources */,
 				ED57BA9422285873004CD15B /* UserRepositoryViewPresenter.swift in Sources */,
-=======
-				37086C212017850600D625CA /* ApiSession.extension.swift in Sources */,
-				37BE2AC21F37460C003DC1F8 /* AppDelegate.swift in Sources */,
-				372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */,
-				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
-				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
-				37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */,
-				ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */,
-				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
-				ED6EEE68222973CE007C3129 /* SearchModel.swift in Sources */,
-				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
-				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
-				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
->>>>>>> mvc
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

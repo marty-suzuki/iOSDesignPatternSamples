@@ -11,7 +11,7 @@ import GithubKit
 import NoticeObserveKit
 
 protocol SearchPresenter: class {
-    init(view: SearchView)
+    var view: SearchView? { get set }
     var numberOfUsers: Int { get }
     var isFetchingUsers: Bool { get }
     func search(queryIfNeeded qeury: String)
@@ -24,121 +24,47 @@ protocol SearchPresenter: class {
 }
 
 final class SearchViewPresenter: SearchPresenter {
-    private weak var view: SearchView?
-    private var query: String = "" {
-        didSet {
-            if query != oldValue {
-                users.removeAll()
-                pageInfo = nil
-                totalCount = 0
-            }
-            task?.cancel()
-            task = nil
-            fetchUsers()
-        }
-    }
-    private var task: URLSessionTask? = nil
-    private var pageInfo: PageInfo? = nil
-    private var totalCount: Int = 0 {
-        didSet {
-            DispatchQueue.main.async { [weak self] in
-                guard let me = self else { return }
-                me.view?.updateTotalCountLabel("\(me.users.count) / \(me.totalCount)")
-                me.view?.reloadData()
-            }
-        }
-    }
-    private var users: [User] = [] {
-        didSet {
-            DispatchQueue.main.async { [weak self] in
-                guard let me = self else { return }
-                me.view?.updateTotalCountLabel("\(me.users.count) / \(me.totalCount)")
-                me.view?.reloadData()
-            }
-        }
-    }
-    private let debounce: (_ action: @escaping () -> ()) -> () = {
-        var lastFireTime: DispatchTime = .now()
-        let delay: DispatchTimeInterval = .milliseconds(500)
-        return { [delay] action in
-            let deadline: DispatchTime = .now() + delay
-            lastFireTime = .now()
-            DispatchQueue.global().asyncAfter(deadline: deadline) { [delay] in
-                let now: DispatchTime = .now()
-                let when: DispatchTime = lastFireTime + delay
-                if now < when { return }
-                lastFireTime = .now()
-                DispatchQueue.main.async {
-                    action()
-                }
-            }
-        }
-    }()
-    private var isReachedBottom: Bool = false {
-        didSet {
-            if isReachedBottom && isReachedBottom != oldValue {
-                fetchUsers()
-            }
-        }
-    }
-    private(set) var isFetchingUsers = false {
-        didSet {
-            DispatchQueue.main.async { [weak self] in
-                self?.view?.reloadData()
-            }
-        }
-    }
-    private var pool = Notice.ObserverPool()
+    weak var view: SearchView?
     
     var numberOfUsers: Int {
-        return users.count
+        return model.users.count
     }
-    
-    init(view: SearchView) {
-        self.view = view
+
+    var isFetchingUsers: Bool {
+        return model.isFetchingUsers
+    }
+
+    private let model = SearchModel()
+    private var isReachedBottom: Bool = false
+    private var pool = Notice.ObserverPool()
+
+    init() {
+        self.model.delegate = self
     }
     
     private func fetchUsers() {
-        if query.isEmpty || task != nil { return }
-        if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
-        isFetchingUsers = true
-        let request = SearchUserRequest(query: query, after: pageInfo?.endCursor)
-        self.task = ApiSession.shared.send(request) { [weak self] in
-            switch $0 {
-            case .success(let value):
-                self?.pageInfo = value.pageInfo
-                self?.users.append(contentsOf: value.nodes)
-                self?.totalCount = value.totalCount
-            
-            case .failure(let error):
-                if case .emptyToken? = (error as? ApiSession.Error) {
-                    DispatchQueue.main.async {
-                        self?.view?.showEmptyTokenError()
-                    }
-                }
-            }
-            self?.isFetchingUsers = false
-            self?.task = nil
-        }
+        model.fetchUsers()
     }
     
-    func search(queryIfNeeded qeury: String) {
-        debounce { [weak self] in
-            self?.query = qeury
-        }
+    func search(queryIfNeeded query: String) {
+        model.fetchUsers(withQuery: query)
     }
     
     func user(at index: Int) -> User {
-        return users[index]
+        return model.users[index]
     }
     
     func showUser(at index: Int) {
-        let user = users[index]
+        let user = model.users[index]
         view?.showUserRepository(with: user)
     }
     
     func setIsReachedBottom(_ isReachedBottom: Bool) {
+        let oldValue = self.isReachedBottom
         self.isReachedBottom = isReachedBottom
+        if isReachedBottom && isReachedBottom != oldValue {
+            fetchUsers()
+        }
     }
     
     func viewWillAppear() {
@@ -159,5 +85,35 @@ final class SearchViewPresenter: SearchPresenter {
     
     func showLoadingView(on view: UIView) {
         self.view?.updateLoadingView(with: view, isLoading: isFetchingUsers)
+    }
+}
+
+extension SearchViewPresenter: SearchModelDelegate {
+    func searchModel(_ searchModel: SearchModel, didRecieve errorMessage: ErrorMessage) {
+        DispatchQueue.main.async {
+            self.view?.showEmptyTokenError(errorMessage: errorMessage)
+        }
+    }
+
+    func searchModel(_ searchModel: SearchModel, didChange isFetchingUsers: Bool) {
+        DispatchQueue.main.async {
+            self.view?.reloadData()
+        }
+    }
+
+    func searchModel(_ searchModel: SearchModel, didChange users: [User]) {
+        let totalCount = searchModel.totalCount
+        DispatchQueue.main.async {
+            self.view?.updateTotalCountLabel("\(users.count) / \(totalCount)")
+            self.view?.reloadData()
+        }
+    }
+
+    func searchModel(_ searchModel: SearchModel, didChange totalCount: Int) {
+        let users = searchModel.users
+        DispatchQueue.main.async {
+            self.view?.updateTotalCountLabel("\(users.count) / \(totalCount)")
+            self.view?.reloadData()
+        }
     }
 }

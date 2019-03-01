@@ -10,7 +10,6 @@ import Foundation
 import GithubKit
 
 protocol UserRepositoryPresenter: class {
-    init(user: User)
     var view: UserRepositoryView? { get set }
     var title: String { get }
     var isFetchingRepositories: Bool { get }
@@ -24,79 +23,37 @@ protocol UserRepositoryPresenter: class {
 
 final class UserRepositoryViewPresenter: UserRepositoryPresenter {
     weak var view: UserRepositoryView?
-    private let user: User
-    
-    private var pageInfo: PageInfo? = nil
-    private var task: URLSessionTask? = nil
-    private var repositories: [Repository] = [] {
-        didSet {
-            DispatchQueue.main.async { [weak self] in
-                guard let me = self else { return }
-                me.view?.updateTotalCountLabel("\(me.repositories.count) / \(me.totalCount)")
-                me.view?.reloadData()
-            }
-        }
-    }
-    private var totalCount: Int = 0  {
-        didSet {
-            DispatchQueue.main.async { [weak self] in
-                guard let me = self else { return }
-                me.view?.updateTotalCountLabel("\(me.repositories.count) / \(me.totalCount)")
-                me.view?.reloadData()
-            }
-        }
-    }
-    private(set) var isFetchingRepositories = false {
-        didSet {
-            DispatchQueue.main.async { [weak self] in
-                self?.view?.reloadData()
-            }
-        }
-    }
-    private var isReachedBottom: Bool = false {
-        didSet {
-            if isReachedBottom && isReachedBottom != oldValue {
-                fetchRepositories()
-            }
-        }
-    }
     
     var numberOfRepositories: Int {
-        return repositories.count
+        return model.repositories.count
     }
+
+    var isFetchingRepositories: Bool {
+        return model.isFetchingRepositories
+    }
+
     var title: String {
-        return "\(user.login)'s Repositories"
+        return "\(model.user.login)'s Repositories"
     }
+
+    private let model: RepositoryModel
+    private var isReachedBottom: Bool = false
     
     init(user: User) {
-        self.user = user
+        self.model = RepositoryModel(user: user)
+        self.model.delegate = self
     }
     
     func fetchRepositories() {
-        if task != nil { return }
-        if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
-        isFetchingRepositories = true
-        let request = UserNodeRequest(id: user.id, after: pageInfo?.endCursor)
-        self.task = ApiSession.shared.send(request) { [weak self] in
-            switch $0 {
-            case .success(let value):
-                    self?.pageInfo = value.pageInfo
-                    self?.repositories.append(contentsOf: value.nodes)
-                    self?.totalCount = value.totalCount
-            case .failure(let error):
-                print(error)
-            }
-            self?.isFetchingRepositories = false
-            self?.task = nil
-        }
+        model.fetchRepositories()
     }
     
     func repository(at index: Int) -> Repository {
-        return repositories[index]
+        return model.repositories[index]
     }
     
     func showRepository(at index: Int) {
-        let repository = repositories[index]
+        let repository = model.repositories[index]
         view?.showRepository(with: repository)
     }
     
@@ -105,6 +62,34 @@ final class UserRepositoryViewPresenter: UserRepositoryPresenter {
     }
     
     func setIsReachedBottom(_ isReachedBottom: Bool) {
+        let oldValue = self.isReachedBottom
         self.isReachedBottom = isReachedBottom
+        if isReachedBottom && isReachedBottom != oldValue {
+            fetchRepositories()
+        }
+    }
+}
+
+extension UserRepositoryViewPresenter: RepositoryModelDelegate {
+    func repositoryModel(_ repositoryModel: RepositoryModel, didChange isFetchingRepositories: Bool) {
+        DispatchQueue.main.async {
+            self.view?.reloadData()
+        }
+    }
+
+    func repositoryModel(_ repositoryModel: RepositoryModel, didChange repositories: [Repository]) {
+        let totalCount = repositoryModel.totalCount
+        DispatchQueue.main.async {
+            self.view?.updateTotalCountLabel("\(repositories.count) / \(totalCount)")
+            self.view?.reloadData()
+        }
+    }
+
+    func repositoryModel(_ repositoryModel: RepositoryModel, didChange totalCount: Int) {
+        let repositories = repositoryModel.repositories
+        DispatchQueue.main.async {
+            self.view?.updateTotalCountLabel("\(repositories.count) / \(totalCount)")
+            self.view?.reloadData()
+        }
     }
 }

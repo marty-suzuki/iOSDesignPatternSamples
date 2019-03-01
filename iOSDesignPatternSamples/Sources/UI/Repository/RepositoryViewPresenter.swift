@@ -12,6 +12,7 @@ import GithubKit
 protocol RepositoryPresenter: class {
     init(repository: Repository, favoritePresenter: FavoritePresenter)
     var view: RepositoryView? { get set }
+    var url: URL { get }
     var favoriteButtonTitle: String { get }
     func favoriteButtonTap()
 }
@@ -23,6 +24,10 @@ final class RepositoryViewPresenter: RepositoryPresenter {
     
     var favoriteButtonTitle: String {
         return favoritePresenter.contains(repository) ? "Remove" : "Add"
+    }
+
+    var url: URL {
+        return repository.url
     }
     
     init(repository: Repository, favoritePresenter: FavoritePresenter) {
