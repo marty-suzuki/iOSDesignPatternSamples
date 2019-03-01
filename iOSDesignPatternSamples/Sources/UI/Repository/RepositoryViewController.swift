@@ -21,7 +21,17 @@ final class RepositoryViewController: SFSafariViewController, RepositoryView {
                                target: self,
                                action: #selector(RepositoryViewController.favoriteButtonTap(_:)))
     }()
+<<<<<<< HEAD
     private let presenter: RepositoryPresenter
+=======
+    
+    let repository: Repository
+    let favoriteModel: FavoriteModel
+    
+    init(repository: Repository, favoriteModel: FavoriteModel) {
+        self.repository = repository
+        self.favoriteModel = favoriteModel
+>>>>>>> mvc
 
     init(repository: Repository,
          favoritePresenter: FavoritePresenter,
