@@ -20,8 +20,8 @@ final class RepositoryViewController: SFSafariViewController {
                                action: #selector(RepositoryViewController.favoriteButtonTap(_:)))
     }()
     
-    private let repository: Repository
-    private let favoriteModel: FavoriteModel
+    let repository: Repository
+    let favoriteModel: FavoriteModel
     
     init(repository: Repository, favoriteModel: FavoriteModel) {
         self.repository = repository

@@ -12,13 +12,12 @@ import NoticeObserveKit
 
 final class SearchViewController: UIViewController {
     
-    @IBOutlet weak var totalCountLabel: UILabel!
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
 
     let searchBar = UISearchBar(frame: .zero)
-    private let loadingView = LoadingView.makeFromNib()
-
+    let loadingView = LoadingView.makeFromNib()
 
     private var pool = Notice.ObserverPool()
     private var isReachedBottom: Bool = false {
@@ -29,8 +28,18 @@ final class SearchViewController: UIViewController {
         }
     }
     
-    var favoriteModel: FavoriteModel?
-    let searchModel = SearchModel()
+    let favoriteModel: FavoriteModel
+    let searchModel: SearchModel
+
+    init(searchModel: SearchModel, favoriteModel: FavoriteModel) {
+        self.searchModel = searchModel
+        self.favoriteModel = favoriteModel
+        super.init(nibName: SearchViewController.className, bundle: nil)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -87,8 +96,8 @@ final class SearchViewController: UIViewController {
     }
     
     private func showUserRepository(with user: User) {
-        guard let favoriteModel = favoriteModel else { return }
-        let vc = UserRepositoryViewController(user: user, favoriteModel: favoriteModel)
+        let repositoryModel = RepositoryModel(user: user)
+        let vc = UserRepositoryViewController(repositoryModel: repositoryModel, favoriteModel: favoriteModel)
         navigationController?.pushViewController(vc, animated: true)
     }
 }

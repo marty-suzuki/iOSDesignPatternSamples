@@ -11,10 +11,10 @@ import GithubKit
 
 final class UserRepositoryViewController: UIViewController {
     
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var totalCountLabel: UILabel!
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
-    private let loadingView = LoadingView.makeFromNib()
+    let loadingView = LoadingView.makeFromNib()
     
     private var isReachedBottom: Bool = false {
         didSet {
@@ -24,11 +24,11 @@ final class UserRepositoryViewController: UIViewController {
         }
     }
 
-    private let favoriteModel: FavoriteModel
-    private let repositoryModel: RepositoryModel
+    let favoriteModel: FavoriteModel
+    let repositoryModel: RepositoryModel
     
-    init(user: User, favoriteModel: FavoriteModel) {
-        self.repositoryModel = RepositoryModel(user: user)
+    init(repositoryModel: RepositoryModel, favoriteModel: FavoriteModel) {
+        self.repositoryModel = repositoryModel
         self.favoriteModel = favoriteModel
         
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)

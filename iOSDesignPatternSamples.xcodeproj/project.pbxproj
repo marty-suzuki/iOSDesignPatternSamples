@@ -26,6 +26,8 @@
 		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
 		ED6EEE68222973CE007C3129 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE67222973CE007C3129 /* SearchModel.swift */; };
 		ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */; };
+		ED6EEE6C22297D95007C3129 /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6EEE6B22297D95007C3129 /* SearchViewController.xib */; };
+		ED6EEE6E22297E05007C3129 /* FavoriteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +59,8 @@
 		E7683412D64555F8497709C2 /* Pods-iOSDesignPatternSamples.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOSDesignPatternSamples.release.xcconfig"; path = "Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples.release.xcconfig"; sourceTree = "<group>"; };
 		ED6EEE67222973CE007C3129 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
 		ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryModel.swift; sourceTree = "<group>"; };
+		ED6EEE6B22297D95007C3129 /* SearchViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchViewController.xib; sourceTree = "<group>"; };
+		ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FavoriteViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AC81F37468C003DC1F8 /* FavoriteViewController.swift */,
+				ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */,
 			);
 			path = Favorite;
 			sourceTree = "<group>";
@@ -173,6 +178,7 @@
 			isa = PBXGroup;
 			children = (
 				37BE2ACA1F374699003DC1F8 /* SearchViewController.swift */,
+				ED6EEE6B22297D95007C3129 /* SearchViewController.xib */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -289,9 +295,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */,
+				ED6EEE6E22297E05007C3129 /* FavoriteViewController.xib in Resources */,
 				37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */,
 				37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */,
 				37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */,
+				ED6EEE6C22297D95007C3129 /* SearchViewController.xib in Resources */,
 				37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

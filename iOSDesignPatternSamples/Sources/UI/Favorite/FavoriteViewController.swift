@@ -10,9 +10,18 @@ import UIKit
 import GithubKit
 
 final class FavoriteViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet private(set) weak var tableView: UITableView!
     
-    let favoriteModel = FavoriteModel()
+    let favoriteModel: FavoriteModel
+
+    init(favoriteModel: FavoriteModel) {
+        self.favoriteModel = favoriteModel
+        super.init(nibName: FavoriteViewController.className, bundle: nil)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
