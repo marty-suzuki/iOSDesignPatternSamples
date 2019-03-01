@@ -27,9 +27,9 @@ final class UserRepositoryViewController: UIViewController, UserRepositoryView {
     let userRepositoryPresenter: UserRepositoryPresenter
     let dataSource: UserRepositoryViewDataSource
     
-    init(user: User, favoritePresenter: FavoritePresenter) {
+    init(userRepositoryPresenter: UserRepositoryPresenter, favoritePresenter: FavoritePresenter) {
         self.favoritePresenter = favoritePresenter
-        self.userRepositoryPresenter = UserRepositoryViewPresenter(user: user)
+        self.userRepositoryPresenter = userRepositoryPresenter
         self.dataSource = UserRepositoryViewDataSource(presenter: userRepositoryPresenter)
         
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)

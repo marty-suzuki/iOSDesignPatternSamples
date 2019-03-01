@@ -94,7 +94,8 @@ final class SearchViewController: UIViewController, SearchView {
     }
     
     func showUserRepository(with user: User) {
-        let vc = UserRepositoryViewController(user: user, favoritePresenter: favoritePresenter)
+        let presenter = UserRepositoryViewPresenter(user: user)
+        let vc = UserRepositoryViewController(userRepositoryPresenter: presenter, favoritePresenter: favoritePresenter)
         navigationController?.pushViewController(vc, animated: true)
     }
     
