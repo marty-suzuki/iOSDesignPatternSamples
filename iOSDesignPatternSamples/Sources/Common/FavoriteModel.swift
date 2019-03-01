@@ -8,14 +8,18 @@
 
 import GithubKit
 
-@objc protocol FavoriteModelDelegate: class {
-    @objc optional func favoriteDidChange()
+protocol FavoriteModelDelegate: AnyObject {
+    func favoriteDidChange()
+}
+
+extension FavoriteModelDelegate {
+    func favoriteDidChange() {}
 }
 
 final class FavoriteModel {
     private(set) var favorites: [Repository] = [] {
         didSet {
-            delegate?.favoriteDidChange?()
+            delegate?.favoriteDidChange()
         }
     }
     
