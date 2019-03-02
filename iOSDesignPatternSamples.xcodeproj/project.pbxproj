@@ -81,8 +81,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0F0703AA9AE659ED5E4E87EF /* Pods_iOSDesignPatternSamples.framework in Frameworks */,
-				37BE2AD61F37471B003DC1F8 /* SafariServices.framework in Frameworks */,
+				EDDF7D36222A4908003BCCAE /* Pods_iOSDesignPatternSamples.framework in Frameworks */,
+				EDDF7D34222A48FC003BCCAE /* SafariServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,6 +210,7 @@
 				37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */,
 				EDDF7D212229C1DA003BCCAE /* UserRepositoryViewDataSource.swift */,
 				EDDF7D222229C1DA003BCCAE /* UserRepositoryViewModel.swift */,
+
 			);
 			path = UserRepository;
 			sourceTree = "<group>";
