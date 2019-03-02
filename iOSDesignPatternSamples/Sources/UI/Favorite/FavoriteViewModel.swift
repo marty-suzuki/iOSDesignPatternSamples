@@ -12,30 +12,45 @@ import RxSwift
 import RxCocoa
 
 final class FavoriteViewModel {
-    let favorites: Observable<[Repository]>
-    let relaodData: Observable<Void>
-    let selectedRepository: Observable<Repository>
+    let output: Output
+    let input: Input
 
-    fileprivate let _favorites = BehaviorRelay<[Repository]>(value: [])
+    var favorites: [Repository] {
+        return _favorites.value
+    }
+
+    private let _favorites = BehaviorRelay<[Repository]>(value: [])
     private let disposeBag = DisposeBag()
 
-    init(favoritesObservable: Observable<[Repository]>,
-         selectedIndexPath: Observable<IndexPath>) {
-        self.favorites = _favorites.asObservable()
-        self.relaodData = _favorites.asObservable().map { _ in }
-        self.selectedRepository = selectedIndexPath
-            .withLatestFrom(_favorites.asObservable()) { $1[$0.row] }
+    init(favoritesInput: AnyObserver<[Repository]>,
+         favoritesOutput: Observable<[Repository]>) {
 
-        favoritesObservable
+        let _selectedIndexPath = PublishRelay<IndexPath>()
+        let selectedRepository = _selectedIndexPath
+            .withLatestFrom(favoritesOutput) { $1[$0.row] }
+
+        self.output = Output(favorites: favoritesOutput,
+                             relaodData: favoritesOutput.map { _ in },
+                             selectedRepository: selectedRepository)
+
+        self.input = Input(selectedIndexPath: _selectedIndexPath.asObserver(),
+                           favorites: favoritesInput)
+
+        favoritesOutput
             .bind(to: _favorites)
             .disposed(by: disposeBag)
     }
 }
 
-extension FavoriteViewModel: ValueCompatible {}
+extension FavoriteViewModel {
+    struct Output {
+        let favorites: Observable<[Repository]>
+        let relaodData: Observable<Void>
+        let selectedRepository: Observable<Repository>
+    }
 
-extension Value where Base == FavoriteViewModel {
-    var favorites: [Repository] {
-        return base._favorites.value
+    struct Input {
+        let selectedIndexPath: AnyObserver<IndexPath>
+        let favorites: AnyObserver<[Repository]>
     }
 }

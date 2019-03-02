@@ -14,11 +14,17 @@ import RxCocoa
 final class UserRepositoryViewModel {
     let title: String
 
-    let updateLoadingView: Observable<(UIView, Bool)>
-    let showRepository: Observable<Repository>
-    let countString: Observable<String>
-    let reloadData: Observable<Void>
-    
+    var repositories: [Repository] {
+        return _repositories.value
+    }
+
+    var isFetchingRepositories: Bool {
+        return _isFetchingRepositories.value
+    }
+
+    let output: Output
+    let input: Input
+
     fileprivate let _repositories = BehaviorRelay<[Repository]>(value: [])
     fileprivate let _isFetchingRepositories = BehaviorRelay<Bool>(value: false)
     private let pageInfo = BehaviorRelay<PageInfo?>(value: nil)
@@ -26,42 +32,51 @@ final class UserRepositoryViewModel {
     private let disposeBag = DisposeBag()
 
     init(user: User,
-         fetchRepositories: Observable<Void>,
-         selectedIndexPath: Observable<IndexPath>,
-         isReachedBottom: Observable<Bool>,
-         headerFooterView: Observable<UIView>) {
-
+         favoritesOutput: Observable<[Repository]>,
+         favoritesInput: AnyObserver<[Repository]>) {
         self.title = "\(user.login)'s Repositories"
 
-        let _countString = PublishSubject<String>()
-        let _reloadData = PublishSubject<Void>()
+        let _fetchRepositories = PublishRelay<Void>()
+        let _selectedIndexPath = PublishRelay<IndexPath>()
+        let _isReachedBottom = PublishRelay<Bool>()
+        let _headerFooterView = PublishRelay<UIView>()
 
-        self.countString = _countString
-        self.reloadData = _reloadData
-        self.updateLoadingView = Observable.combineLatest(headerFooterView,
-                                                          _isFetchingRepositories.asObservable())
-        self.showRepository = selectedIndexPath
-            .withLatestFrom(_repositories.asObservable()) { $1[$0.row] }
+        self.input = Input(fetchRepositories: _fetchRepositories.asObserver(),
+                           selectedIndexPath: _selectedIndexPath.asObserver(),
+                           isReachedBottom: _isReachedBottom.asObserver(),
+                           headerFooterView: _headerFooterView.asObserver(),
+                           favorites: favoritesInput)
 
-        Observable.combineLatest(totalCount.asObservable(),
-                                 _repositories.asObservable())
-            .map { "\($1.count) / \($0)" }
-            .bind(to: _countString)
-            .disposed(by: disposeBag)
+        do {
+            let updateLoadingView = Observable.combineLatest(_headerFooterView,
+                                                             _isFetchingRepositories.asObservable())
 
-        Observable.merge(_repositories.asObservable().map { _ in },
-                         totalCount.asObservable().map { _ in },
-                         _isFetchingRepositories.asObservable().map { _ in })
-            .bind(to: _reloadData)
-            .disposed(by: disposeBag)
+            let showRepository = _selectedIndexPath
+                .withLatestFrom(_repositories.asObservable()) { $1[$0.row] }
+
+            let countString = Observable.combineLatest(totalCount.asObservable(),
+                                                       _repositories.asObservable())
+                .map { "\($1.count) / \($0)" }
+                .share(replay: 1, scope: .whileConnected)
+
+            let reloadData = Observable.merge(_repositories.asObservable().map { _ in },
+                                              totalCount.asObservable().map { _ in },
+                                              _isFetchingRepositories.asObservable().map { _ in })
+
+            self.output = Output(updateLoadingView: updateLoadingView,
+                                 showRepository: showRepository,
+                                 countString: countString,
+                                 reloadData: reloadData,
+                                 favorites: favoritesOutput)
+        }
 
         // fetch repositories
-        let _requestTrigger = PublishSubject<(User, String?)>()
+        let _requestTrigger = PublishRelay<(User, String?)>()
 
-        let initialLoadRequest = fetchRepositories
+        let initialLoadRequest = _fetchRepositories
             .withLatestFrom(_requestTrigger)
 
-        let loadMoreRequest = isReachedBottom
+        let loadMoreRequest = _isReachedBottom
             .distinctUntilChanged()
             .filter { $0 }
             .withLatestFrom(_requestTrigger)
@@ -95,14 +110,20 @@ final class UserRepositoryViewModel {
     }
 }
 
-extension UserRepositoryViewModel: ValueCompatible {}
-
-extension Value where Base == UserRepositoryViewModel {
-    var repositories: [Repository] {
-        return base._repositories.value
+extension UserRepositoryViewModel {
+    struct Output {
+        let updateLoadingView: Observable<(UIView, Bool)>
+        let showRepository: Observable<Repository>
+        let countString: Observable<String>
+        let reloadData: Observable<Void>
+        let favorites: Observable<[Repository]>
     }
 
-    var isFetchingRepositories: Bool {
-        return base._isFetchingRepositories.value
+    struct Input {
+        let fetchRepositories: AnyObserver<Void>
+        let selectedIndexPath: AnyObserver<IndexPath>
+        let isReachedBottom: AnyObserver<Bool>
+        let headerFooterView: AnyObserver<UIView>
+        let favorites: AnyObserver<[Repository]>
     }
 }

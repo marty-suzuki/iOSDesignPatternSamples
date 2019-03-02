@@ -13,81 +13,95 @@ import RxSwift
 import RxCocoa
 
 final class SearchViewModel {
-    let accessTokenAlert: Observable<(String, String)>
-    let updateLoadingView: Observable<(UIView, Bool)>
-    let selectedUser: Observable<User>
-    let keyboardWillShow: Observable<UIKeyboardInfo>
-    let keyboardWillHide: Observable<UIKeyboardInfo>
-    let countString: Observable<String>
-    let reloadData: Observable<Void>
+    let output: Output
+    let input: Input
+
+    var users: [User] {
+        return _users.value
+    }
+
+    var isFetchingUsers: Bool {
+        return _isFetchingUsers.value
+    }
 
     fileprivate let _users = BehaviorRelay<[User]>(value: [])
     fileprivate let _isFetchingUsers = BehaviorRelay<Bool>(value: false)
     private let pageInfo = BehaviorRelay<PageInfo?>(value: nil)
     private let totalCount = BehaviorRelay<Int>(value: 0)
     private let disposeBag = DisposeBag()
-    
-    private var pool = NoticeObserverPool()
 
-    init(viewDidAppear: Observable<Void>,
-         viewDidDisappear: Observable<Void>,
-         searchText: ControlProperty<String>,
-         isReachedBottom: Observable<Bool>,
-         selectedIndexPath: Observable<IndexPath>,
-         headerFooterView: Observable<UIView>) {
+    init(favoritesOutput: Observable<[Repository]>,
+         favoritesInput: AnyObserver<[Repository]>) {
 
-        let _keyboardWillShow = PublishSubject<UIKeyboardInfo>()
-        let _keyboardWillHide = PublishSubject<UIKeyboardInfo>()
-        let _countString = PublishSubject<String>()
-        let _reloadData = PublishSubject<Void>()
-        let _accessTokenAlert = PublishSubject<(String, String)>()
+        let viewDidAppear = PublishRelay<Void>()
+        let viewDidDisappear = PublishRelay<Void>()
+        let searchText = PublishRelay<String>()
+        let isReachedBottom = PublishRelay<Bool>()
+        let selectedIndexPath = PublishRelay<IndexPath>()
+        let headerFooterView = PublishRelay<UIView>()
 
-        self.keyboardWillShow = _keyboardWillShow
-        self.keyboardWillHide = _keyboardWillHide
-        self.countString = _countString
-        self.reloadData = _reloadData
-        self.accessTokenAlert = _accessTokenAlert
-        self.updateLoadingView = Observable.combineLatest(headerFooterView,
-                                                          _isFetchingUsers.asObservable())
-        self.selectedUser = selectedIndexPath
-            .withLatestFrom(_users.asObservable()) { $1[$0.row] }
+        self.input = Input(viewDidAppear: viewDidAppear.asObserver(),
+                           viewDidDisappear: viewDidDisappear.asObserver(),
+                           searchText: searchText.asObserver(),
+                           isReachedBottom: isReachedBottom.asObserver(),
+                           selectedIndexPath: selectedIndexPath.asObserver(),
+                           headerFooterView: headerFooterView.asObserver(),
+                           favorites: favoritesInput)
 
-        Observable.zip(totalCount.asObservable(),
-                       _users.asObservable())
-            .map { "\($1.count) / \($0)" }
-            .bind(to: _countString)
-            .disposed(by: disposeBag)
+        let _accessTokenAlert = PublishRelay<ErrorMessage>()
 
-        Observable.merge(_users.asObservable().map { _ in },
-                         totalCount.asObservable().map { _ in },
-                         _isFetchingUsers.asObservable().map { _ in })
-            .bind(to: _reloadData)
-            .disposed(by: disposeBag)
+        do {
+            let selectedUser = selectedIndexPath
+                .withLatestFrom(_users.asObservable()) { $1[$0.row] }
 
-        // keyboard notification
-        viewDidAppear
-            .subscribe(onNext: { [weak self] in
-                guard let me = self else { return }
-                UIKeyboardWillShow.observe {
-                    _keyboardWillShow.onNext($0)
+            let updateLoadingView = Observable.combineLatest(headerFooterView,
+                                                             _isFetchingUsers.asObservable())
+
+            let countString = Observable.zip(totalCount.asObservable(),
+                                             _users.asObservable())
+                .map { "\($1.count) / \($0)" }
+                .share(replay: 1, scope: .whileConnected)
+
+            let reloadData = Observable.merge(_users.asObservable().map { _ in },
+                                              totalCount.asObservable().map { _ in },
+                                              _isFetchingUsers.asObservable().map { _ in })
+
+            // keyboard notification
+            let isViewAppearing = Observable.merge(viewDidAppear.map { true },
+                                                   viewDidDisappear.map { false })
+
+            let makeKeyboardObservable: (Notice.Name<UIKeyboardInfo>, Bool) -> Observable<UIKeyboardInfo> = { name, isViewAppearing in
+                guard isViewAppearing else {
+                    return .empty()
                 }
-                .disposed(by: me.pool)
-
-                UIKeyboardWillHide.observe {
-                    _keyboardWillHide.onNext($0)
+                return Observable.create { observer in
+                    let observation = NotificationCenter.default.nok.observe(name: name) {
+                        observer.onNext($0)
+                    }
+                    return Disposables.create {
+                        observation.invalidate()
+                    }
                 }
-                .disposed(by: me.pool)
-            })
-            .disposed(by: disposeBag)
+            }
 
-        viewDidDisappear
-            .subscribe(onNext: { [weak self] in
-                self?.pool = NoticeObserverPool()
-            })
-            .disposed(by: disposeBag)
+            let keyboardWillShow = isViewAppearing
+                .flatMapLatest { makeKeyboardObservable(.keyboardWillShow, $0) }
+
+            let keyboardWillHide = isViewAppearing
+                .flatMapLatest { makeKeyboardObservable(.keyboardWillHide, $0) }
+
+            self.output = Output(accessTokenAlert: _accessTokenAlert.asObservable(),
+                                 updateLoadingView: updateLoadingView,
+                                 selectedUser: selectedUser,
+                                 keyboardWillShow: keyboardWillShow,
+                                 keyboardWillHide: keyboardWillHide,
+                                 countString: countString,
+                                 reloadData: reloadData,
+                                 favorites: favoritesOutput)
+        }
 
         // fetch users
-        let _searchTrigger = PublishSubject<String>()
+        let _searchTrigger = PublishRelay<String>()
 
         let query = _searchTrigger
             .debounce(0.3, scheduler: MainScheduler.instance)
@@ -148,11 +162,11 @@ final class SearchViewModel {
             .disposed(by: disposeBag)
 
         response
-            .flatMap { response -> Observable<(String, String)> in
+            .flatMap { response -> Observable<ErrorMessage> in
                 guard case .emptyToken? = (response.1 as? ApiSession.Error) else { return .empty() }
                 let title = "Access Token Error"
                 let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
-                return .just((title, message))
+                return .just(ErrorMessage(title: title, message: message))
             }
             .bind(to: _accessTokenAlert)
             .disposed(by: disposeBag)
@@ -163,14 +177,25 @@ final class SearchViewModel {
     }
 }
 
-extension SearchViewModel: ValueCompatible {}
-
-extension Value where Base == SearchViewModel {
-    var users: [User] {
-        return base._users.value
+extension SearchViewModel {
+    struct Input {
+        let viewDidAppear: AnyObserver<Void>
+        let viewDidDisappear: AnyObserver<Void>
+        let searchText: AnyObserver<String>
+        let isReachedBottom: AnyObserver<Bool>
+        let selectedIndexPath: AnyObserver<IndexPath>
+        let headerFooterView: AnyObserver<UIView>
+        let favorites: AnyObserver<[Repository]>
     }
 
-    var isFetchingUsers: Bool {
-        return base._isFetchingUsers.value
+    struct Output {
+        let accessTokenAlert: Observable<ErrorMessage>
+        let updateLoadingView: Observable<(UIView, Bool)>
+        let selectedUser: Observable<User>
+        let keyboardWillShow: Observable<UIKeyboardInfo>
+        let keyboardWillHide: Observable<UIKeyboardInfo>
+        let countString: Observable<String>
+        let reloadData: Observable<Void>
+        let favorites: Observable<[Repository]>
     }
 }

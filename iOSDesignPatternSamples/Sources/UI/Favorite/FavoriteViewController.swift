@@ -11,42 +11,19 @@ import GithubKit
 import RxSwift
 import RxCocoa
 
-<<<<<<< HEAD
 final class FavoriteViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    var favoritesInput: AnyObserver<[Repository]> { return favorites.asObserver() }
-    var favoritesOutput: Observable<[Repository]> { return viewModel.favorites }
-
-    private let _selectedIndexPath = PublishSubject<IndexPath>()
-
-    private lazy var dataSource: FavoriteViewDataSource = {
-        return .init(viewModel: self.viewModel,
-                     selectedIndexPath: self._selectedIndexPath.asObserver())
-    }()
-    private private(set) lazy var viewModel: FavoriteViewModel = {
-        .init(favoritesObservable: self.favorites,
-              selectedIndexPath: self._selectedIndexPath)
-    }()
+    private let dataSource: FavoriteViewDataSource
+    private let viewModel: FavoriteViewModel
     
-    private let favorites = PublishSubject<[Repository]>()
     private let disposeBag = DisposeBag()
-=======
-protocol FavoriteView: class {
-    func reloadData()
-    func showRepository(with repository: Repository)
-}
 
-final class FavoriteViewController: UIViewController, FavoriteView {
-    @IBOutlet private(set) weak var tableView: UITableView!
->>>>>>> mvp
-    
-    let presenter: FavoritePresenter
-    let dataSource: FavoriteViewDataSource
-
-    init(presenter: FavoritePresenter) {
-        self.presenter = presenter
-        self.dataSource = FavoriteViewDataSource(presenter: presenter)
+    init(favoritesInput: AnyObserver<[Repository]>,
+         favoritesOutput: Observable<[Repository]>) {
+        self.viewModel = FavoriteViewModel(favoritesInput: favoritesInput,
+                                           favoritesOutput: favoritesOutput)
+        self.dataSource = FavoriteViewDataSource(viewModel: viewModel)
         super.init(nibName: FavoriteViewController.className, bundle: nil)
     }
 
@@ -58,43 +35,31 @@ final class FavoriteViewController: UIViewController, FavoriteView {
         super.viewDidLoad()
 
         title = "On Memory Favorite"
-<<<<<<< HEAD
-        automaticallyAdjustsScrollViewInsets = false
-=======
 
-        presenter.view = self
->>>>>>> mvp
         dataSource.configure(with: tableView)
 
         // observe viewModel
-        viewModel.selectedRepository
+        viewModel.output.selectedRepository
             .bind(to: showRepository)
             .disposed(by: disposeBag)
         
-        viewModel.relaodData
+        viewModel.output.relaodData
             .bind(to: reloadData)
             .disposed(by: disposeBag)
     }
     
-<<<<<<< HEAD
-    private var showRepository: AnyObserver<Repository> {
+    private var showRepository: Binder<Repository> {
         return Binder(self) { me, repository in
             let vc = RepositoryViewController(repository: repository,
-                                              favoritesOutput: me.favoritesOutput,
-                                              favoritesInput: me.favoritesInput)
+                                              favoritesOutput: me.viewModel.output.favorites,
+                                              favoritesInput: me.viewModel.input.favorites)
             me.navigationController?.pushViewController(vc, animated: true)
-        }.asObserver()
-=======
-    func showRepository(with repository: Repository) {
-        let repositoryPresenter = RepositoryViewPresenter(repository: repository, favoritePresenter: presenter)
-        let vc = RepositoryViewController(presenter: repositoryPresenter)
-        navigationController?.pushViewController(vc, animated: true)
->>>>>>> mvp
+        }
     }
     
-    private var reloadData: AnyObserver<Void> {
-        return Binder(self) { me, _ in
-            me.tableView.reloadData()
-        }.asObserver()
+    private var reloadData: Binder<Void> {
+        return Binder(tableView) { tableView, _ in
+            tableView.reloadData()
+        }
     }
 }

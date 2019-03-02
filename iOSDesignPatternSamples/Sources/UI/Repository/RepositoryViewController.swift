@@ -13,61 +13,32 @@ import RxSwift
 import RxCocoa
 
 final class RepositoryViewController: SFSafariViewController {
-    private let favoriteButtonItem: UIBarButtonItem
     private let disposeBag = DisposeBag()
     private let viewModel: RepositoryViewModel
 
-<<<<<<< HEAD
     init(repository: Repository,
          favoritesOutput: Observable<[Repository]>,
-         favoritesInput: AnyObserver<[Repository]>,
-         entersReaderIfAvailable: Bool = true) {
-        let favoriteButtonItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
-        self.favoriteButtonItem = favoriteButtonItem
+         favoritesInput: AnyObserver<[Repository]>) {
         self.viewModel = RepositoryViewModel(repository: repository,
                                              favoritesOutput: favoritesOutput,
-                                             favoritesInput: favoritesInput,
-                                             favoriteButtonTap: favoriteButtonItem.rx.tap)
+                                             favoritesInput: favoritesInput)
 
-        super.init(url: repository.url, entersReaderIfAvailable: entersReaderIfAvailable)
+        super.init(url: repository.url, configuration: .init())
         hidesBottomBarWhenPushed = true
-=======
-final class RepositoryViewController: SFSafariViewController, RepositoryView {
-    private(set) lazy var favoriteButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(title: self.presenter.favoriteButtonTitle,
-                               style: .plain,
-                               target: self,
-                               action: #selector(RepositoryViewController.favoriteButtonTap(_:)))
-    }()
-    private let presenter: RepositoryPresenter
-    
-    init(presenter: RepositoryPresenter) {
-        self.presenter = presenter
-        super.init(url: presenter.url, configuration: .init())
-        hidesBottomBarWhenPushed = true
-
->>>>>>> mvp
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let favoriteButtonItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
         navigationItem.rightBarButtonItem = favoriteButtonItem
 
-<<<<<<< HEAD
-        viewModel.favoriteButtonTitle
+        favoriteButtonItem.rx.tap
+            .bind(to: viewModel.input.favoriteButtonTap)
+            .disposed(by: disposeBag)
+
+        viewModel.output.favoriteButtonTitle
             .bind(to: favoriteButtonItem.rx.title)
             .disposed(by: disposeBag)
-=======
-        presenter.view = self
-    }
-    
-    @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
-        presenter.favoriteButtonTap()
-    }
-    
-    func updateFavoriteButtonTitle(_ title: String) {
-        favoriteButtonItem.title = title
->>>>>>> mvp
     }
 }
