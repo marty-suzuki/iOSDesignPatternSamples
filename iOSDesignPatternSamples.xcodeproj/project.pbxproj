@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0F0703AA9AE659ED5E4E87EF /* Pods_iOSDesignPatternSamples.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86A9C053DE1021D9CB7BFF98 /* Pods_iOSDesignPatternSamples.framework */; };
 		37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */; };
 		37086C212017850600D625CA /* ApiSession.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C202017850600D625CA /* ApiSession.extension.swift */; };
 		372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372936AD1F54538A00762D15 /* FavoriteModel.swift */; };
@@ -20,10 +19,11 @@
 		37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */; };
 		37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */; };
 		37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */; };
-		37BE2AD61F37471B003DC1F8 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AD51F37471B003DC1F8 /* SafariServices.framework */; };
 		37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */; };
 		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
 		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
+		ED487038222A4B7C00BD970B /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED487037222A4B7C00BD970B /* SafariServices.framework */; };
+		ED48703A222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED487039222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework */; };
 		ED6EEE68222973CE007C3129 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE67222973CE007C3129 /* SearchModel.swift */; };
 		ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */; };
 		ED6EEE6C22297D95007C3129 /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6EEE6B22297D95007C3129 /* SearchViewController.xib */; };
@@ -55,12 +55,12 @@
 		37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepositoryViewController.swift; sourceTree = "<group>"; };
 		37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewController.swift; sourceTree = "<group>"; };
 		37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserRepositoryViewController.xib; sourceTree = "<group>"; };
-		37BE2AD51F37471B003DC1F8 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
 		37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardInfo.swift; sourceTree = "<group>"; };
 		37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
-		86A9C053DE1021D9CB7BFF98 /* Pods_iOSDesignPatternSamples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iOSDesignPatternSamples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7683412D64555F8497709C2 /* Pods-iOSDesignPatternSamples.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOSDesignPatternSamples.release.xcconfig"; path = "Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples.release.xcconfig"; sourceTree = "<group>"; };
+		ED487037222A4B7C00BD970B /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		ED487039222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_iOSDesignPatternSamples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED6EEE67222973CE007C3129 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
 		ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryModel.swift; sourceTree = "<group>"; };
 		ED6EEE6B22297D95007C3129 /* SearchViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchViewController.xib; sourceTree = "<group>"; };
@@ -81,8 +81,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EDDF7D36222A4908003BCCAE /* Pods_iOSDesignPatternSamples.framework in Frameworks */,
-				EDDF7D34222A48FC003BCCAE /* SafariServices.framework in Frameworks */,
+				ED48703A222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework in Frameworks */,
+				ED487038222A4B7C00BD970B /* SafariServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,7 +210,6 @@
 				37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */,
 				EDDF7D212229C1DA003BCCAE /* UserRepositoryViewDataSource.swift */,
 				EDDF7D222229C1DA003BCCAE /* UserRepositoryViewModel.swift */,
-
 			);
 			path = UserRepository;
 			sourceTree = "<group>";
@@ -218,8 +217,8 @@
 		37BE2AD41F37471B003DC1F8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				86A9C053DE1021D9CB7BFF98 /* Pods_iOSDesignPatternSamples.framework */,
-				37BE2AD51F37471B003DC1F8 /* SafariServices.framework */,
+				ED487039222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework */,
+				ED487037222A4B7C00BD970B /* SafariServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
