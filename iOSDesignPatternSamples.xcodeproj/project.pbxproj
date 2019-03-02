@@ -47,11 +47,6 @@
 		37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewController.swift; sourceTree = "<group>"; };
 		37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserRepositoryViewController.xib; sourceTree = "<group>"; };
 		37BE2AD51F37471B003DC1F8 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
-		37BE2ADF1F374790003DC1F8 /* GithubKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GithubKit.framework; path = Carthage/Build/iOS/GithubKit.framework; sourceTree = "<group>"; };
-		37BE2AE01F374790003DC1F8 /* Nuke.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Nuke.framework; path = Carthage/Build/iOS/Nuke.framework; sourceTree = "<group>"; };
-		37BE2AE11F374790003DC1F8 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
-		37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftIconFont.framework; path = Carthage/Build/iOS/SwiftIconFont.framework; sourceTree = "<group>"; };
-		37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NoticeObserveKit.framework; path = Carthage/Build/iOS/NoticeObserveKit.framework; sourceTree = "<group>"; };
 		37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardInfo.swift; sourceTree = "<group>"; };
 		37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
@@ -195,13 +190,8 @@
 		37BE2AD41F37471B003DC1F8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				37BE2ADF1F374790003DC1F8 /* GithubKit.framework */,
-				37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */,
-				37BE2AE01F374790003DC1F8 /* Nuke.framework */,
 				86A9C053DE1021D9CB7BFF98 /* Pods_iOSDesignPatternSamples.framework */,
-				37BE2AE11F374790003DC1F8 /* RxSwift.framework */,
 				37BE2AD51F37471B003DC1F8 /* SafariServices.framework */,
-				37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
