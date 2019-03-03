@@ -10,7 +10,7 @@ import GithubKit
 
 extension ApiSession {
     static let shared: ApiSession = {
-        let token = "" // <- Your Github Personal Access Token
+        let token = "16bae8f74eca2d2d4011f7ea67312898dd6189cb" // <- Your Github Personal Access Token
         return ApiSession(injectToken: { InjectableToken(token: token) })
     }()
 }

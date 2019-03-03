@@ -21,31 +21,30 @@ final class RepositoryViewModel {
          favoritesOutput: Observable<[Repository]>,
          favoritesInput: AnyObserver<[Repository]>) {
 
-        let favoritesAndIndex = favoritesOutput
-            .map { ($0, $0.index { $0.url == repository.url }) }
-            .share(replay: 1, scope: .whileConnected)
+        let model = FavoriteModel(repository: repository,
+                                  favoritesInput: favoritesInput,
+                                  favoritesOutput: favoritesOutput)
 
-        self.output = Output(favoriteButtonTitle: favoritesAndIndex
-            .map { $0.1 == nil ? "Add" : "Remove" }
-            .share(replay: 1, scope: .forever))
+        do {
+            let favoriteButtonTitle = model.contains
+                .map { $0.0 ? "Remove" : "Add" }
+                .share(replay: 1, scope: .whileConnected)
+
+            self.output = Output(favoriteButtonTitle: favoriteButtonTitle)
+        }
 
         let favoriteButtonTap = PublishRelay<Void>()
         self.input = Input(favoriteButtonTap: favoriteButtonTap.asObserver())
 
         favoriteButtonTap
-            .withLatestFrom(favoritesAndIndex)
-            .map { favorites, index in
-                var favorites = favorites
-                if let index = index {
-                    favorites.remove(at: index)
-                    return favorites
+            .withLatestFrom(model.contains)
+            .subscribe(onNext: { contains, repository in
+                if contains {
+                    model.removeFavorite(repository)
+                } else {
+                    model.addFavorite(repository)
                 }
-                favorites.append(repository)
-                return favorites
-            }
-            // to use ".concat(Observable.never())" because to avoid sending dispose
-            .concat(Observable.never())
-            .bind(to: favoritesInput)
+            })
             .disposed(by: disposeBag)
     }
 }
