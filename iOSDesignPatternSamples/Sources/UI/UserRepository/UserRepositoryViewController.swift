@@ -12,11 +12,11 @@ import RxSwift
 import RxCocoa
 
 final class UserRepositoryViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var totalCountLabel: UILabel!
 
-    private let loadingView = LoadingView.makeFromNib()
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
+<<<<<<< HEAD
     private let dataSource = UserRepositoryViewDataSource()
     private let userAction: UserAction
     private let userStore: UserStore
@@ -32,6 +32,22 @@ final class UserRepositoryViewController: UIViewController {
         self.userStore = userStore
         self.repositoryAction = repositoryAction
         self.repositoryStore = repositoryStore
+=======
+    let loadingView = LoadingView.makeFromNib()
+
+    let viewModel: UserRepositoryViewModel
+    let dataSource: UserRepositoryViewDataSource
+
+    private let disposeBag = DisposeBag()
+
+    init(user: User,
+         favoritesOutput: Observable<[Repository]>,
+         favoritesInput: AnyObserver<[Repository]>) {
+        self.viewModel = UserRepositoryViewModel(user: user,
+                                                 favoritesOutput: favoritesOutput,
+                                                 favoritesInput: favoritesInput)
+        self.dataSource = UserRepositoryViewDataSource(viewModel: viewModel)
+>>>>>>> mvvm
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -50,6 +66,7 @@ final class UserRepositoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+<<<<<<< HEAD
         edgesForExtendedLayout = []
         dataSource.configure(with: tableView)
 
@@ -85,6 +102,26 @@ final class UserRepositoryViewController: UIViewController {
         user
             .map { "\($0.login)'s Repositories" }
             .bind(to: rx.title)
+=======
+        title = viewModel.title
+
+        dataSource.configure(with: tableView)
+
+        viewModel.output.showRepository
+            .bind(to: showRepository)
+            .disposed(by: disposeBag)
+
+        viewModel.output.reloadData
+            .bind(to: reloadData)
+            .disposed(by: disposeBag)
+
+        viewModel.output.countString
+            .bind(to: totalCountLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        viewModel.output.updateLoadingView
+            .bind(to: updateLoadingView)
+>>>>>>> mvvm
             .disposed(by: disposeBag)
 
         // fetch repositories
@@ -99,6 +136,7 @@ final class UserRepositoryViewController: UIViewController {
             .withLatestFrom(_fetchTrigger)
             .filter { $1 != nil }
         
+<<<<<<< HEAD
         Observable.merge(initialLoadRequest, loadMoreRequest)
             .map { UserNodeRequest(id: $0.id, after: $1) }
             .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
@@ -121,21 +159,31 @@ final class UserRepositoryViewController: UIViewController {
     private var showRepository: AnyObserver<Void> {
         return Binder(self) { me, repository in
             guard let vc = RepositoryViewController() else { return }
+=======
+        viewModel.input.fetchRepositories.onNext(())
+    }
+    
+    private var showRepository: Binder<Repository> {
+        return Binder(self) { me, repository in
+            let vc = RepositoryViewController(repository: repository,
+                                              favoritesOutput: me.viewModel.output.favorites,
+                                              favoritesInput: me.viewModel.input.favorites)
+>>>>>>> mvvm
             me.navigationController?.pushViewController(vc, animated: true)
-        }.asObserver()
+        }
     }
     
-    private var reloadData: AnyObserver<Void> {
-        return Binder(self) { me, _ in
-            me.tableView.reloadData()
-        }.asObserver()
+    private var reloadData: Binder<Void> {
+        return Binder(tableView) { tableView, _ in
+            tableView.reloadData()
+        }
     }
     
-    private var updateLoadingView: AnyObserver<(UIView, Bool)> {
-        return Binder(self) { (me, value: (view: UIView, isLoading: Bool)) in
-            me.loadingView.removeFromSuperview()
-            me.loadingView.isLoading = value.isLoading
-            me.loadingView.add(to: value.view)
-        }.asObserver()
+    private var updateLoadingView: Binder<(UIView, Bool)> {
+        return Binder(loadingView) { (loadingView, value: (view: UIView, isLoading: Bool)) in
+            loadingView.removeFromSuperview()
+            loadingView.isLoading = value.isLoading
+            loadingView.add(to: value.view)
+        }
     }
 }

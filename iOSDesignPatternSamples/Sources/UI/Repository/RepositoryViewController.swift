@@ -13,11 +13,15 @@ import RxSwift
 import RxCocoa
 
 final class RepositoryViewController: SFSafariViewController {
+<<<<<<< HEAD
     private let favoriteButtonItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
+=======
+>>>>>>> mvvm
     private let disposeBag = DisposeBag()
     private let action: RepositoryAction
     private let store: RepositoryStore
 
+<<<<<<< HEAD
     init?(action: RepositoryAction = .init(),
          store: RepositoryStore = .instantiate(),
          entersReaderIfAvailable: Bool = true) {
@@ -25,14 +29,27 @@ final class RepositoryViewController: SFSafariViewController {
         self.action = action
         self.store = store
         super.init(url: repository.url, entersReaderIfAvailable: entersReaderIfAvailable)
+=======
+    init(repository: Repository,
+         favoritesOutput: Observable<[Repository]>,
+         favoritesInput: AnyObserver<[Repository]>) {
+        self.viewModel = RepositoryViewModel(repository: repository,
+                                             favoritesOutput: favoritesOutput,
+                                             favoritesInput: favoritesInput)
+
+        super.init(url: repository.url, configuration: .init())
+>>>>>>> mvvm
         hidesBottomBarWhenPushed = true
+
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let favoriteButtonItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
         navigationItem.rightBarButtonItem = favoriteButtonItem
 
+<<<<<<< HEAD
         // observe store
         let repository = store.selectedRepository
             .flatMap { $0.map(Observable.just) ?? .empty() }
@@ -60,6 +77,13 @@ final class RepositoryViewController: SFSafariViewController {
 
         containsRepository
             .map { $0.0 ? "Remove" : "Add" }
+=======
+        favoriteButtonItem.rx.tap
+            .bind(to: viewModel.input.favoriteButtonTap)
+            .disposed(by: disposeBag)
+
+        viewModel.output.favoriteButtonTitle
+>>>>>>> mvvm
             .bind(to: favoriteButtonItem.rx.title)
             .disposed(by: disposeBag)
 

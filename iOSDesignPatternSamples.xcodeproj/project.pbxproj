@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+<<<<<<< HEAD
 		374EAA9F2017B37100EDD001 /* ApiSession.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374EAA9C2017B37100EDD001 /* ApiSession.extension.swift */; };
 		374EAAA02017B37100EDD001 /* NSObjectProtocol.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374EAA9D2017B37100EDD001 /* NSObjectProtocol.extension.swift */; };
 		374EAAA12017B37100EDD001 /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374EAA9E2017B37100EDD001 /* Value.swift */; };
@@ -20,6 +21,11 @@
 		378D1A431F66E649007AD091 /* Dispatcher.User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A421F66E649007AD091 /* Dispatcher.User.swift */; };
 		378D1A451F66E65A007AD091 /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A441F66E65A007AD091 /* UserAction.swift */; };
 		378D1A471F66E66C007AD091 /* UserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A461F66E66C007AD091 /* UserStore.swift */; };
+=======
+		37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */; };
+		37086C212017850600D625CA /* ApiSession.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C202017850600D625CA /* ApiSession.extension.swift */; };
+		372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372936AD1F54538A00762D15 /* FavoriteModel.swift */; };
+>>>>>>> mvvm
 		37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */; };
 		37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */; };
 		37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB61F3745D0003DC1F8 /* Main.storyboard */; };
@@ -29,17 +35,10 @@
 		37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */; };
 		37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */; };
 		37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */; };
-		37BE2AD61F37471B003DC1F8 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AD51F37471B003DC1F8 /* SafariServices.framework */; };
-		37BE2AE31F374790003DC1F8 /* GithubKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2ADF1F374790003DC1F8 /* GithubKit.framework */; };
-		37BE2AE41F374790003DC1F8 /* Nuke.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AE01F374790003DC1F8 /* Nuke.framework */; };
-		37BE2AE51F374790003DC1F8 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AE11F374790003DC1F8 /* RxSwift.framework */; };
-		37BE2AE61F374790003DC1F8 /* SwiftIconFont.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */; };
-		37BE2AE81F37480F003DC1F8 /* NoticeObserveKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */; };
 		37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */; };
-		37BE2AED1F3748D9003DC1F8 /* UIKeyboardWillHide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEC1F3748D9003DC1F8 /* UIKeyboardWillHide.swift */; };
-		37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */; };
 		37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
 		37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */; };
+<<<<<<< HEAD
 		9DDAB3C11F66328B00D2EE00 /* RxCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9DDAB3C01F66328A00D2EE00 /* RxCocoa.framework */; };
 /* End PBXBuildFile section */
 
@@ -58,6 +57,31 @@
 		378D1A421F66E649007AD091 /* Dispatcher.User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dispatcher.User.swift; sourceTree = "<group>"; };
 		378D1A441F66E65A007AD091 /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
 		378D1A461F66E66C007AD091 /* UserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStore.swift; sourceTree = "<group>"; };
+=======
+		ED487038222A4B7C00BD970B /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED487037222A4B7C00BD970B /* SafariServices.framework */; };
+		ED48703A222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED487039222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework */; };
+		ED6EEE68222973CE007C3129 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE67222973CE007C3129 /* SearchModel.swift */; };
+		ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */; };
+		ED6EEE6C22297D95007C3129 /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6EEE6B22297D95007C3129 /* SearchViewController.xib */; };
+		ED6EEE6E22297E05007C3129 /* FavoriteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */; };
+		EDDF7D192229C1CA003BCCAE /* FavoriteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D172229C1CA003BCCAE /* FavoriteViewModel.swift */; };
+		EDDF7D1A2229C1CA003BCCAE /* FavoriteViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D182229C1CA003BCCAE /* FavoriteViewDataSource.swift */; };
+		EDDF7D1C2229C1CF003BCCAE /* RepositoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D1B2229C1CF003BCCAE /* RepositoryViewModel.swift */; };
+		EDDF7D1F2229C1D5003BCCAE /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D1D2229C1D5003BCCAE /* SearchViewModel.swift */; };
+		EDDF7D202229C1D5003BCCAE /* SearchViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D1E2229C1D5003BCCAE /* SearchViewDataSource.swift */; };
+		EDDF7D232229C1DA003BCCAE /* UserRepositoryViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D212229C1DA003BCCAE /* UserRepositoryViewDataSource.swift */; };
+		EDDF7D242229C1DA003BCCAE /* UserRepositoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D222229C1DA003BCCAE /* UserRepositoryViewModel.swift */; };
+		EDDF7D262229CE79003BCCAE /* PublishRelay.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D252229CE79003BCCAE /* PublishRelay.extension.swift */; };
+		EDDF7D282229CF07003BCCAE /* BehaviorRelay.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D272229CF07003BCCAE /* BehaviorRelay.extension.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		12A585EA9BD1550442F668A2 /* Pods-iOSDesignPatternSamples.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOSDesignPatternSamples.debug.xcconfig"; path = "Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples.debug.xcconfig"; sourceTree = "<group>"; };
+		37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSObjectProtocol.extension.swift; sourceTree = "<group>"; };
+		37086C202017850600D625CA /* ApiSession.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiSession.extension.swift; sourceTree = "<group>"; };
+		372936AD1F54538A00762D15 /* FavoriteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteModel.swift; sourceTree = "<group>"; };
+		37817D031F373F8B00EC69C6 /* iOSDesignPatternSamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDesignPatternSamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
+>>>>>>> mvvm
 		37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		37BE2AB51F3745D0003DC1F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		37BE2AB71F3745D0003DC1F8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -68,18 +92,29 @@
 		37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepositoryViewController.swift; sourceTree = "<group>"; };
 		37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewController.swift; sourceTree = "<group>"; };
 		37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserRepositoryViewController.xib; sourceTree = "<group>"; };
-		37BE2AD51F37471B003DC1F8 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
-		37BE2ADF1F374790003DC1F8 /* GithubKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GithubKit.framework; path = Carthage/Build/iOS/GithubKit.framework; sourceTree = "<group>"; };
-		37BE2AE01F374790003DC1F8 /* Nuke.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Nuke.framework; path = Carthage/Build/iOS/Nuke.framework; sourceTree = "<group>"; };
-		37BE2AE11F374790003DC1F8 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
-		37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftIconFont.framework; path = Carthage/Build/iOS/SwiftIconFont.framework; sourceTree = "<group>"; };
-		37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NoticeObserveKit.framework; path = Carthage/Build/iOS/NoticeObserveKit.framework; sourceTree = "<group>"; };
 		37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardInfo.swift; sourceTree = "<group>"; };
-		37BE2AEC1F3748D9003DC1F8 /* UIKeyboardWillHide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardWillHide.swift; sourceTree = "<group>"; };
-		37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKeyboardWillShow.swift; sourceTree = "<group>"; };
 		37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		37BE2AF61F3759F0003DC1F8 /* LoadingView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoadingView.xib; sourceTree = "<group>"; };
+<<<<<<< HEAD
 		9DDAB3C01F66328A00D2EE00 /* RxCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxCocoa.framework; path = Carthage/Build/iOS/RxCocoa.framework; sourceTree = "<group>"; };
+=======
+		E7683412D64555F8497709C2 /* Pods-iOSDesignPatternSamples.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOSDesignPatternSamples.release.xcconfig"; path = "Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples.release.xcconfig"; sourceTree = "<group>"; };
+		ED487037222A4B7C00BD970B /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		ED487039222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_iOSDesignPatternSamples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED6EEE67222973CE007C3129 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
+		ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryModel.swift; sourceTree = "<group>"; };
+		ED6EEE6B22297D95007C3129 /* SearchViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchViewController.xib; sourceTree = "<group>"; };
+		ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FavoriteViewController.xib; sourceTree = "<group>"; };
+		EDDF7D172229C1CA003BCCAE /* FavoriteViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteViewModel.swift; sourceTree = "<group>"; };
+		EDDF7D182229C1CA003BCCAE /* FavoriteViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteViewDataSource.swift; sourceTree = "<group>"; };
+		EDDF7D1B2229C1CF003BCCAE /* RepositoryViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepositoryViewModel.swift; sourceTree = "<group>"; };
+		EDDF7D1D2229C1D5003BCCAE /* SearchViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
+		EDDF7D1E2229C1D5003BCCAE /* SearchViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewDataSource.swift; sourceTree = "<group>"; };
+		EDDF7D212229C1DA003BCCAE /* UserRepositoryViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewDataSource.swift; sourceTree = "<group>"; };
+		EDDF7D222229C1DA003BCCAE /* UserRepositoryViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewModel.swift; sourceTree = "<group>"; };
+		EDDF7D252229CE79003BCCAE /* PublishRelay.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishRelay.extension.swift; sourceTree = "<group>"; };
+		EDDF7D272229CF07003BCCAE /* BehaviorRelay.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorRelay.extension.swift; sourceTree = "<group>"; };
+>>>>>>> mvvm
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +122,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+<<<<<<< HEAD
 				376A99ED1F69B26500C251C0 /* FluxCapacitor.framework in Frameworks */,
 				9DDAB3C11F66328B00D2EE00 /* RxCocoa.framework in Frameworks */,
 				37BE2AE81F37480F003DC1F8 /* NoticeObserveKit.framework in Frameworks */,
@@ -95,18 +131,32 @@
 				37BE2AE51F374790003DC1F8 /* RxSwift.framework in Frameworks */,
 				37BE2AE61F374790003DC1F8 /* SwiftIconFont.framework in Frameworks */,
 				37BE2AD61F37471B003DC1F8 /* SafariServices.framework in Frameworks */,
+=======
+				ED48703A222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework in Frameworks */,
+				ED487038222A4B7C00BD970B /* SafariServices.framework in Frameworks */,
+>>>>>>> mvvm
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+<<<<<<< HEAD
 		374EAA9B2017B37100EDD001 /* Extension */ = {
 			isa = PBXGroup;
 			children = (
 				374EAA9C2017B37100EDD001 /* ApiSession.extension.swift */,
 				374EAA9D2017B37100EDD001 /* NSObjectProtocol.extension.swift */,
 				374EAA9E2017B37100EDD001 /* Value.swift */,
+=======
+		37086C1D2017847A00D625CA /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				37086C202017850600D625CA /* ApiSession.extension.swift */,
+				EDDF7D272229CF07003BCCAE /* BehaviorRelay.extension.swift */,
+				37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */,
+				EDDF7D252229CE79003BCCAE /* PublishRelay.extension.swift */,
+>>>>>>> mvvm
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -143,9 +193,10 @@
 		37817CFA1F373F8B00EC69C6 = {
 			isa = PBXGroup;
 			children = (
-				37817D051F373F8B00EC69C6 /* iOSDesignPatternSamples */,
-				37817D041F373F8B00EC69C6 /* Products */,
 				37BE2AD41F37471B003DC1F8 /* Frameworks */,
+				37817D051F373F8B00EC69C6 /* iOSDesignPatternSamples */,
+				C72F81EC67A22FD83004732D /* Pods */,
+				37817D041F373F8B00EC69C6 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
@@ -170,8 +221,8 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */,
-				37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */,
 				37BE2AB81F3745D0003DC1F8 /* Info.plist */,
+				37BE2AB41F3745D0003DC1F8 /* LaunchScreen.storyboard */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -188,10 +239,18 @@
 		37BE2AC01F37460C003DC1F8 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+<<<<<<< HEAD
 				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
 				374EAA9B2017B37100EDD001 /* Extension */,
 				377C15501F66E39800F25D8E /* Flux */,
+=======
+				37086C1D2017847A00D625CA /* Extension */,
+>>>>>>> mvvm
 				37BE2AE91F374889003DC1F8 /* NotieObserver */,
+				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
+				372936AD1F54538A00762D15 /* FavoriteModel.swift */,
+				ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */,
+				ED6EEE67222973CE007C3129 /* SearchModel.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -199,12 +258,12 @@
 		37BE2AC31F37461E003DC1F8 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				37BE2AB61F3745D0003DC1F8 /* Main.storyboard */,
 				37BE2AF31F3759D1003DC1F8 /* Common */,
 				37BE2AC41F374673003DC1F8 /* Favorite */,
 				37BE2AC51F374673003DC1F8 /* Repository */,
 				37BE2AC61F374673003DC1F8 /* Search */,
 				37BE2AC71F374673003DC1F8 /* UserRepository */,
+				37BE2AB61F3745D0003DC1F8 /* Main.storyboard */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -213,7 +272,13 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AC81F37468C003DC1F8 /* FavoriteViewController.swift */,
+<<<<<<< HEAD
 				375C542C1F6509E900310929 /* FavoriteViewDataSource.swift */,
+=======
+				ED6EEE6D22297E05007C3129 /* FavoriteViewController.xib */,
+				EDDF7D182229C1CA003BCCAE /* FavoriteViewDataSource.swift */,
+				EDDF7D172229C1CA003BCCAE /* FavoriteViewModel.swift */,
+>>>>>>> mvvm
 			);
 			path = Favorite;
 			sourceTree = "<group>";
@@ -222,6 +287,10 @@
 			isa = PBXGroup;
 			children = (
 				37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */,
+<<<<<<< HEAD
+=======
+				EDDF7D1B2229C1CF003BCCAE /* RepositoryViewModel.swift */,
+>>>>>>> mvvm
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -230,7 +299,13 @@
 			isa = PBXGroup;
 			children = (
 				37BE2ACA1F374699003DC1F8 /* SearchViewController.swift */,
+<<<<<<< HEAD
 				375C54281F65073900310929 /* SearchViewDataSource.swift */,
+=======
+				ED6EEE6B22297D95007C3129 /* SearchViewController.xib */,
+				EDDF7D1E2229C1D5003BCCAE /* SearchViewDataSource.swift */,
+				EDDF7D1D2229C1D5003BCCAE /* SearchViewModel.swift */,
+>>>>>>> mvvm
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -239,8 +314,13 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AD01F3746FA003DC1F8 /* UserRepositoryViewController.swift */,
+<<<<<<< HEAD
 				375C54321F65455700310929 /* UserRepositoryViewDataSource.swift */,
+=======
+>>>>>>> mvvm
 				37BE2AD11F3746FA003DC1F8 /* UserRepositoryViewController.xib */,
+				EDDF7D212229C1DA003BCCAE /* UserRepositoryViewDataSource.swift */,
+				EDDF7D222229C1DA003BCCAE /* UserRepositoryViewModel.swift */,
 			);
 			path = UserRepository;
 			sourceTree = "<group>";
@@ -248,6 +328,7 @@
 		37BE2AD41F37471B003DC1F8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+<<<<<<< HEAD
 				376A99EC1F69B26500C251C0 /* FluxCapacitor.framework */,
 				9DDAB3C01F66328A00D2EE00 /* RxCocoa.framework */,
 				37BE2AE71F37480F003DC1F8 /* NoticeObserveKit.framework */,
@@ -256,6 +337,10 @@
 				37BE2AE11F374790003DC1F8 /* RxSwift.framework */,
 				37BE2AE21F374790003DC1F8 /* SwiftIconFont.framework */,
 				37BE2AD51F37471B003DC1F8 /* SafariServices.framework */,
+=======
+				ED487039222A4B7F00BD970B /* Pods_iOSDesignPatternSamples.framework */,
+				ED487037222A4B7C00BD970B /* SafariServices.framework */,
+>>>>>>> mvvm
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -264,8 +349,6 @@
 			isa = PBXGroup;
 			children = (
 				37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */,
-				37BE2AEC1F3748D9003DC1F8 /* UIKeyboardWillHide.swift */,
-				37BE2AEE1F3748EF003DC1F8 /* UIKeyboardWillShow.swift */,
 			);
 			path = NotieObserver;
 			sourceTree = "<group>";
@@ -279,6 +362,15 @@
 			path = Common;
 			sourceTree = "<group>";
 		};
+		C72F81EC67A22FD83004732D /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				12A585EA9BD1550442F668A2 /* Pods-iOSDesignPatternSamples.debug.xcconfig */,
+				E7683412D64555F8497709C2 /* Pods-iOSDesignPatternSamples.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -286,10 +378,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 37817D151F373F8B00EC69C6 /* Build configuration list for PBXNativeTarget "iOSDesignPatternSamples" */;
 			buildPhases = (
+				4496EE1B5B6B54210EA45BD2 /* [CP] Check Pods Manifest.lock */,
 				37817CFF1F373F8B00EC69C6 /* Sources */,
 				37817D001F373F8B00EC69C6 /* Frameworks */,
 				37817D011F373F8B00EC69C6 /* Resources */,
-				37BE2AB11F37433C003DC1F8 /* ShellScript */,
+				093B7CDB1F7B93DA7699BB16 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -307,7 +400,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
-				LastUpgradeCheck = 0920;
+				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "marty-suzuki";
 				TargetAttributes = {
 					37817D021F373F8B00EC69C6 = {
@@ -341,22 +434,63 @@
 			buildActionMask = 2147483647;
 			files = (
 				37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */,
-				37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */,
+				ED6EEE6E22297E05007C3129 /* FavoriteViewController.xib in Resources */,
+				37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */,
 				37BE2AF71F3759F0003DC1F8 /* LoadingView.xib in Resources */,
 				37BE2ABD1F3745D0003DC1F8 /* Main.storyboard in Resources */,
-				37BE2ABC1F3745D0003DC1F8 /* LaunchScreen.storyboard in Resources */,
+				ED6EEE6C22297D95007C3129 /* SearchViewController.xib in Resources */,
+				37BE2AD31F3746FA003DC1F8 /* UserRepositoryViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		37BE2AB11F37433C003DC1F8 /* ShellScript */ = {
+		093B7CDB1F7B93DA7699BB16 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
+			inputFileListPaths = (
+			);
 			inputPaths = (
+				"${BUILT_PRODUCTS_DIR}/FluxCapacitor/FluxCapacitor.framework",
+				"${BUILT_PRODUCTS_DIR}/GithubKit/GithubKit.framework",
+				"${BUILT_PRODUCTS_DIR}/NoticeObserveKit/NoticeObserveKit.framework",
+				"${BUILT_PRODUCTS_DIR}/Nuke/Nuke.framework",
+				"${BUILT_PRODUCTS_DIR}/RxAtomic/RxAtomic.framework",
+				"${BUILT_PRODUCTS_DIR}/RxCocoa/RxCocoa.framework",
+				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftIconFont/SwiftIconFont.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples-frameworks.sh",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FluxCapacitor.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GithubKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/NoticeObserveKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Nuke.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxAtomic.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxCocoa.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftIconFont.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4496EE1B5B6B54210EA45BD2 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+<<<<<<< HEAD
 				"$(SRCROOT)/Carthage/Build/iOS/Nuke.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/RxSwift.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/SwiftIconFont.framework",
@@ -364,12 +498,21 @@
 				"$(SRCROOT)/Carthage/Build/iOS/NoticeObserveKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/RxCocoa.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/FluxCapacitor.framework",
+=======
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+>>>>>>> mvvm
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-iOSDesignPatternSamples-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/local/bin/carthage copy-frameworks";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -378,6 +521,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+<<<<<<< HEAD
 				374EAAA02017B37100EDD001 /* NSObjectProtocol.extension.swift in Sources */,
 				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
 				374EAAA12017B37100EDD001 /* Value.swift in Sources */,
@@ -388,10 +532,28 @@
 				378D1A3D1F66E5A7007AD091 /* RepositoryAction.swift in Sources */,
 				374EAA9F2017B37100EDD001 /* ApiSession.extension.swift in Sources */,
 				375C542D1F6509E900310929 /* FavoriteViewDataSource.swift in Sources */,
+=======
+				37086C212017850600D625CA /* ApiSession.extension.swift in Sources */,
+				37BE2AC21F37460C003DC1F8 /* AppDelegate.swift in Sources */,
+				EDDF7D282229CF07003BCCAE /* BehaviorRelay.extension.swift in Sources */,
+				372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */,
+				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
+				EDDF7D1A2229C1CA003BCCAE /* FavoriteViewDataSource.swift in Sources */,
+				EDDF7D192229C1CA003BCCAE /* FavoriteViewModel.swift in Sources */,
+				37BE2AF51F3759E7003DC1F8 /* LoadingView.swift in Sources */,
+				37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */,
+				EDDF7D262229CE79003BCCAE /* PublishRelay.extension.swift in Sources */,
+				ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */,
+				37BE2ACE1F3746E2003DC1F8 /* RepositoryViewController.swift in Sources */,
+				EDDF7D1C2229C1CF003BCCAE /* RepositoryViewModel.swift in Sources */,
+				ED6EEE68222973CE007C3129 /* SearchModel.swift in Sources */,
+>>>>>>> mvvm
 				37BE2ACB1F374699003DC1F8 /* SearchViewController.swift in Sources */,
-				375C54291F65073900310929 /* SearchViewDataSource.swift in Sources */,
-				37BE2AEF1F3748EF003DC1F8 /* UIKeyboardWillShow.swift in Sources */,
+				EDDF7D202229C1D5003BCCAE /* SearchViewDataSource.swift in Sources */,
+				EDDF7D1F2229C1D5003BCCAE /* SearchViewModel.swift in Sources */,
+				37BE2AEB1F3748B6003DC1F8 /* UIKeyboardInfo.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
+<<<<<<< HEAD
 				377C15541F66E3D900F25D8E /* Dispatcher.Repository.swift in Sources */,
 				37BE2AED1F3748D9003DC1F8 /* UIKeyboardWillHide.swift in Sources */,
 				378D1A431F66E649007AD091 /* Dispatcher.User.swift in Sources */,
@@ -399,6 +561,10 @@
 				37BE2AC91F37468C003DC1F8 /* FavoriteViewController.swift in Sources */,
 				375C54331F65455700310929 /* UserRepositoryViewDataSource.swift in Sources */,
 				37BE2AC21F37460C003DC1F8 /* AppDelegate.swift in Sources */,
+=======
+				EDDF7D232229C1DA003BCCAE /* UserRepositoryViewDataSource.swift in Sources */,
+				EDDF7D242229C1DA003BCCAE /* UserRepositoryViewModel.swift in Sources */,
+>>>>>>> mvvm
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -439,6 +605,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -446,6 +613,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -496,6 +664,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -503,6 +672,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -534,39 +704,37 @@
 		};
 		37817D161F373F8B00EC69C6 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12A585EA9BD1550442F668A2 /* Pods-iOSDesignPatternSamples.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Build/iOS",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = iOSDesignPatternSamples/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.marty-suzuki.iOSDesignPatternSamples";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
 		37817D171F373F8B00EC69C6 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E7683412D64555F8497709C2 /* Pods-iOSDesignPatternSamples.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Build/iOS",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = iOSDesignPatternSamples/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.marty-suzuki.iOSDesignPatternSamples";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
 		};
