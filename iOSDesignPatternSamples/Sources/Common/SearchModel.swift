@@ -7,13 +7,8 @@
 //
 
 import GithubKit
-
-protocol SearchModelDelegate: AnyObject {
-    func searchModel(_ searchModel: SearchModel, didRecieve errorMessage: ErrorMessage)
-    func searchModel(_ searchModel: SearchModel, didChange isFetchingUsers: Bool)
-    func searchModel(_ searchModel: SearchModel, didChange users: [User])
-    func searchModel(_ searchModel: SearchModel, didChange totalCount: Int)
-}
+import RxSwift
+import RxCocoa
 
 struct ErrorMessage {
     let title: String
@@ -22,92 +17,106 @@ struct ErrorMessage {
 
 final class SearchModel {
 
-    weak var delegate: SearchModelDelegate?
+    let errorMessage: Observable<ErrorMessage>
+    let users: Observable<[User]>
+    let isFetchingUsers: Observable<Bool>
+    let totalCount: Observable<Int>
 
-    private(set) var query: String = ""
-    private(set) var totalCount: Int = 0 {
-        didSet {
-            delegate?.searchModel(self, didChange: totalCount)
-        }
-    }
-    private(set) var users: [User] = [] {
-        didSet {
-            delegate?.searchModel(self, didChange: users)
-        }
-    }
-    private(set) var isFetchingUsers = false {
-        didSet {
-            delegate?.searchModel(self, didChange: isFetchingUsers)
-        }
+    var usersValue: [User] {
+        return _users.value
     }
 
-    private var pageInfo: PageInfo?
-    private var task: URLSessionTask?
+    var isFetchingUsersValue: Bool {
+        return _isFetchingUsers.value
+    }
 
-    private let debounce: (_ action: @escaping () -> ()) -> () = {
-        var lastFireTime: DispatchTime = .now()
-        let delay: DispatchTimeInterval = .milliseconds(500)
-        return { [delay] action in
-            let deadline: DispatchTime = .now() + delay
-            lastFireTime = .now()
-            DispatchQueue.global().asyncAfter(deadline: deadline) { [delay] in
-                let now: DispatchTime = .now()
-                let when: DispatchTime = lastFireTime + delay
-                if now < when { return }
-                lastFireTime = .now()
-                DispatchQueue.main.async {
-                    action()
+    private let _users = BehaviorRelay<[User]>(value: [])
+    private let _isFetchingUsers = BehaviorRelay<Bool>(value: false)
+
+    private let disposeBag = DisposeBag()
+
+    private let _fetchUsers = PublishRelay<Void>()
+    private let _feachUsersWithQuery = PublishRelay<String>()
+
+    init() {
+        let _pageInfo = BehaviorRelay<PageInfo?>(value: nil)
+        let _totalCount = BehaviorRelay<Int>(value: 0)
+
+        self.totalCount = _totalCount.asObservable()
+        self.users = _users.asObservable()
+        self.isFetchingUsers = _isFetchingUsers.asObservable()
+
+        let query = _feachUsersWithQuery
+            .debounce(0.3, scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .share()
+
+        let endCousor = _pageInfo
+            .map { $0?.endCursor }
+            .share()
+
+        let initialLoad = query
+            .filter { !$0.isEmpty }
+            .withLatestFrom(endCousor) { ($0, $1) }
+
+        let loadMore = _fetchUsers
+            .withLatestFrom(Observable.combineLatest(query, endCousor)) { $1 }
+            .filter { !$0.isEmpty && $1 != nil }
+
+        query
+            .subscribe(onNext: { [_users] _ in
+                _pageInfo.accept(nil)
+                _users.accept([])
+                _totalCount.accept(0)
+            })
+            .disposed(by: disposeBag)
+
+        let requestWillStart = Observable.merge(initialLoad, loadMore)
+            .map { SearchUserRequest(query: $0, after: $1) }
+            .distinctUntilChanged { $0.query == $1.query && $0.after == $1.after }
+            .share()
+
+        let response = requestWillStart
+            .do(onNext: { [_isFetchingUsers] _ in
+                _isFetchingUsers.accept(true)
+            })
+            .flatMapLatest { request -> Observable<Event<Response<User>>> in
+                ApiSession.shared.rx.send(request)
+                    .materialize()
+            }
+            .do(onNext: { [_isFetchingUsers] _ in
+                _isFetchingUsers.accept(false)
+            })
+            .share()
+
+        response
+            .flatMap { response -> Observable<Response<User>> in
+                response.element.map(Observable.just) ?? .empty()
+            }
+            .subscribe(onNext: { [_users] response in
+                _pageInfo.accept(response.pageInfo)
+                _users.accept(_users.value + response.nodes)
+                _totalCount.accept(response.totalCount)
+            })
+            .disposed(by: disposeBag)
+
+        self.errorMessage = response
+            .flatMap { response -> Observable<ErrorMessage> in
+                guard case .emptyToken? = (response.error as? ApiSession.Error) else {
+                    return .empty()
                 }
+                let title = "Access Token Error"
+                let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
+                return .just(ErrorMessage(title: title, message: message))
             }
-        }
-    }()
-
-    func fetchUsers() {
-        if query.isEmpty || task != nil { return }
-        if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
-        isFetchingUsers = true
-        let request = SearchUserRequest(query: query, after: pageInfo?.endCursor)
-        self.task = ApiSession.shared.send(request) { [weak self] in
-            guard let me = self else {
-                return
-            }
-
-            switch $0 {
-            case .success(let value):
-                me.pageInfo = value.pageInfo
-                me.users.append(contentsOf: value.nodes)
-                me.totalCount = value.totalCount
-
-            case .failure(let error):
-                if case .emptyToken? = (error as? ApiSession.Error) {
-                    let title = "Access Token Error"
-                    let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
-                    let errorMessage = ErrorMessage(title: title, message: message)
-                    me.delegate?.searchModel(me, didRecieve: errorMessage)
-                }
-            }
-
-            me.isFetchingUsers = false
-            me.task = nil
-        }
+            .share()
     }
 
     func fetchUsers(withQuery query: String) {
-        debounce { [weak self] in
-            guard let me = self else {
-                return
-            }
+        _feachUsersWithQuery.accept(query)
+    }
 
-            let oldValue = me.query
-            me.query = query
-            if query != oldValue {
-                me.users.removeAll()
-                me.pageInfo = nil
-                me.totalCount = 0
-            }
-            me.task?.cancel()
-            me.task = nil
-            me.fetchUsers()
-        }
+    func fetchUsers() {
+        _fetchUsers.accept(())
     }
 }

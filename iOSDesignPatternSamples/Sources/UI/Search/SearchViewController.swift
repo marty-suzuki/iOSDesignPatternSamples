@@ -52,7 +52,7 @@ final class SearchViewController: UIViewController {
             .bind(to: viewModel.input.viewDidDisappear)
             .disposed(by: disposeBag)
 
-        searchBar.rx.text.orEmpty
+        searchBar.rx.text
             .bind(to: viewModel.input.searchText)
             .disposed(by: disposeBag)
 
