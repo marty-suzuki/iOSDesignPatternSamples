@@ -12,15 +12,17 @@ import RxSwift
 import RxCocoa
 
 final class SearchViewController: UIViewController {
-    @IBOutlet weak var totalCountLabel: UILabel!
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
 
-    private let searchBar = UISearchBar(frame: .zero)
-    private let loadingView = LoadingView.makeFromNib()
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
 
-    private let dataSource: SearchViewDataSource
-    private let viewModel: SearchViewModel
+
+    let searchBar = UISearchBar(frame: .zero)
+    let loadingView = LoadingView.makeFromNib()
+
+    let viewModel: SearchViewModel
+    let dataSource: SearchViewDataSource
 
     private let disposeBag = DisposeBag()
 
@@ -40,6 +42,7 @@ final class SearchViewController: UIViewController {
 
         navigationItem.titleView = searchBar
         searchBar.placeholder = "Input user name"
+
         dataSource.configure(with: tableView)
 
         rx.methodInvoked(#selector(SearchViewController.viewDidAppear(_:)))

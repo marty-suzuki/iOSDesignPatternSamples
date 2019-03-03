@@ -12,10 +12,10 @@ import RxSwift
 import RxCocoa
 
 final class FavoriteViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet private(set) weak var tableView: UITableView!
 
-    private let dataSource: FavoriteViewDataSource
-    private let viewModel: FavoriteViewModel
+    let viewModel: FavoriteViewModel
+    let dataSource: FavoriteViewDataSource
     
     private let disposeBag = DisposeBag()
 
@@ -38,7 +38,6 @@ final class FavoriteViewController: UIViewController {
 
         dataSource.configure(with: tableView)
 
-        // observe viewModel
         viewModel.output.selectedRepository
             .bind(to: showRepository)
             .disposed(by: disposeBag)

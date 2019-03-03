@@ -25,6 +25,7 @@ final class RepositoryViewController: SFSafariViewController {
 
         super.init(url: repository.url, configuration: .init())
         hidesBottomBarWhenPushed = true
+
     }
 
     override func viewDidLoad() {

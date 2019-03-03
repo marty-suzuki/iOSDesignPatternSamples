@@ -12,13 +12,14 @@ import RxSwift
 import RxCocoa
 
 final class UserRepositoryViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var totalCountLabel: UILabel!
 
-    private let loadingView = LoadingView.makeFromNib()
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
-    private let dataSource: UserRepositoryViewDataSource
-    private let viewModel: UserRepositoryViewModel
+    let loadingView = LoadingView.makeFromNib()
+
+    let viewModel: UserRepositoryViewModel
+    let dataSource: UserRepositoryViewDataSource
 
     private let disposeBag = DisposeBag()
 
@@ -40,10 +41,10 @@ final class UserRepositoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        dataSource.configure(with: tableView)
         title = viewModel.title
 
-        // observe viewModel
+        dataSource.configure(with: tableView)
+
         viewModel.output.showRepository
             .bind(to: showRepository)
             .disposed(by: disposeBag)
