@@ -15,26 +15,25 @@ final class UserRepositoryViewModel {
     let title: String
 
     var repositories: [Repository] {
-        return _repositories.value
+        return model.repositoriesValue
     }
 
     var isFetchingRepositories: Bool {
-        return _isFetchingRepositories.value
+        return model.isFetchingRepositoriesValue
     }
 
     let output: Output
     let input: Input
 
-    fileprivate let _repositories = BehaviorRelay<[Repository]>(value: [])
-    fileprivate let _isFetchingRepositories = BehaviorRelay<Bool>(value: false)
-    private let pageInfo = BehaviorRelay<PageInfo?>(value: nil)
-    private let totalCount = BehaviorRelay<Int>(value: 0)
+    private let model: RepositoryModel
     private let disposeBag = DisposeBag()
 
     init(user: User,
          favoritesOutput: Observable<[Repository]>,
          favoritesInput: AnyObserver<[Repository]>) {
         self.title = "\(user.login)'s Repositories"
+
+        self.model = RepositoryModel(user: user)
 
         let _fetchRepositories = PublishRelay<Void>()
         let _selectedIndexPath = PublishRelay<IndexPath>()
@@ -49,19 +48,18 @@ final class UserRepositoryViewModel {
 
         do {
             let updateLoadingView = Observable.combineLatest(_headerFooterView,
-                                                             _isFetchingRepositories.asObservable())
+                                                             model.isFetchingRepositories)
 
             let showRepository = _selectedIndexPath
-                .withLatestFrom(_repositories.asObservable()) { $1[$0.row] }
+                .withLatestFrom(model.repositories) { $1[$0.row] }
 
-            let countString = Observable.combineLatest(totalCount.asObservable(),
-                                                       _repositories.asObservable())
+            let countString = Observable.combineLatest(model.totalCount, model.repositories)
                 .map { "\($1.count) / \($0)" }
                 .share(replay: 1, scope: .whileConnected)
 
-            let reloadData = Observable.merge(_repositories.asObservable().map { _ in },
-                                              totalCount.asObservable().map { _ in },
-                                              _isFetchingRepositories.asObservable().map { _ in })
+            let reloadData = Observable.merge(model.repositories.map { _ in },
+                                              model.totalCount.map { _ in },
+                                              model.isFetchingRepositories.map { _ in })
 
             self.output = Output(updateLoadingView: updateLoadingView,
                                  showRepository: showRepository,
@@ -70,43 +68,15 @@ final class UserRepositoryViewModel {
                                  favorites: favoritesOutput)
         }
 
-        // fetch repositories
-        let _requestTrigger = PublishRelay<(User, String?)>()
-
-        let initialLoadRequest = _fetchRepositories
-            .withLatestFrom(_requestTrigger)
-
-        let loadMoreRequest = _isReachedBottom
+        _isReachedBottom
             .distinctUntilChanged()
             .filter { $0 }
-            .withLatestFrom(_requestTrigger)
-            .filter { $1 != nil }
-
-        let willStartRequest = Observable.merge(initialLoadRequest, loadMoreRequest)
-            .map { UserNodeRequest(id: $0.id, after: $1) }
-            .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
-            .share()
-
-        willStartRequest
-            .map { _ in true }
-            .bind(to: _isFetchingRepositories)
-            .disposed(by: disposeBag)
-
-        willStartRequest
-            .flatMap { ApiSession.shared.rx.send($0) }
-            .subscribe(onNext: { [weak self] (response: Response<Repository>) in
-                guard let me = self else { return }
-                me.pageInfo.accept(response.pageInfo)
-                me._repositories.accept(me._repositories.value + response.nodes)
-                me.totalCount.accept(response.totalCount)
-                me._isFetchingRepositories.accept(false)
+            .subscribe(onNext: { [model] _ in
+                model.fetchRepositories()
             })
             .disposed(by: disposeBag)
 
-        Observable.combineLatest(Observable<User>.just(user),
-                                 pageInfo.asObservable().map { $0?.endCursor })
-            .bind(to: _requestTrigger)
-            .disposed(by: disposeBag)
+        model.fetchRepositories()
     }
 }
 

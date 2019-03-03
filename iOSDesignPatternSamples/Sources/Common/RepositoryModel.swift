@@ -7,64 +7,74 @@
 //
 
 import GithubKit
-
-protocol RepositoryModelDelegate: AnyObject {
-    func repositoryModel(_ repositoryModel: RepositoryModel, didChange isFetchingRepositories: Bool)
-    func repositoryModel(_ repositoryModel: RepositoryModel, didChange repositories: [Repository])
-    func repositoryModel(_ repositoryModel: RepositoryModel, didChange totalCount: Int)
-}
+import RxCocoa
+import RxSwift
 
 final class RepositoryModel {
 
-    let user: User
-    weak var delegate: RepositoryModelDelegate?
+    let repositories: Observable<[Repository]>
+    let isFetchingRepositories: Observable<Bool>
+    let totalCount: Observable<Int>
 
-    private(set) var query: String = ""
-    private(set) var totalCount: Int = 0 {
-        didSet {
-            delegate?.repositoryModel(self, didChange: totalCount)
-        }
-    }
-    private(set) var repositories: [Repository] = [] {
-        didSet {
-            delegate?.repositoryModel(self, didChange: repositories)
-        }
-    }
-    private(set) var isFetchingRepositories = false {
-        didSet {
-            delegate?.repositoryModel(self, didChange: isFetchingRepositories)
-        }
+    var repositoriesValue: [Repository] {
+        return _repositories.value
     }
 
-    private var pageInfo: PageInfo?
-    private var task: URLSessionTask?
+    var isFetchingRepositoriesValue: Bool {
+        return _isFetchingRepositories.value
+    }
+
+    private let _repositories = BehaviorRelay<[Repository]>(value: [])
+    private let _isFetchingRepositories = BehaviorRelay<Bool>(value: false)
+    private let disposeBag = DisposeBag()
+
+    private let _fetchRepositories = PublishRelay<Void>()
 
     init(user: User) {
-        self.user = user
+
+        let _pageInfo = BehaviorRelay<PageInfo?>(value: nil)
+        let _totalCount = BehaviorRelay<Int>(value: 0)
+
+        self.totalCount = _totalCount.asObservable()
+        self.repositories = _repositories.asObservable()
+        self.isFetchingRepositories = _isFetchingRepositories.asObservable()
+
+        let requestTrigger = _pageInfo.map { (user, $0?.endCursor) }
+            .share(replay: 1, scope: .whileConnected)
+
+        let initialLoadRequest = _fetchRepositories
+            .withLatestFrom(requestTrigger)
+            .filter { $1 == nil }
+
+        let loadMoreRequest = _fetchRepositories
+            .withLatestFrom(requestTrigger)
+            .filter { $1 != nil }
+
+        let willStartRequest = Observable.merge(initialLoadRequest, loadMoreRequest)
+            .map { UserNodeRequest(id: $0.id, after: $1) }
+            .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
+            .share()
+
+        willStartRequest
+            .do(onNext: { [_isFetchingRepositories] _ in
+                _isFetchingRepositories.accept(true)
+            })
+            .flatMap {
+                ApiSession.shared.rx.send($0)
+                    .catchError { _ in .empty() }
+            }
+            .do(onNext: { [_isFetchingRepositories] _ in
+                _isFetchingRepositories.accept(false)
+            })
+            .subscribe(onNext: { [_repositories] response in
+                _pageInfo.accept(response.pageInfo)
+                _repositories.accept(_repositories.value + response.nodes)
+                _totalCount.accept(response.totalCount)
+            })
+            .disposed(by: disposeBag)
     }
 
     func fetchRepositories() {
-        if task != nil { return }
-        if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
-        isFetchingRepositories = true
-        let request = UserNodeRequest(id: user.id, after: pageInfo?.endCursor)
-        self.task = ApiSession.shared.send(request) { [weak self] in
-            guard let me = self else {
-                return
-            }
-
-            switch $0 {
-            case .success(let value):
-                me.pageInfo = value.pageInfo
-                me.repositories.append(contentsOf: value.nodes)
-                me.totalCount = value.totalCount
-
-            case .failure(let error):
-                print(error)
-            }
-
-            me.isFetchingRepositories = false
-            me.task = nil
-        }
+        _fetchRepositories.accept(())
     }
 }
