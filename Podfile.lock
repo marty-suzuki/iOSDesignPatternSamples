@@ -1,5 +1,4 @@
 PODS:
-  - FluxCapacitor (0.11.0)
   - GithubKit (0.4.1):
     - Nuke (~> 7.0)
     - RxCocoa (~> 4.0)
@@ -15,13 +14,11 @@ PODS:
   - SwiftIconFont (3.0.0)
 
 DEPENDENCIES:
-  - FluxCapacitor (= 0.11.0)
   - GithubKit (from `https://github.com/marty-suzuki/GithubKitForSample.git`, tag `0.4.1`)
   - NoticeObserveKit (= 0.11.1)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
-    - FluxCapacitor
     - NoticeObserveKit
     - Nuke
     - RxAtomic
@@ -40,7 +37,6 @@ CHECKOUT OPTIONS:
     :tag: 0.4.1
 
 SPEC CHECKSUMS:
-  FluxCapacitor: c88085b524a1152dbde8ed86aec07123069e54ec
   GithubKit: 470b988d16b87752488a382985464cf5322f4047
   NoticeObserveKit: eb4a123d96fb4ed373758a0c52d507eefff2e48a
   Nuke: 0350d346a688426e8f2331253ef28dc2fc4f6178
@@ -49,6 +45,6 @@ SPEC CHECKSUMS:
   RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
   SwiftIconFont: 2ba18554a77c44948dc35b561b344e3c23834a84
 
-PODFILE CHECKSUM: 9b1227eed4c1dc63953e9d7c215e5c9d0b1a48f7
+PODFILE CHECKSUM: c165bf5e10d9cc93c39d5496328f638dbfd7c035
 
 COCOAPODS: 1.6.0
