@@ -16,25 +16,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-<<<<<<< HEAD
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-=======
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-
-        let favoritesRelay = BehaviorRelay<[Repository]>(value: [])
-        let favoritesOutput = favoritesRelay.asObservable()
-        let favoritesInput = favoritesRelay.asObserver()
 
         if let viewControllers = (window?.rootViewController as? UITabBarController)?.viewControllers {
             for value in viewControllers.enumerated() {
                 switch value {
                 case let (0, nc as UINavigationController):
-                    let searchVC = SearchViewController(favoritesInput: favoritesInput, favoritesOutput: favoritesOutput)
+                    let searchVC = SearchViewController()
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let searchVC = FavoriteViewController(favoritesInput: favoritesInput, favoritesOutput: favoritesOutput)
+                    let searchVC = FavoriteViewController()
                     nc.setViewControllers([searchVC], animated: false)
 
                 default:
@@ -42,8 +34,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
-
->>>>>>> mvvm
 
         return true
     }
