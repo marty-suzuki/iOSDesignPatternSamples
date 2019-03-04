@@ -9,12 +9,11 @@
 /* Begin PBXBuildFile section */
 		37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */; };
 		37086C212017850600D625CA /* ApiSession.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37086C202017850600D625CA /* ApiSession.extension.swift */; };
-		372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372936AD1F54538A00762D15 /* FavoriteModel.swift */; };
 		374EAAA12017B37100EDD001 /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374EAA9E2017B37100EDD001 /* Value.swift */; };
-		377C15541F66E3D900F25D8E /* Dispatcher.Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377C15531F66E3D900F25D8E /* Dispatcher.Repository.swift */; };
+		377C15541F66E3D900F25D8E /* RepositoryDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377C15531F66E3D900F25D8E /* RepositoryDispatcher.swift */; };
 		378D1A3D1F66E5A7007AD091 /* RepositoryAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A3C1F66E5A7007AD091 /* RepositoryAction.swift */; };
 		378D1A3F1F66E5BF007AD091 /* RepositoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A3E1F66E5BF007AD091 /* RepositoryStore.swift */; };
-		378D1A431F66E649007AD091 /* Dispatcher.User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A421F66E649007AD091 /* Dispatcher.User.swift */; };
+		378D1A431F66E649007AD091 /* UserDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A421F66E649007AD091 /* UserDispatcher.swift */; };
 		378D1A451F66E65A007AD091 /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A441F66E65A007AD091 /* UserAction.swift */; };
 		378D1A471F66E66C007AD091 /* UserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378D1A461F66E66C007AD091 /* UserStore.swift */; };
 		37BE2ABB1F3745D0003DC1F8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */; };
@@ -40,19 +39,19 @@
 		EDF07901222D7B2800B880FE /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */; };
 		EDF07902222D7B2800B880FE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */; };
 		EDF07903222D7B2800B880FE /* RepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2ACC1F3746E2003DC1F8 /* RepositoryViewController.swift */; };
+		EDF07905222D7B7600B880FE /* Flux.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF07904222D7B7600B880FE /* Flux.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		12A585EA9BD1550442F668A2 /* Pods-iOSDesignPatternSamples.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOSDesignPatternSamples.debug.xcconfig"; path = "Target Support Files/Pods-iOSDesignPatternSamples/Pods-iOSDesignPatternSamples.debug.xcconfig"; sourceTree = "<group>"; };
 		37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSObjectProtocol.extension.swift; sourceTree = "<group>"; };
 		37086C202017850600D625CA /* ApiSession.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiSession.extension.swift; sourceTree = "<group>"; };
-		372936AD1F54538A00762D15 /* FavoriteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteModel.swift; sourceTree = "<group>"; };
 		374EAA9E2017B37100EDD001 /* Value.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Value.swift; sourceTree = "<group>"; };
-		377C15531F66E3D900F25D8E /* Dispatcher.Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dispatcher.Repository.swift; sourceTree = "<group>"; };
+		377C15531F66E3D900F25D8E /* RepositoryDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryDispatcher.swift; sourceTree = "<group>"; };
 		37817D031F373F8B00EC69C6 /* iOSDesignPatternSamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSDesignPatternSamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		378D1A3C1F66E5A7007AD091 /* RepositoryAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryAction.swift; sourceTree = "<group>"; };
 		378D1A3E1F66E5BF007AD091 /* RepositoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryStore.swift; sourceTree = "<group>"; };
-		378D1A421F66E649007AD091 /* Dispatcher.User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dispatcher.User.swift; sourceTree = "<group>"; };
+		378D1A421F66E649007AD091 /* UserDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDispatcher.swift; sourceTree = "<group>"; };
 		378D1A441F66E65A007AD091 /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
 		378D1A461F66E66C007AD091 /* UserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStore.swift; sourceTree = "<group>"; };
 		37BE2AB31F3745D0003DC1F8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -80,6 +79,7 @@
 		EDDF7D252229CE79003BCCAE /* PublishRelay.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishRelay.extension.swift; sourceTree = "<group>"; };
 		EDDF7D272229CF07003BCCAE /* BehaviorRelay.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorRelay.extension.swift; sourceTree = "<group>"; };
 		EDF078FE222D7ADF00B880FE /* FavoriteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteViewController.swift; sourceTree = "<group>"; };
+		EDF07904222D7B7600B880FE /* Flux.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flux.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +112,7 @@
 			children = (
 				377C15511F66E39800F25D8E /* Repository */,
 				377C15521F66E39800F25D8E /* User */,
+				EDF07904222D7B7600B880FE /* Flux.swift */,
 			);
 			path = Flux;
 			sourceTree = "<group>";
@@ -119,8 +120,8 @@
 		377C15511F66E39800F25D8E /* Repository */ = {
 			isa = PBXGroup;
 			children = (
-				377C15531F66E3D900F25D8E /* Dispatcher.Repository.swift */,
 				378D1A3C1F66E5A7007AD091 /* RepositoryAction.swift */,
+				377C15531F66E3D900F25D8E /* RepositoryDispatcher.swift */,
 				378D1A3E1F66E5BF007AD091 /* RepositoryStore.swift */,
 			);
 			path = Repository;
@@ -129,8 +130,8 @@
 		377C15521F66E39800F25D8E /* User */ = {
 			isa = PBXGroup;
 			children = (
-				378D1A421F66E649007AD091 /* Dispatcher.User.swift */,
 				378D1A441F66E65A007AD091 /* UserAction.swift */,
+				378D1A421F66E649007AD091 /* UserDispatcher.swift */,
 				378D1A461F66E66C007AD091 /* UserStore.swift */,
 			);
 			path = User;
@@ -189,7 +190,6 @@
 				377C15501F66E39800F25D8E /* Flux */,
 				37BE2AE91F374889003DC1F8 /* NotieObserver */,
 				37BE2AC11F37460C003DC1F8 /* AppDelegate.swift */,
-				372936AD1F54538A00762D15 /* FavoriteModel.swift */,
 				ED6EEE6922297AD4007C3129 /* RepositoryModel.swift */,
 				ED6EEE67222973CE007C3129 /* SearchModel.swift */,
 			);
@@ -425,15 +425,14 @@
 				37086C212017850600D625CA /* ApiSession.extension.swift in Sources */,
 				EDF07902222D7B2800B880FE /* AppDelegate.swift in Sources */,
 				EDDF7D282229CF07003BCCAE /* BehaviorRelay.extension.swift in Sources */,
-				377C15541F66E3D900F25D8E /* Dispatcher.Repository.swift in Sources */,
-				378D1A431F66E649007AD091 /* Dispatcher.User.swift in Sources */,
-				372936AE1F54538A00762D15 /* FavoriteModel.swift in Sources */,
 				EDF078FF222D7ADF00B880FE /* FavoriteViewController.swift in Sources */,
 				EDDF7D1A2229C1CA003BCCAE /* FavoriteViewDataSource.swift in Sources */,
+				EDF07905222D7B7600B880FE /* Flux.swift in Sources */,
 				EDF07900222D7B2800B880FE /* LoadingView.swift in Sources */,
 				37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */,
 				EDDF7D262229CE79003BCCAE /* PublishRelay.extension.swift in Sources */,
 				378D1A3D1F66E5A7007AD091 /* RepositoryAction.swift in Sources */,
+				377C15541F66E3D900F25D8E /* RepositoryDispatcher.swift in Sources */,
 				ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */,
 				378D1A3F1F66E5BF007AD091 /* RepositoryStore.swift in Sources */,
 				EDF07903222D7B2800B880FE /* RepositoryViewController.swift in Sources */,
@@ -442,6 +441,7 @@
 				EDDF7D202229C1D5003BCCAE /* SearchViewDataSource.swift in Sources */,
 				EDF07901222D7B2800B880FE /* UIKeyboardInfo.swift in Sources */,
 				378D1A451F66E65A007AD091 /* UserAction.swift in Sources */,
+				378D1A431F66E649007AD091 /* UserDispatcher.swift in Sources */,
 				37BE2AD21F3746FA003DC1F8 /* UserRepositoryViewController.swift in Sources */,
 				EDDF7D232229C1DA003BCCAE /* UserRepositoryViewDataSource.swift in Sources */,
 				378D1A471F66E66C007AD091 /* UserStore.swift in Sources */,

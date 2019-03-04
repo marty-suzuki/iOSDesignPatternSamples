@@ -22,9 +22,9 @@ final class SearchViewDataSource: NSObject {
     private let store: UserStore
     private let action: UserAction
 
-    init(action: UserAction = .init(), store: UserStore = .instantiate()) {
-        self.action = action
-        self.store = store
+    init(flux: Flux) {
+        self.action = flux.userAction
+        self.store = flux.userStore
         self.isReachedBottom = _isReachedBottom.distinctUntilChanged()
         self.headerFooterView = _headerFooterView.asObservable()
     }

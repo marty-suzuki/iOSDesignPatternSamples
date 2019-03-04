@@ -14,12 +14,13 @@ import RxCocoa
 final class FavoriteViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
-    private let dataSource = FavoriteViewDataSource()
+    private let dataSource: FavoriteViewDataSource
+    private let flux: Flux
     private let disposeBag = DisposeBag()
-    private let store: RepositoryStore = .instantiate()
-    private let action = RepositoryAction()
 
-    init() {
+    init(flux: Flux) {
+        self.flux = flux
+        self.dataSource = FavoriteViewDataSource(flux: flux)
         super.init(nibName: FavoriteViewController.className, bundle: nil)
     }
 
@@ -33,18 +34,19 @@ final class FavoriteViewController: UIViewController {
         title = "On Memory Favorite"
         dataSource.configure(with: tableView)
 
-        // observe store
-        let viewWillDisappear = rx
-            .sentMessage(#selector(FavoriteViewController.viewDidDisappear(_:)))
+        let store = flux.repositoryStore
 
-        rx.methodInvoked(#selector(FavoriteViewController.viewDidAppear(_:)))
-            .flatMapLatest { [weak self] _ -> Observable<Void> in
-                self.map { $0.store.selectedRepository
-                    .takeUntil(viewWillDisappear)
-                    .filter { $0 != nil }
-                    .map { _ in }
-                } ?? .empty()
+        Observable.merge(
+            rx.methodInvoked(#selector(FavoriteViewController.viewDidAppear(_:)))
+                .map { _ in true },
+            rx.sentMessage(#selector(FavoriteViewController.viewDidDisappear(_:)))
+                .map { _ in false }
+            )
+            .flatMapLatest { isAppearing -> Observable<Repository?> in
+                isAppearing ? store.selectedRepository : .empty()
             }
+            .filter { $0 != nil }
+            .map { _ in }
             .bind(to: showRepository)
             .disposed(by: disposeBag)
 
@@ -56,7 +58,7 @@ final class FavoriteViewController: UIViewController {
     
     private var showRepository: AnyObserver<Void> {
         return Binder(self) { me, _ in
-            guard let vc = RepositoryViewController() else { return }
+            guard let vc = RepositoryViewController(flux: me.flux) else { return }
             me.navigationController?.pushViewController(vc, animated: true)
         }.asObserver()
     }

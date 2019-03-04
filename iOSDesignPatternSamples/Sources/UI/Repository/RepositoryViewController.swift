@@ -15,15 +15,11 @@ import RxCocoa
 final class RepositoryViewController: SFSafariViewController {
     private let favoriteButtonItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
     private let disposeBag = DisposeBag()
-    private let action: RepositoryAction
-    private let store: RepositoryStore
+    private let flux: Flux
 
-    init?(action: RepositoryAction = .init(),
-         store: RepositoryStore = .instantiate(),
-         entersReaderIfAvailable: Bool = true) {
-        guard let repository = store.value.selectedRepository else { return nil }
-        self.action = action
-        self.store = store
+    init?(flux: Flux) {
+        guard let repository = flux.repositoryStore.value.selectedRepository else { return nil }
+        self.flux = flux
         super.init(url: repository.url, configuration: .init())
         hidesBottomBarWhenPushed = true
     }
@@ -33,7 +29,9 @@ final class RepositoryViewController: SFSafariViewController {
 
         navigationItem.rightBarButtonItem = favoriteButtonItem
 
-        // observe store
+        let store = flux.repositoryStore
+        let action = flux.repositoryAction
+
         let repository = store.selectedRepository
             .flatMap { $0.map(Observable.just) ?? .empty() }
 
@@ -46,15 +44,15 @@ final class RepositoryViewController: SFSafariViewController {
 
         buttonTapAndRepository
             .filter { $0.0 }
-            .subscribe(onNext: { [weak self] in
-                self?.action.removeFavorite($1)
+            .subscribe(onNext: {
+                action.removeFavorite($1)
             })
             .disposed(by: disposeBag)
 
         buttonTapAndRepository
             .filter { !$0.0 }
-            .subscribe(onNext: { [weak self] in
-                self?.action.addFavorite($1)
+            .subscribe(onNext: {
+                action.addFavorite($1)
             })
             .disposed(by: disposeBag)
 
@@ -64,8 +62,8 @@ final class RepositoryViewController: SFSafariViewController {
             .disposed(by: disposeBag)
 
         rx.sentMessage(#selector(RepositoryViewController.viewDidDisappear(_:)))
-            .subscribe(onNext: { [weak self] _ in
-                self?.action.clearSelectedRepository()
+            .subscribe(onNext: { _ in
+                action.clearSelectedRepository()
             })
             .disposed(by: disposeBag)
     }

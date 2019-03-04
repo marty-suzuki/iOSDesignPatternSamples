@@ -20,13 +20,14 @@ final class SearchViewController: UIViewController {
     private let searchBar = UISearchBar(frame: .zero)
     private let loadingView = LoadingView.makeFromNib()
     
-    private let dataSource = SearchViewDataSource()
-    private let action = UserAction()
-    private let store: UserStore = .instantiate()
+    private let dataSource: SearchViewDataSource
+    private let flux: Flux
     private let disposeBag = DisposeBag()
     private var pool = Notice.ObserverPool()
 
-    init() {
+    init(flux: Flux) {
+        self.flux = flux
+        self.dataSource = SearchViewDataSource(flux: flux)
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
     
@@ -42,6 +43,8 @@ final class SearchViewController: UIViewController {
         dataSource.configure(with: tableView)
 
         // observe store
+        let store = flux.userStore
+        let action = flux.userAction
         let users = store.users.asObservable()
         let totalCount = store.userTotalCount.asObservable()
         let isFetching = store.isUserFetching.asObservable()
@@ -143,50 +146,44 @@ final class SearchViewController: UIViewController {
             .filter { !$0.isEmpty && $1 != nil }
 
         query
-            .subscribe(onNext: { [weak self] _ in
-                self?.action.clearPageInfo()
-                self?.action.removeAllUsers()
-                self?.action.userTotalCount(0)
+            .subscribe(onNext: { _ in
+                action.clearPageInfo()
+                action.removeAllUsers()
+                action.userTotalCount(0)
             })
             .disposed(by: disposeBag)
 
         Observable.merge(initialLoad, loadMore)
             .map { SearchUserRequest(query: $0, after: $1) }
             .distinctUntilChanged { $0.query == $1.query && $0.after == $1.after }
-            .subscribe(onNext: { [weak self] request in
-                self?.action.fetchUsers(withQuery: request.query, after: request.after)
+            .subscribe(onNext: { request in
+                action.fetchUsers(withQuery: request.query, after: request.after)
             })
             .disposed(by: disposeBag)
 
         Observable.merge(viewDidAppear.map { _ in true },
                          viewDidDisappear.map { _ in false })
-            .flatMapLatest { [weak self] isAppearing in
-                self.map { $0.store.fetchError } ?? .empty()
-            }
-            .flatMap { error -> Observable<(String, String)> in
-                guard case .emptyToken? = (error as? ApiSession.Error) else { return .empty() }
-                let title = "Access Token Error"
-                let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
-                return .just((title, message))
+            .flatMapLatest { isAppearing in
+                isAppearing ? store.fetchError : .empty()
             }
             .bind(to: showAccessTokenAlert)
             .disposed(by: disposeBag)
     }
 
-    private var showAccessTokenAlert: AnyObserver<(String, String)> {
-        return Binder(self) { (me, value: (title: String, message: String)) in
-            let alert = UIAlertController(title: value.title, message: value.message, preferredStyle: .alert)
+    private var showAccessTokenAlert: Binder<ErrorMessage> {
+        return Binder(self) { me, error in
+            let alert = UIAlertController(title: error.title, message: error.message, preferredStyle: .alert)
             me.present(alert, animated: false, completion: nil)
-        }.asObserver()
+        }
     }
 
-    private var reloadData: AnyObserver<Void>  {
+    private var reloadData: Binder<Void>  {
         return Binder(self) { me, _ in
             me.tableView.reloadData()
-        }.asObserver()
+        }
     }
     
-    private var keyboardWillShow: AnyObserver<UIKeyboardInfo> {
+    private var keyboardWillShow: Binder<UIKeyboardInfo> {
         return Binder(self) { me, keyboardInfo in
             me.view.layoutIfNeeded()
             let extra = me.tabBarController?.tabBar.bounds.height ?? 0
@@ -196,10 +193,10 @@ final class SearchViewController: UIViewController {
                            options: keyboardInfo.animationCurve,
                            animations: { me.view.layoutIfNeeded() },
                            completion: nil)
-        }.asObserver()
+        }
     }
     
-    private var  keyboardWillHide: AnyObserver<UIKeyboardInfo> {
+    private var keyboardWillHide: Binder<UIKeyboardInfo> {
         return Binder(self) { me, keyboardInfo in
             me.view.layoutIfNeeded()
             me.tableViewBottomConstraint.constant = 0
@@ -208,21 +205,21 @@ final class SearchViewController: UIViewController {
                            options: keyboardInfo.animationCurve,
                            animations: { me.view.layoutIfNeeded() },
                            completion: nil)
-        }.asObserver()
+        }
     }
     
-    private var showUserRepository: AnyObserver<Void> {
+    private var showUserRepository: Binder<Void> {
         return Binder(self) { me, _ in
-            let vc = UserRepositoryViewController()
+            let vc = UserRepositoryViewController(flux: me.flux)
             me.navigationController?.pushViewController(vc, animated: true)
-        }.asObserver()
+        }
     }
     
-    private var updateLoadingView: AnyObserver<(UIView, Bool)> {
+    private var updateLoadingView: Binder<(UIView, Bool)> {
         return Binder(self) { (me, value: (view: UIView, isLoading: Bool)) in
             me.loadingView.removeFromSuperview()
             me.loadingView.isLoading = value.isLoading
             me.loadingView.add(to: value.view)
-        }.asObserver()
+        }
     }
 }
