@@ -12,26 +12,20 @@ import RxSwift
 import RxCocoa
 
 final class UserRepositoryViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var totalCountLabel: UILabel!
 
-    private let loadingView = LoadingView.makeFromNib()
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
-    private let dataSource = UserRepositoryViewDataSource()
-    private let userAction: UserAction
-    private let userStore: UserStore
-    private let repositoryAction: RepositoryAction
-    private let repositoryStore: RepositoryStore
+    let loadingView = LoadingView.makeFromNib()
+
+    let flux: Flux
+    let dataSource: UserRepositoryViewDataSource
+
     private let disposeBag = DisposeBag()
 
-    init(userAction: UserAction = .init(),
-         userStore: UserStore = .instantiate(),
-         repositoryAction: RepositoryAction = .init(),
-         repositoryStore: RepositoryStore = .instantiate()) {
-        self.userAction = userAction
-        self.userStore = userStore
-        self.repositoryAction = repositoryAction
-        self.repositoryStore = repositoryStore
+    init(flux: Flux) {
+        self.flux = flux
+        self.dataSource = UserRepositoryViewDataSource(flux: flux)
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -41,19 +35,20 @@ final class UserRepositoryViewController: UIViewController {
     }
 
     deinit {
-        userAction.clearSelectedUser()
-        repositoryAction.removeAllRepositories()
-        repositoryAction.repositoryTotalCount(0)
-        repositoryAction.clearPageInfo()
+        flux.userAction.clearSelectedUser()
+        flux.repositoryAction.removeAllRepositories()
+        flux.repositoryAction.repositoryTotalCount(0)
+        flux.repositoryAction.clearPageInfo()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        edgesForExtendedLayout = []
         dataSource.configure(with: tableView)
 
-        // observe store
+        let repositoryAction = flux.repositoryAction
+        let repositoryStore = flux.repositoryStore
+
         let repositories = repositoryStore.repositories.asObservable()
         let totalCount = repositoryStore.repositoryTotalCount.asObservable()
         let isFetching = repositoryStore.isRepositoryFetching.asObservable()
@@ -79,7 +74,7 @@ final class UserRepositoryViewController: UIViewController {
             .bind(to: totalCountLabel.rx.text)
             .disposed(by: disposeBag)
 
-        let user = userStore.selectedUser
+        let user = flux.userStore.selectedUser
             .flatMap { $0.map(Observable.just) ?? .empty() }
 
         user
@@ -102,9 +97,9 @@ final class UserRepositoryViewController: UIViewController {
         Observable.merge(initialLoadRequest, loadMoreRequest)
             .map { UserNodeRequest(id: $0.id, after: $1) }
             .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
-            .subscribe(onNext: { [weak self] request in
-                self?.repositoryAction.fetchRepositories(withUserId: request.id,
-                                                         after: request.after)
+            .subscribe(onNext: { request in
+                repositoryAction.fetchRepositories(withUserID: request.id,
+                                                   after: request.after)
             })
             .disposed(by: disposeBag)
 
@@ -118,24 +113,24 @@ final class UserRepositoryViewController: UIViewController {
         fetchRepositories.onNext(())
     }
     
-    private var showRepository: AnyObserver<Void> {
+    private var showRepository: Binder<Void> {
         return Binder(self) { me, repository in
-            guard let vc = RepositoryViewController() else { return }
+            guard let vc = RepositoryViewController(flux: me.flux) else { return }
             me.navigationController?.pushViewController(vc, animated: true)
-        }.asObserver()
+        }
     }
     
-    private var reloadData: AnyObserver<Void> {
-        return Binder(self) { me, _ in
-            me.tableView.reloadData()
-        }.asObserver()
+    private var reloadData: Binder<Void> {
+        return Binder(tableView) { tableView, _ in
+            tableView.reloadData()
+        }
     }
     
-    private var updateLoadingView: AnyObserver<(UIView, Bool)> {
-        return Binder(self) { (me, value: (view: UIView, isLoading: Bool)) in
-            me.loadingView.removeFromSuperview()
-            me.loadingView.isLoading = value.isLoading
-            me.loadingView.add(to: value.view)
-        }.asObserver()
+    private var updateLoadingView: Binder<(UIView, Bool)> {
+        return Binder(loadingView) { (loadingView, value: (view: UIView, isLoading: Bool)) in
+            loadingView.removeFromSuperview()
+            loadingView.isLoading = value.isLoading
+            loadingView.add(to: value.view)
+        }
     }
 }

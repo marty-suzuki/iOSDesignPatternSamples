@@ -15,10 +15,9 @@ final class FavoriteViewDataSource: NSObject {
     private let store: RepositoryStore
     private let action: RepositoryAction
 
-    init(store: RepositoryStore = .instantiate(),
-         action: RepositoryAction = .init()) {
-        self.store = store
-        self.action = action
+    init(flux: Flux) {
+        self.store = flux.repositoryStore
+        self.action = flux.repositoryAction
     }
     
     func configure(with tableView: UITableView) {

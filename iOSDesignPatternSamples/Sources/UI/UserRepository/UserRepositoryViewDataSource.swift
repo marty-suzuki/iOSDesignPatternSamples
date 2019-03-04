@@ -22,9 +22,9 @@ final class UserRepositoryViewDataSource: NSObject {
     private let action: RepositoryAction
     private let store: RepositoryStore
 
-    init(action: RepositoryAction = .init(), store: RepositoryStore = .instantiate()) {
-        self.action = action
-        self.store = store
+    init(flux: Flux) {
+        self.action = flux.repositoryAction
+        self.store = flux.repositoryStore
         self.isReachedBottom = _isReachedBottom.distinctUntilChanged()
         self.headerFooterView = _headerFooterView.asObservable()
     }

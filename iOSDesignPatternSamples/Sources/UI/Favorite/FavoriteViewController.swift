@@ -12,32 +12,42 @@ import RxSwift
 import RxCocoa
 
 final class FavoriteViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet private(set) weak var tableView: UITableView!
 
-    private let dataSource = FavoriteViewDataSource()
+    let flux: Flux
+    let dataSource: FavoriteViewDataSource
+
     private let disposeBag = DisposeBag()
-    private let store: RepositoryStore = .instantiate()
-    private let action = RepositoryAction()
+
+    init(flux: Flux) {
+        self.flux = flux
+        self.dataSource = FavoriteViewDataSource(flux: flux)
+        super.init(nibName: FavoriteViewController.className, bundle: nil)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         title = "On Memory Favorite"
-        automaticallyAdjustsScrollViewInsets = false
         dataSource.configure(with: tableView)
 
-        // observe store
-        let viewWillDisappear = rx
-            .sentMessage(#selector(FavoriteViewController.viewDidDisappear(_:)))
+        let store = flux.repositoryStore
 
-        rx.methodInvoked(#selector(FavoriteViewController.viewDidAppear(_:)))
-            .flatMapLatest { [weak self] _ -> Observable<Void> in
-                self.map { $0.store.selectedRepository
-                    .takeUntil(viewWillDisappear)
-                    .filter { $0 != nil }
-                    .map { _ in }
-                } ?? .empty()
+        Observable.merge(
+            rx.methodInvoked(#selector(FavoriteViewController.viewDidAppear(_:)))
+                .map { _ in true },
+            rx.sentMessage(#selector(FavoriteViewController.viewDidDisappear(_:)))
+                .map { _ in false }
+            )
+            .flatMapLatest { isAppearing -> Observable<Repository?> in
+                isAppearing ? store.selectedRepository : .empty()
             }
+            .filter { $0 != nil }
+            .map { _ in }
             .bind(to: showRepository)
             .disposed(by: disposeBag)
 
@@ -47,16 +57,16 @@ final class FavoriteViewController: UIViewController {
             .disposed(by: disposeBag)
     }
     
-    private var showRepository: AnyObserver<Void> {
+    private var showRepository: Binder<Void> {
         return Binder(self) { me, _ in
-            guard let vc = RepositoryViewController() else { return }
+            guard let vc = RepositoryViewController(flux: me.flux) else { return }
             me.navigationController?.pushViewController(vc, animated: true)
-        }.asObserver()
+        }
     }
     
-    private var reloadData: AnyObserver<Void> {
-        return Binder(self) { me, _ in
-            me.tableView.reloadData()
-        }.asObserver()
+    private var reloadData: Binder<Void> {
+        return Binder(tableView) { tableView, _ in
+            tableView.reloadData()
+        }
     }
 }

@@ -7,12 +7,11 @@
 //
 
 import Foundation
-import FluxCapacitor
 import GithubKit
 import RxSwift
 import RxCocoa
 
-final class UserStore: Storable {
+final class UserStore {
     let isUserFetching: Observable<Bool>
     fileprivate let _isUserFetching = BehaviorRelay<Bool>(value: false)
     
@@ -31,38 +30,48 @@ final class UserStore: Storable {
     let userTotalCount: Observable<Int>
     fileprivate let _userTotalCount = BehaviorRelay<Int>(value: 0)
 
-    let fetchError: Observable<Error>
-    private let _fetchError = PublishRelay<Error>()
-    
-    init() {
+    let fetchError: Observable<ErrorMessage>
+
+    private let disposeBag = DisposeBag()
+
+    init(dispatcher: UserDispatcher) {
         self.isUserFetching = _isUserFetching.asObservable()
         self.users = _users.asObservable()
         self.selectedUser = _selectedUser.asObservable()
         self.lastPageInfo = _lastPageInfo.asObservable()
         self.lastSearchQuery = _lastSearchQuery.asObservable()
         self.userTotalCount = _userTotalCount.asObservable()
-        self.fetchError = _fetchError.asObservable()
-    }
+        self.fetchError = dispatcher.fetchError.asObservable()
 
-    func reduce(with state: Dispatcher.User) {
-        switch state {
-        case .isUserFetching(let value):
-            _isUserFetching.accept(value)
-        case .addUsers(let value):
-            _users.accept(_users.value + value)
-        case .removeAllUsers:
-            _users.accept([])
-        case .selectedUser(let value):
-            _selectedUser.accept(value)
-        case .lastPageInfo(let value):
-            _lastPageInfo.accept(value)
-        case .lastSearchQuery(let value):
-            _lastSearchQuery.accept(value)
-        case .userTotalCount(let value):
-            _userTotalCount.accept(value)
-        case .fetchError(let value):
-            _fetchError.accept(value)
-        }
+        dispatcher.isUserFetching
+            .bind(to: _isUserFetching)
+            .disposed(by: disposeBag)
+
+        dispatcher.addUsers
+            .withLatestFrom(_users) { $1 + $0 }
+            .bind(to: _users)
+            .disposed(by: disposeBag)
+
+        dispatcher.removeAllUsers
+            .map { [] }
+            .bind(to: _users)
+            .disposed(by: disposeBag)
+
+        dispatcher.selectedUser
+            .bind(to: _selectedUser)
+            .disposed(by: disposeBag)
+
+        dispatcher.lastPageInfo
+            .bind(to: _lastPageInfo)
+            .disposed(by: disposeBag)
+
+        dispatcher.lastSearchQuery
+            .bind(to: _lastSearchQuery)
+            .disposed(by: disposeBag)
+
+        dispatcher.userTotalCount
+            .bind(to: _userTotalCount)
+            .disposed(by: disposeBag)
     }
 }
 

@@ -6,13 +6,11 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import Foundation
-import FluxCapacitor
 import GithubKit
 import RxSwift
 import RxCocoa
 
-final class RepositoryStore: Storable {
+final class RepositoryStore {
     let isRepositoryFetching: Observable<Bool>
     fileprivate let _isRepositoryFetching = BehaviorRelay<Bool>(value: false)
     
@@ -30,44 +28,60 @@ final class RepositoryStore: Storable {
     
     let repositoryTotalCount: Observable<Int>
     fileprivate let _repositoryTotalCount = BehaviorRelay<Int>(value: 0)
-    
-    init() {
+
+    private let disposeBag = DisposeBag()
+
+    init(dispatcher: RepositoryDispatcher) {
         self.isRepositoryFetching = _isRepositoryFetching.asObservable()
         self.favorites = _favorites.asObservable()
         self.repositories = _repositories.asObservable()
         self.selectedRepository = _selectedRepository.asObservable()
         self.lastPageInfo = _lastPageInfo.asObservable()
         self.repositoryTotalCount = _repositoryTotalCount.asObservable()
-    }
 
-    func reduce(with state: Dispatcher.Repository) {
-        switch state {
-        case .isRepositoryFetching(let value):
-            _isRepositoryFetching.accept(value)
-        case .addRepositories(let value):
-            _repositories.accept(_repositories.value + value)
-        case .removeAllRepositories:
-            _repositories.accept([])
-        case .selectedRepository(let value):
-            _selectedRepository.accept(value)
-        case .lastPageInfo(let value):
-            _lastPageInfo.accept(value)
-        case .repositoryTotalCount(let value):
-            _repositoryTotalCount.accept(value)
+        dispatcher.isRepositoryFetching
+            .bind(to: _isRepositoryFetching)
+            .disposed(by: disposeBag)
 
-        case .addFavorite(let value):
-            if _favorites.value.index(where: { $0.url == value.url }) == nil {
-                _favorites.accept(_favorites.value + [value])
+        dispatcher.addRepositories
+            .withLatestFrom(_repositories) { $1 + $0 }
+            .bind(to: _repositories)
+            .disposed(by: disposeBag)
+
+        dispatcher.removeAllRepositories
+            .map { [] }
+            .bind(to: _repositories)
+            .disposed(by: disposeBag)
+
+        dispatcher.selectedRepository
+            .bind(to: _selectedRepository)
+            .disposed(by: disposeBag)
+
+        dispatcher.lastPageInfo
+            .bind(to: _lastPageInfo)
+            .disposed(by: disposeBag)
+
+        dispatcher.repositoryTotalCount
+            .bind(to: _repositoryTotalCount)
+            .disposed(by: disposeBag)
+
+        dispatcher.addFavorite
+            .withLatestFrom(_favorites) { $1 + [$0] }
+            .bind(to: _favorites)
+            .disposed(by: disposeBag)
+
+        dispatcher.removeFavorite
+            .withLatestFrom(_favorites) { ($0, $1) }
+            .map { repository, favorites in
+                favorites.filter { $0.url != repository.url }
             }
-        case .removeFavorite(let value):
-            if let index = _favorites.value.index(where: { $0.url == value.url }) {
-                var favorites = _favorites.value
-                favorites.remove(at: index)
-                _favorites.accept(favorites)
-            }
-        case .removeAllFavorites:
-            _favorites.accept([])
-        }
+            .bind(to: _favorites)
+            .disposed(by: disposeBag)
+
+        dispatcher.removeAllFavorites
+            .map { [] }
+            .bind(to: _favorites)
+            .disposed(by: disposeBag)
     }
 }
 

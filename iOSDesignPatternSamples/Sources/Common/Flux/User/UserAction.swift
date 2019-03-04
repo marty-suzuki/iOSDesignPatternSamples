@@ -6,69 +6,79 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import Foundation
-import FluxCapacitor
 import GithubKit
+import RxCocoa
 import RxSwift
 
-final class UserAction: Actionable {
-    typealias DispatchStateType = Dispatcher.User
-    
-    private let session: ApiSession
-    private var disposeBag = DisposeBag()
-    
-    init(session: ApiSession = .shared) {
-        self.session = session
-    }
-    
-    func fetchUsers(withQuery query: String, after: String?) {
-        invoke(.lastSearchQuery(query))
-        if query.isEmpty { return }
-        disposeBag = DisposeBag()
-        invoke(.isUserFetching(true))
-        let request = SearchUserRequest(query: query, after: after)
-        session.rx.send(request)
-            .subscribe(onNext: { [weak self] in
-                self?.invoke(.addUsers($0.nodes))
-                self?.invoke(.lastPageInfo($0.pageInfo))
-                self?.invoke(.userTotalCount($0.totalCount))
-            }, onError: { [weak self] in
-                self?.invoke(.fetchError($0))
-            }, onDisposed: { [weak self] in
-                self?.invoke(.isUserFetching(false))
+final class UserAction {
+
+    private let model: SearchModel
+    private let dispatcher: UserDispatcher
+    private let disposeBag = DisposeBag()
+
+    init(dispatcher: UserDispatcher,
+         model: SearchModel) {
+        self.model = model
+        self.dispatcher = dispatcher
+
+        model.response
+            .subscribe(onNext: {
+                dispatcher.addUsers.accept($0.nodes)
+                dispatcher.lastPageInfo.accept($0.pageInfo)
+                dispatcher.userTotalCount.accept($0.totalCount)
+            })
+            .disposed(by: disposeBag)
+
+        model.errorMessage
+            .subscribe(onNext: {
+                dispatcher.fetchError.accept($0)
+            })
+            .disposed(by: disposeBag)
+
+        model.isFetchingUsers
+            .subscribe(onNext: {
+                dispatcher.isUserFetching.accept($0)
             })
             .disposed(by: disposeBag)
     }
+    
+    func fetchUsers(withQuery query: String, after: String?) {
+        dispatcher.lastSearchQuery.accept(query)
+        guard !query.isEmpty else {
+            return
+        }
+        model.fetchUsers(withQuery: query, after: after)
+    }
 
     func selectUser(_ user: User) {
-        invoke(.selectedUser(user))
+        dispatcher.selectedUser.accept(user)
     }
 
     func clearSelectedUser() {
-        invoke(.selectedUser(nil))
+        dispatcher.selectedUser.accept(nil)
     }
 
     func addUsers(_ users: [User]) {
-        invoke(.addUsers(users))
+        dispatcher.addUsers.accept(users)
     }
 
     func removeAllUsers() {
-        invoke(.removeAllUsers)
+        dispatcher.removeAllUsers.accept(())
     }
 
     func pageInfo(_ pageInfo: PageInfo) {
-        invoke(.lastPageInfo(pageInfo))
+        dispatcher.lastPageInfo.accept(pageInfo)
     }
 
     func clearPageInfo() {
-        invoke(.lastPageInfo(nil))
+        dispatcher.lastPageInfo.accept(nil)
     }
 
     func userTotalCount(_ count: Int) {
-        invoke(.userTotalCount(count))
+        dispatcher.userTotalCount.accept(count)
     }
 
     func isUserFetching(_ isFetching: Bool) {
-        invoke(.isUserFetching(isFetching))
+        dispatcher.isUserFetching.accept(isFetching)
     }
 }

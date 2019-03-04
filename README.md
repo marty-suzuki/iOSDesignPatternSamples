@@ -34,7 +34,7 @@ You can compare differences like this.
 
 ## Run
 
-To run this example, you need `carthage update`.
+To run this example, you need `make install`.
 
 In addition, you need to set `Github Personal Access Token` like this.
 
@@ -49,16 +49,15 @@ extension ApiSession {
 
 ## Requirements
 
-- Xcode 9.2 or later
+- Xcode 10.1 or later
 - iOS 11 or later
-- Swift 4 or later
+- Swift 4.2 or later
 
 ## Special Thanks
 
 - [RxSwift](https://github.com/ReactiveX/RxSwift)
 - [Nuke](https://github.com/kean/Nuke)
 - [SwiftIconFont](https://github.com/0x73/SwiftIconFont)
-- [FluxCapacitor](https://github.com/marty-suzuki/FluxCapacitor)
 - [GithubKitForSample](https://github.com/marty-suzuki/GithubKitForSample)
 - [NoticeObserveKit](https://github.com/marty-suzuki/NoticeObserveKit)
 

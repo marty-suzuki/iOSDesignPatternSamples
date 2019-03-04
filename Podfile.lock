@@ -1,0 +1,50 @@
+PODS:
+  - GithubKit (0.4.1):
+    - Nuke (~> 7.0)
+    - RxCocoa (~> 4.0)
+    - RxSwift (~> 4.0)
+    - SwiftIconFont (~> 3.0)
+  - NoticeObserveKit (0.11.1)
+  - Nuke (7.5.2)
+  - RxAtomic (4.4.1)
+  - RxCocoa (4.4.1):
+    - RxSwift (~> 4.0)
+  - RxSwift (4.4.1):
+    - RxAtomic (~> 4.4)
+  - SwiftIconFont (3.0.0)
+
+DEPENDENCIES:
+  - GithubKit (from `https://github.com/marty-suzuki/GithubKitForSample.git`, tag `0.4.1`)
+  - NoticeObserveKit (= 0.11.1)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - NoticeObserveKit
+    - Nuke
+    - RxAtomic
+    - RxCocoa
+    - RxSwift
+    - SwiftIconFont
+
+EXTERNAL SOURCES:
+  GithubKit:
+    :git: https://github.com/marty-suzuki/GithubKitForSample.git
+    :tag: 0.4.1
+
+CHECKOUT OPTIONS:
+  GithubKit:
+    :git: https://github.com/marty-suzuki/GithubKitForSample.git
+    :tag: 0.4.1
+
+SPEC CHECKSUMS:
+  GithubKit: 470b988d16b87752488a382985464cf5322f4047
+  NoticeObserveKit: eb4a123d96fb4ed373758a0c52d507eefff2e48a
+  Nuke: 0350d346a688426e8f2331253ef28dc2fc4f6178
+  RxAtomic: f8d6adc1ccb87a767811269e4875887bc74dbf19
+  RxCocoa: 2f35a76bf8887872e28a1914112395b11b8e0e64
+  RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
+  SwiftIconFont: 2ba18554a77c44948dc35b561b344e3c23834a84
+
+PODFILE CHECKSUM: c165bf5e10d9cc93c39d5496328f638dbfd7c035
+
+COCOAPODS: 1.6.0

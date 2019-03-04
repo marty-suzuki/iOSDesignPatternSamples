@@ -6,72 +6,76 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import Foundation
-import FluxCapacitor
 import GithubKit
 import RxSwift
 
-final class RepositoryAction: Actionable {
-    typealias DispatchStateType = Dispatcher.Repository
+final class RepositoryAction {
+
+    private let dispatcher: RepositoryDispatcher
+    private let model: RepositoryModel
+    private let disposeBag = DisposeBag()
     
-    private let session: ApiSession
-    private var disposeBag = DisposeBag()
-    
-    init(session: ApiSession = .shared) {
-        self.session = session
-    }
-    
-    func fetchRepositories(withUserId id: String, after: String?) {
-        invoke(.isRepositoryFetching(true))
-        let request = UserNodeRequest(id: id, after: after)
-        session.rx.send(request)
-            .subscribe(onNext: { [weak self] in
-                self?.invoke(.lastPageInfo($0.pageInfo))
-                self?.invoke(.addRepositories($0.nodes))
-                self?.invoke(.repositoryTotalCount($0.totalCount))
-            }, onDisposed: { [weak self] in
-                self?.invoke(.isRepositoryFetching(false))
+    init(dispatcher: RepositoryDispatcher,
+         model: RepositoryModel) {
+        self.dispatcher = dispatcher
+        self.model = model
+
+        model.response
+            .subscribe(onNext: {
+                dispatcher.lastPageInfo.accept($0.pageInfo)
+                dispatcher.addRepositories.accept($0.nodes)
+                dispatcher.repositoryTotalCount.accept($0.totalCount)
+            })
+            .disposed(by: disposeBag)
+
+        model.isFetchingRepositories
+            .subscribe(onNext: {
+                dispatcher.isRepositoryFetching.accept($0)
             })
             .disposed(by: disposeBag)
     }
+    
+    func fetchRepositories(withUserID id: String, after: String?) {
+        model.fetchRepositories(withUserID: id, after: after)
+    }
 
     func selectRepository(_ repository: Repository) {
-        invoke(.selectedRepository(repository))
+        dispatcher.selectedRepository.accept(repository)
     }
 
     func clearSelectedRepository() {
-        invoke(.selectedRepository(nil))
+        dispatcher.selectedRepository.accept(nil)
     }
 
     func addFavorite(_ repository: Repository) {
-        invoke(.addFavorite(repository))
+        dispatcher.addFavorite.accept(repository)
     }
 
     func removeFavorite(_ repository: Repository) {
-        invoke(.removeFavorite(repository))
+        dispatcher.removeFavorite.accept(repository)
     }
 
     func pageInfo(_ pageInfo: PageInfo) {
-        invoke(.lastPageInfo(pageInfo))
+        dispatcher.lastPageInfo.accept(pageInfo)
     }
 
     func clearPageInfo() {
-        invoke(.lastPageInfo(nil))
+        dispatcher.lastPageInfo.accept(nil)
     }
 
     func addRepositories(_ repositories: [Repository]) {
-        invoke(.addRepositories(repositories))
+        dispatcher.addRepositories.accept(repositories)
     }
 
     func removeAllRepositories() {
-        invoke(.removeAllRepositories)
+        dispatcher.removeAllRepositories.accept(())
     }
 
     func repositoryTotalCount(_ count: Int) {
-        invoke(.repositoryTotalCount(count))
+        dispatcher.repositoryTotalCount.accept(count)
     }
 
     func isRepositoriesFetching(_ isFetching: Bool) {
-        invoke(.isRepositoryFetching(isFetching))
+        dispatcher.isRepositoryFetching.accept(isFetching)
     }
 }

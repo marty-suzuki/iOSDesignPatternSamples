@@ -13,19 +13,29 @@ import RxCocoa
 import NoticeObserveKit
 
 final class SearchViewController: UIViewController {
-    @IBOutlet weak var totalCountLabel: UILabel!
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
 
-    private let searchBar = UISearchBar(frame: .zero)
-    private let loadingView = LoadingView.makeFromNib()
-    
-    private let dataSource = SearchViewDataSource()
-    private let action = UserAction()
-    private let store: UserStore = .instantiate()
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
+
+    let searchBar = UISearchBar(frame: .zero)
+    let loadingView = LoadingView.makeFromNib()
+
+    private let flux: Flux
+    let dataSource: SearchViewDataSource
+
     private let disposeBag = DisposeBag()
-    private var pool = NoticeObserverPool()
 
+    init(flux: Flux) {
+        self.flux = flux
+        self.dataSource = SearchViewDataSource(flux: flux)
+        super.init(nibName: SearchViewController.className, bundle: nil)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -34,6 +44,8 @@ final class SearchViewController: UIViewController {
         dataSource.configure(with: tableView)
 
         // observe store
+        let store = flux.userStore
+        let action = flux.userAction
         let users = store.users.asObservable()
         let totalCount = store.userTotalCount.asObservable()
         let isFetching = store.isUserFetching.asObservable()
@@ -62,15 +74,15 @@ final class SearchViewController: UIViewController {
         // observe views
         Observable.merge(searchBar.rx.searchButtonClicked.asObservable(),
                          searchBar.rx.cancelButtonClicked.asObservable())
-            .subscribe(onNext: { [weak self] in
-                self?.searchBar.resignFirstResponder()
-                self?.searchBar.showsCancelButton = false
+            .bind(to: Binder(searchBar) { searchBar, _ in
+                searchBar.resignFirstResponder()
+                searchBar.showsCancelButton = false
             })
             .disposed(by: disposeBag)
 
         searchBar.rx.textDidBeginEditing
-            .subscribe(onNext: { [weak self] in
-                self?.searchBar.showsCancelButton = true
+            .bind(to: Binder(searchBar) { searchBar, _ in
+                searchBar.showsCancelButton = true
             })
             .disposed(by: disposeBag)
 
@@ -78,38 +90,46 @@ final class SearchViewController: UIViewController {
         let viewDidDisappear = rx.methodInvoked(#selector(SearchViewController.viewDidDisappear(_:)))
 
         viewDidDisappear
-            .subscribe(onNext: { [weak self] _ in
-                self?.searchBar.resignFirstResponder()
-                self?.pool = NoticeObserverPool()
+            .bind(to: Binder(searchBar) { searchBar, _ in
+                searchBar.resignFirstResponder()
             })
             .disposed(by: disposeBag)
 
-         // keyboard notification
-        viewDidAppear
-            .flatMap { [weak self] _ -> Observable<UIKeyboardInfo> in
-                Observable.create { observer in
-                    let disposable = Disposables.create()
-                    guard let me = self else { return disposable }
-                    UIKeyboardWillShow.observe {
+        // keyboard notification
+        let isViewAppearing = Observable.merge(viewDidAppear.map { _ in true },
+                                               viewDidDisappear.map { _ in false })
+
+        isViewAppearing
+            .flatMapLatest { isViewAppearing -> Observable<UIKeyboardInfo> in
+                guard isViewAppearing else {
+                    return .empty()
+                }
+
+                return Observable.create { observer in
+                    let observation = NotificationCenter.default.nok.observe(name: .keyboardWillShow) {
                         observer.onNext($0)
                     }
-                    .disposed(by: me.pool)
-                    return disposable
+                    return Disposables.create {
+                        observation.invalidate()
+                    }
                 }
             }
             .bind(to: keyboardWillShow)
             .disposed(by: disposeBag)
 
-        viewDidAppear
-            .flatMap { [weak self] _ -> Observable<UIKeyboardInfo> in
-                Observable.create { observer in
-                    let disposable = Disposables.create()
-                    guard let me = self else { return disposable }
-                    UIKeyboardWillHide.observe {
+        isViewAppearing
+            .flatMapLatest { isViewAppearing -> Observable<UIKeyboardInfo> in
+                guard isViewAppearing else {
+                    return .empty()
+                }
+
+                return Observable.create { observer in
+                    let observation = NotificationCenter.default.nok.observe(name: .keyboardWillHide) {
                         observer.onNext($0)
                     }
-                    .disposed(by: me.pool)
-                    return disposable
+                    return Disposables.create {
+                        observation.invalidate()
+                    }
                 }
             }
             .bind(to: keyboardWillHide)
@@ -135,50 +155,44 @@ final class SearchViewController: UIViewController {
             .filter { !$0.isEmpty && $1 != nil }
 
         query
-            .subscribe(onNext: { [weak self] _ in
-                self?.action.clearPageInfo()
-                self?.action.removeAllUsers()
-                self?.action.userTotalCount(0)
+            .subscribe(onNext: { _ in
+                action.clearPageInfo()
+                action.removeAllUsers()
+                action.userTotalCount(0)
             })
             .disposed(by: disposeBag)
 
         Observable.merge(initialLoad, loadMore)
             .map { SearchUserRequest(query: $0, after: $1) }
             .distinctUntilChanged { $0.query == $1.query && $0.after == $1.after }
-            .subscribe(onNext: { [weak self] request in
-                self?.action.fetchUsers(withQuery: request.query, after: request.after)
+            .subscribe(onNext: { request in
+                action.fetchUsers(withQuery: request.query, after: request.after)
             })
             .disposed(by: disposeBag)
 
         Observable.merge(viewDidAppear.map { _ in true },
                          viewDidDisappear.map { _ in false })
-            .flatMapLatest { [weak self] isAppearing in
-                self.map { $0.store.fetchError } ?? .empty()
-            }
-            .flatMap { error -> Observable<(String, String)> in
-                guard case .emptyToken? = (error as? ApiSession.Error) else { return .empty() }
-                let title = "Access Token Error"
-                let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
-                return .just((title, message))
+            .flatMapLatest { isAppearing in
+                isAppearing ? store.fetchError : .empty()
             }
             .bind(to: showAccessTokenAlert)
             .disposed(by: disposeBag)
     }
 
-    private var showAccessTokenAlert: AnyObserver<(String, String)> {
-        return Binder(self) { (me, value: (title: String, message: String)) in
-            let alert = UIAlertController(title: value.title, message: value.message, preferredStyle: .alert)
+    private var showAccessTokenAlert: Binder<ErrorMessage> {
+        return Binder(self) { me, error in
+            let alert = UIAlertController(title: error.title, message: error.message, preferredStyle: .alert)
             me.present(alert, animated: false, completion: nil)
-        }.asObserver()
+        }
     }
 
-    private var reloadData: AnyObserver<Void>  {
+    private var reloadData: Binder<Void>  {
         return Binder(self) { me, _ in
             me.tableView.reloadData()
-        }.asObserver()
+        }
     }
     
-    private var keyboardWillShow: AnyObserver<UIKeyboardInfo> {
+    private var keyboardWillShow: Binder<UIKeyboardInfo> {
         return Binder(self) { me, keyboardInfo in
             me.view.layoutIfNeeded()
             let extra = me.tabBarController?.tabBar.bounds.height ?? 0
@@ -188,10 +202,10 @@ final class SearchViewController: UIViewController {
                            options: keyboardInfo.animationCurve,
                            animations: { me.view.layoutIfNeeded() },
                            completion: nil)
-        }.asObserver()
+        }
     }
     
-    private var  keyboardWillHide: AnyObserver<UIKeyboardInfo> {
+    private var keyboardWillHide: Binder<UIKeyboardInfo> {
         return Binder(self) { me, keyboardInfo in
             me.view.layoutIfNeeded()
             me.tableViewBottomConstraint.constant = 0
@@ -200,21 +214,21 @@ final class SearchViewController: UIViewController {
                            options: keyboardInfo.animationCurve,
                            animations: { me.view.layoutIfNeeded() },
                            completion: nil)
-        }.asObserver()
+        }
     }
     
-    private var showUserRepository: AnyObserver<Void> {
+    private var showUserRepository: Binder<Void> {
         return Binder(self) { me, _ in
-            let vc = UserRepositoryViewController()
+            let vc = UserRepositoryViewController(flux: me.flux)
             me.navigationController?.pushViewController(vc, animated: true)
-        }.asObserver()
+        }
     }
     
-    private var updateLoadingView: AnyObserver<(UIView, Bool)> {
+    private var updateLoadingView: Binder<(UIView, Bool)> {
         return Binder(self) { (me, value: (view: UIView, isLoading: Bool)) in
             me.loadingView.removeFromSuperview()
             me.loadingView.isLoading = value.isLoading
             me.loadingView.add(to: value.view)
-        }.asObserver()
+        }
     }
 }
