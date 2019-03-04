@@ -77,7 +77,6 @@ extension ApiSession {
 - [RxSwift](https://github.com/ReactiveX/RxSwift)
 - [Nuke](https://github.com/kean/Nuke)
 - [SwiftIconFont](https://github.com/0x73/SwiftIconFont)
-- [FluxCapacitor](https://github.com/marty-suzuki/FluxCapacitor)
 - [GithubKitForSample](https://github.com/marty-suzuki/GithubKitForSample)
 - [NoticeObserveKit](https://github.com/marty-suzuki/NoticeObserveKit)
 

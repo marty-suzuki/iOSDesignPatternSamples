@@ -14,9 +14,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    let favoritePresenter = FavoriteViewPresenter()
 
-        let favoritePresenter = FavoriteViewPresenter()
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         if let viewControllers = (window?.rootViewController as? UITabBarController)?.viewControllers {
             for value in viewControllers.enumerated() {
@@ -26,8 +26,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let searchVC = FavoriteViewController(presenter: favoritePresenter)
-                    nc.setViewControllers([searchVC], animated: false)
+                    let favoriteVC = FavoriteViewController(presenter: favoritePresenter)
+                    nc.setViewControllers([favoriteVC], animated: false)
 
                 default:
                     continue

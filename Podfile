@@ -10,5 +10,4 @@ target 'iOSDesignPatternSamples' do
   # Pods for iOSDesignPatternSamples
   pod 'GithubKit', :git => 'https://github.com/marty-suzuki/GithubKitForSample.git', :tag => '0.4.1'
   pod 'NoticeObserveKit', '0.11.1'
-  pod 'FluxCapacitor', '0.11.0'
 end
