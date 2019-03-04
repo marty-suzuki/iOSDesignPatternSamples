@@ -12,13 +12,15 @@ import RxSwift
 import RxCocoa
 
 final class UserRepositoryViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var totalCountLabel: UILabel!
 
-    private let loadingView = LoadingView.makeFromNib()
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
-    private let dataSource: UserRepositoryViewDataSource
-    private let flux: Flux
+    let loadingView = LoadingView.makeFromNib()
+
+    let flux: Flux
+    let dataSource: UserRepositoryViewDataSource
+
     private let disposeBag = DisposeBag()
 
     init(flux: Flux) {
@@ -119,16 +121,16 @@ final class UserRepositoryViewController: UIViewController {
     }
     
     private var reloadData: Binder<Void> {
-        return Binder(self) { me, _ in
-            me.tableView.reloadData()
+        return Binder(tableView) { tableView, _ in
+            tableView.reloadData()
         }
     }
     
     private var updateLoadingView: Binder<(UIView, Bool)> {
-        return Binder(self) { (me, value: (view: UIView, isLoading: Bool)) in
-            me.loadingView.removeFromSuperview()
-            me.loadingView.isLoading = value.isLoading
-            me.loadingView.add(to: value.view)
+        return Binder(loadingView) { (loadingView, value: (view: UIView, isLoading: Bool)) in
+            loadingView.removeFromSuperview()
+            loadingView.isLoading = value.isLoading
+            loadingView.add(to: value.view)
         }
     }
 }

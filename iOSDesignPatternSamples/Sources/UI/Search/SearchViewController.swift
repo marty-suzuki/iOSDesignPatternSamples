@@ -13,17 +13,18 @@ import RxCocoa
 import NoticeObserveKit
 
 final class SearchViewController: UIViewController {
-    @IBOutlet weak var totalCountLabel: UILabel!
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
 
-    private let searchBar = UISearchBar(frame: .zero)
-    private let loadingView = LoadingView.makeFromNib()
-    
-    private let dataSource: SearchViewDataSource
+    @IBOutlet private(set) weak var totalCountLabel: UILabel!
+    @IBOutlet private(set) weak var tableView: UITableView!
+    @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
+
+    let searchBar = UISearchBar(frame: .zero)
+    let loadingView = LoadingView.makeFromNib()
+
     private let flux: Flux
+    let dataSource: SearchViewDataSource
+
     private let disposeBag = DisposeBag()
-    private var pool = Notice.ObserverPool()
 
     init(flux: Flux) {
         self.flux = flux
@@ -73,15 +74,15 @@ final class SearchViewController: UIViewController {
         // observe views
         Observable.merge(searchBar.rx.searchButtonClicked.asObservable(),
                          searchBar.rx.cancelButtonClicked.asObservable())
-            .subscribe(onNext: { [weak self] in
-                self?.searchBar.resignFirstResponder()
-                self?.searchBar.showsCancelButton = false
+            .bind(to: Binder(searchBar) { searchBar, _ in
+                searchBar.resignFirstResponder()
+                searchBar.showsCancelButton = false
             })
             .disposed(by: disposeBag)
 
         searchBar.rx.textDidBeginEditing
-            .subscribe(onNext: { [weak self] in
-                self?.searchBar.showsCancelButton = true
+            .bind(to: Binder(searchBar) { searchBar, _ in
+                searchBar.showsCancelButton = true
             })
             .disposed(by: disposeBag)
 
@@ -89,38 +90,46 @@ final class SearchViewController: UIViewController {
         let viewDidDisappear = rx.methodInvoked(#selector(SearchViewController.viewDidDisappear(_:)))
 
         viewDidDisappear
-            .subscribe(onNext: { [weak self] _ in
-                self?.searchBar.resignFirstResponder()
-                self?.pool = Notice.ObserverPool()
+            .bind(to: Binder(searchBar) { searchBar, _ in
+                searchBar.resignFirstResponder()
             })
             .disposed(by: disposeBag)
 
-         // keyboard notification
-        viewDidAppear
-            .flatMap { [weak self] _ -> Observable<UIKeyboardInfo> in
-                Observable.create { observer in
-                    let disposable = Disposables.create()
-                    guard let me = self else { return disposable }
-                    NotificationCenter.default.nok.observe(name: .keyboardWillShow) {
+        // keyboard notification
+        let isViewAppearing = Observable.merge(viewDidAppear.map { _ in true },
+                                               viewDidDisappear.map { _ in false })
+
+        isViewAppearing
+            .flatMapLatest { isViewAppearing -> Observable<UIKeyboardInfo> in
+                guard isViewAppearing else {
+                    return .empty()
+                }
+
+                return Observable.create { observer in
+                    let observation = NotificationCenter.default.nok.observe(name: .keyboardWillShow) {
                         observer.onNext($0)
                     }
-                    .invalidated(by: me.pool)
-                    return disposable
+                    return Disposables.create {
+                        observation.invalidate()
+                    }
                 }
             }
             .bind(to: keyboardWillShow)
             .disposed(by: disposeBag)
 
-        viewDidAppear
-            .flatMap { [weak self] _ -> Observable<UIKeyboardInfo> in
-                Observable.create { observer in
-                    let disposable = Disposables.create()
-                    guard let me = self else { return disposable }
-                    NotificationCenter.default.nok.observe(name: .keyboardWillHide) {
+        isViewAppearing
+            .flatMapLatest { isViewAppearing -> Observable<UIKeyboardInfo> in
+                guard isViewAppearing else {
+                    return .empty()
+                }
+
+                return Observable.create { observer in
+                    let observation = NotificationCenter.default.nok.observe(name: .keyboardWillHide) {
                         observer.onNext($0)
                     }
-                    .invalidated(by: me.pool)
-                    return disposable
+                    return Disposables.create {
+                        observation.invalidate()
+                    }
                 }
             }
             .bind(to: keyboardWillHide)

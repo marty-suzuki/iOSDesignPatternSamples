@@ -13,7 +13,6 @@ import RxSwift
 import RxCocoa
 
 final class RepositoryViewController: SFSafariViewController {
-    private let favoriteButtonItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
     private let disposeBag = DisposeBag()
     private let flux: Flux
 
@@ -22,11 +21,13 @@ final class RepositoryViewController: SFSafariViewController {
         self.flux = flux
         super.init(url: repository.url, configuration: .init())
         hidesBottomBarWhenPushed = true
+
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let favoriteButtonItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
         navigationItem.rightBarButtonItem = favoriteButtonItem
 
         let store = flux.repositoryStore

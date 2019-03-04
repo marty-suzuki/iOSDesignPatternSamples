@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    let flux = Flux(searchModel: .init(), repositoryModel: .init())
+    let flux = Flux(searchModel: SearchModel(), repositoryModel: RepositoryModel())
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 

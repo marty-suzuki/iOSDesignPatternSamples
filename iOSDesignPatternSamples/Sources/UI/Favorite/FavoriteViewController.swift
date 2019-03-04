@@ -12,10 +12,11 @@ import RxSwift
 import RxCocoa
 
 final class FavoriteViewController: UIViewController {
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet private(set) weak var tableView: UITableView!
 
-    private let dataSource: FavoriteViewDataSource
-    private let flux: Flux
+    let flux: Flux
+    let dataSource: FavoriteViewDataSource
+
     private let disposeBag = DisposeBag()
 
     init(flux: Flux) {
@@ -56,16 +57,16 @@ final class FavoriteViewController: UIViewController {
             .disposed(by: disposeBag)
     }
     
-    private var showRepository: AnyObserver<Void> {
+    private var showRepository: Binder<Void> {
         return Binder(self) { me, _ in
             guard let vc = RepositoryViewController(flux: me.flux) else { return }
             me.navigationController?.pushViewController(vc, animated: true)
-        }.asObserver()
+        }
     }
     
-    private var reloadData: AnyObserver<Void> {
-        return Binder(self) { me, _ in
-            me.tableView.reloadData()
-        }.asObserver()
+    private var reloadData: Binder<Void> {
+        return Binder(tableView) { tableView, _ in
+            tableView.reloadData()
+        }
     }
 }
