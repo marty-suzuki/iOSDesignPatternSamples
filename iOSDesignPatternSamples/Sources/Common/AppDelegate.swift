@@ -28,8 +28,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let searchVC = FavoriteViewController(flux: flux)
-                    nc.setViewControllers([searchVC], animated: false)
+                    let favoriteVC = FavoriteViewController(flux: flux)
+                    nc.setViewControllers([favoriteVC], animated: false)
 
                 default:
                     continue

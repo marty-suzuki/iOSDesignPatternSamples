@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import FluxCapacitor
 import GithubKit
 import RxSwift
 import RxCocoa
