@@ -32,8 +32,6 @@
 		EDDF7D1A2229C1CA003BCCAE /* FavoriteViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D182229C1CA003BCCAE /* FavoriteViewDataSource.swift */; };
 		EDDF7D202229C1D5003BCCAE /* SearchViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D1E2229C1D5003BCCAE /* SearchViewDataSource.swift */; };
 		EDDF7D232229C1DA003BCCAE /* UserRepositoryViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D212229C1DA003BCCAE /* UserRepositoryViewDataSource.swift */; };
-		EDDF7D262229CE79003BCCAE /* PublishRelay.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D252229CE79003BCCAE /* PublishRelay.extension.swift */; };
-		EDDF7D282229CF07003BCCAE /* BehaviorRelay.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDF7D272229CF07003BCCAE /* BehaviorRelay.extension.swift */; };
 		EDF078FF222D7ADF00B880FE /* FavoriteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF078FE222D7ADF00B880FE /* FavoriteViewController.swift */; };
 		EDF07900222D7B2800B880FE /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AF41F3759E7003DC1F8 /* LoadingView.swift */; };
 		EDF07901222D7B2800B880FE /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BE2AEA1F3748B6003DC1F8 /* UIKeyboardInfo.swift */; };
@@ -76,8 +74,6 @@
 		EDDF7D182229C1CA003BCCAE /* FavoriteViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteViewDataSource.swift; sourceTree = "<group>"; };
 		EDDF7D1E2229C1D5003BCCAE /* SearchViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewDataSource.swift; sourceTree = "<group>"; };
 		EDDF7D212229C1DA003BCCAE /* UserRepositoryViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewDataSource.swift; sourceTree = "<group>"; };
-		EDDF7D252229CE79003BCCAE /* PublishRelay.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishRelay.extension.swift; sourceTree = "<group>"; };
-		EDDF7D272229CF07003BCCAE /* BehaviorRelay.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorRelay.extension.swift; sourceTree = "<group>"; };
 		EDF078FE222D7ADF00B880FE /* FavoriteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteViewController.swift; sourceTree = "<group>"; };
 		EDF07904222D7B7600B880FE /* Flux.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flux.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -99,9 +95,7 @@
 			isa = PBXGroup;
 			children = (
 				37086C202017850600D625CA /* ApiSession.extension.swift */,
-				EDDF7D272229CF07003BCCAE /* BehaviorRelay.extension.swift */,
 				37086C1E2017848900D625CA /* NSObjectProtocol.extension.swift */,
-				EDDF7D252229CE79003BCCAE /* PublishRelay.extension.swift */,
 				374EAA9E2017B37100EDD001 /* Value.swift */,
 			);
 			path = Extension;
@@ -422,13 +416,11 @@
 			files = (
 				37086C212017850600D625CA /* ApiSession.extension.swift in Sources */,
 				EDF07902222D7B2800B880FE /* AppDelegate.swift in Sources */,
-				EDDF7D282229CF07003BCCAE /* BehaviorRelay.extension.swift in Sources */,
 				EDF078FF222D7ADF00B880FE /* FavoriteViewController.swift in Sources */,
 				EDDF7D1A2229C1CA003BCCAE /* FavoriteViewDataSource.swift in Sources */,
 				EDF07905222D7B7600B880FE /* Flux.swift in Sources */,
 				EDF07900222D7B2800B880FE /* LoadingView.swift in Sources */,
 				37086C1F2017848900D625CA /* NSObjectProtocol.extension.swift in Sources */,
-				EDDF7D262229CE79003BCCAE /* PublishRelay.extension.swift in Sources */,
 				378D1A3D1F66E5A7007AD091 /* RepositoryAction.swift in Sources */,
 				377C15541F66E3D900F25D8E /* RepositoryDispatcher.swift in Sources */,
 				ED6EEE6A22297AD4007C3129 /* RepositoryModel.swift in Sources */,
