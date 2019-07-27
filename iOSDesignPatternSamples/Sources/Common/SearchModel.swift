@@ -36,7 +36,7 @@ final class SearchModel {
     private let disposeBag = DisposeBag()
 
     private let _fetchUsers = PublishRelay<Void>()
-    private let _feachUsersWithQuery = PublishRelay<String>()
+    private let _fetchUsersWithQuery = PublishRelay<String>()
 
     init() {
         let _pageInfo = BehaviorRelay<PageInfo?>(value: nil)
@@ -46,7 +46,7 @@ final class SearchModel {
         self.users = _users.asObservable()
         self.isFetchingUsers = _isFetchingUsers.asObservable()
 
-        let query = _feachUsersWithQuery
+        let query = _fetchUsersWithQuery
             .debounce(0.3, scheduler: MainScheduler.instance)
             .distinctUntilChanged()
             .share()
@@ -113,7 +113,7 @@ final class SearchModel {
     }
 
     func fetchUsers(withQuery query: String) {
-        _feachUsersWithQuery.accept(query)
+        _fetchUsersWithQuery.accept(query)
     }
 
     func fetchUsers() {
