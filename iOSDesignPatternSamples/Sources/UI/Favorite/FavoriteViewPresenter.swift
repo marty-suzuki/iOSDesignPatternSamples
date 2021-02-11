@@ -26,9 +26,10 @@ final class FavoriteViewPresenter: FavoritePresenter {
         return model.favorites.count
     }
 
-    private let model = FavoriteModel()
+    private let model: FavoriteModelType
 
-    init() {
+    init(model: FavoriteModelType) {
+        self.model = model
         self.model.delegate = self
     }
     
@@ -45,7 +46,7 @@ final class FavoriteViewPresenter: FavoritePresenter {
     }
     
     func contains(_ repository: Repository) -> Bool {
-        return model.favorites.lazy.index { $0.url == repository.url } != nil
+        return model.favorites.firstIndex { $0.url == repository.url } != nil
     }
     
     func showFavoriteRepository(at index: Int) {
