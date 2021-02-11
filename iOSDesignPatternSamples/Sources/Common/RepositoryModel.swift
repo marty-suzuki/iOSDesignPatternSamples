@@ -6,6 +6,7 @@
 //  Copyright © 2019 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
 
 protocol RepositoryModelDelegate: AnyObject {
@@ -14,7 +15,17 @@ protocol RepositoryModelDelegate: AnyObject {
     func repositoryModel(_ repositoryModel: RepositoryModel, didChange totalCount: Int)
 }
 
-final class RepositoryModel {
+protocol RepositoryModelType: AnyObject {
+    var user: User { get }
+    var delegate: RepositoryModelDelegate? { get set }
+    var query: String { get }
+    var totalCount: Int { get }
+    var repositories: [Repository] { get }
+    var isFetchingRepositories: Bool { get }
+    func fetchRepositories()
+}
+
+final class RepositoryModel: RepositoryModelType {
 
     let user: User
     weak var delegate: RepositoryModelDelegate?
@@ -37,18 +48,23 @@ final class RepositoryModel {
     }
 
     private var pageInfo: PageInfo?
-    private var task: URLSessionTask?
+    private var cancellable: AnyCancellable?
+    private let sendRequest: SendRequest<UserNodeRequest>
 
-    init(user: User) {
+    init(
+        user: User,
+        sendRequest: @escaping SendRequest<UserNodeRequest>
+    ) {
         self.user = user
+        self.sendRequest = sendRequest
     }
 
     func fetchRepositories() {
-        if task != nil { return }
+        if cancellable != nil { return }
         if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
         isFetchingRepositories = true
         let request = UserNodeRequest(id: user.id, after: pageInfo?.endCursor)
-        self.task = ApiSession.shared.send(request) { [weak self] in
+        self.cancellable = sendRequest(request) { [weak self] in
             guard let me = self else {
                 return
             }
@@ -64,7 +80,7 @@ final class RepositoryModel {
             }
 
             me.isFetchingRepositories = false
-            me.task = nil
+            me.cancellable = nil
         }
     }
 }

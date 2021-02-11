@@ -21,7 +21,7 @@ final class UserRepositoryViewController: UIViewController, UserRepositoryView {
     @IBOutlet private(set) weak var tableView: UITableView!
     @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
-    let loadingView = LoadingView.makeFromNib()
+    let loadingView = LoadingView()
 
     let favoritePresenter: FavoritePresenter
     let userRepositoryPresenter: UserRepositoryPresenter
@@ -31,7 +31,7 @@ final class UserRepositoryViewController: UIViewController, UserRepositoryView {
         self.favoritePresenter = favoritePresenter
         self.userRepositoryPresenter = userRepositoryPresenter
         self.dataSource = UserRepositoryViewDataSource(presenter: userRepositoryPresenter)
-        
+
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }

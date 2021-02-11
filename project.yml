@@ -1,0 +1,20 @@
+name: iOSDesignPatternSamples
+packages:
+  GithubKit:
+    url: https://github.com/marty-suzuki/GithubKitForSample
+    version: 0.5.0
+targets:
+  iOSDesignPatternSamples:
+    type: application
+    platform: iOS
+    deploymentTarget: "13.0"
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: jp.marty-suzuki.iOSDesignPatternSamples
+    sources:
+      - path: iOSDesignPatternSamples
+    dependencies:
+      - sdk: SafariServices.framework
+      - package: GithubKit
+
+
+

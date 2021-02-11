@@ -6,9 +6,10 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import Foundation
 import GithubKit
-import NoticeObserveKit
+import UIKit
 
 protocol SearchPresenter: class {
     var view: SearchView? { get set }
@@ -34,9 +35,12 @@ final class SearchViewPresenter: SearchPresenter {
         return model.isFetchingUsers
     }
 
-    private let model = SearchModel()
+    private let model = SearchModel(
+        sendRequest: ApiSession.shared.send,
+        asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) }
+    )
     private var isReachedBottom: Bool = false
-    private var pool = Notice.ObserverPool()
+    private var cancellables = Set<AnyCancellable>()
 
     init() {
         self.model.delegate = self
@@ -68,19 +72,27 @@ final class SearchViewPresenter: SearchPresenter {
     }
     
     func viewWillAppear() {
-        NotificationCenter.default.nok.observe(name: .keyboardWillShow) { [weak self] in
-            self?.view?.keyboardWillShow(with: $0)
-        }
-        .invalidated(by: pool)
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            .sink { [weak self] notification in
+                guard let info = UIKeyboardInfo(notification: notification) else {
+                    return
+                }
+                self?.view?.keyboardWillShow(with: info)
+            }
+            .store(in: &cancellables)
 
-        NotificationCenter.default.nok.observe(name: .keyboardWillHide) { [weak self] in
-            self?.view?.keyboardWillHide(with: $0)
-        }
-        .invalidated(by: pool)
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            .sink { [weak self] notification in
+                guard let info = UIKeyboardInfo(notification: notification) else {
+                    return
+                }
+                self?.view?.keyboardWillHide(with: info)
+            }
+            .store(in: &cancellables)
     }
     
     func viewWillDisappear() {
-        pool = Notice.ObserverPool()
+        cancellables.removeAll()
     }
     
     func showLoadingView(on view: UIView) {

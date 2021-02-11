@@ -8,6 +8,7 @@
 
 import Foundation
 import GithubKit
+import UIKit
 
 protocol UserRepositoryPresenter: class {
     var view: UserRepositoryView? { get set }
@@ -40,7 +41,7 @@ final class UserRepositoryViewPresenter: UserRepositoryPresenter {
     private var isReachedBottom: Bool = false
     
     init(user: User) {
-        self.model = RepositoryModel(user: user)
+        self.model = RepositoryModel(user: user, sendRequest: ApiSession.shared.send)
         self.model.delegate = self
     }
     

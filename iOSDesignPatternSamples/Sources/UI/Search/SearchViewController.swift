@@ -6,8 +6,9 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
+import UIKit
 
 protocol SearchView: class {
     func reloadData()
@@ -26,7 +27,7 @@ final class SearchViewController: UIViewController, SearchView {
     @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
 
     let searchBar = UISearchBar(frame: .zero)
-    let loadingView = LoadingView.makeFromNib()
+    let loadingView = LoadingView()
 
     let favoritePresenter: FavoritePresenter
     let searchPresenter: SearchPresenter
@@ -71,7 +72,7 @@ final class SearchViewController: UIViewController, SearchView {
     func reloadData() {
         tableView.reloadData()
     }
-    
+
     func keyboardWillShow(with keyboardInfo: UIKeyboardInfo) {
         view.layoutIfNeeded()
         let extra = tabBarController?.tabBar.bounds.height ?? 0

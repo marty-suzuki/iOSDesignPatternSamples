@@ -16,7 +16,14 @@ extension FavoriteModelDelegate {
     func favoriteDidChange() {}
 }
 
-final class FavoriteModel {
+protocol FavoriteModelType: AnyObject {
+    var favorites: [Repository] { get }
+    var delegate: FavoriteModelDelegate? { get set }
+    func addFavorite(_ repository: Repository)
+    func removeFavorite(_ repository: Repository)
+}
+
+final class FavoriteModel: FavoriteModelType {
     private(set) var favorites: [Repository] = [] {
         didSet {
             delegate?.favoriteDidChange()
@@ -26,14 +33,14 @@ final class FavoriteModel {
     weak var delegate: FavoriteModelDelegate?
     
     func addFavorite(_ repository: Repository) {
-        if favorites.lazy.index(where: { $0.url == repository.url }) != nil {
+        if favorites.firstIndex(where: { $0.url == repository.url }) != nil {
             return
         }
         favorites.append(repository)
     }
     
     func removeFavorite(_ repository: Repository) {
-        guard let index = favorites.lazy.index(where: { $0.url == repository.url }) else {
+        guard let index = favorites.firstIndex(where: { $0.url == repository.url }) else {
             return
         }
         favorites.remove(at: index)

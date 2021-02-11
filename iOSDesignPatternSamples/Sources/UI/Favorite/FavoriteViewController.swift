@@ -16,7 +16,7 @@ protocol FavoriteView: class {
 
 final class FavoriteViewController: UIViewController, FavoriteView {
     @IBOutlet private(set) weak var tableView: UITableView!
-    
+
     let presenter: FavoritePresenter
     let dataSource: FavoriteViewDataSource
 
