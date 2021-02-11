@@ -25,7 +25,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let searchVC = SearchViewController(
                         searchModel: SearchModel(
                             sendRequest: ApiSession.shared.send,
-                            asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) }
+                            asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) },
+                            mainAsync: { work in DispatchQueue.main.async { work() } }
                         ),
                         favoriteModel: favoriteModel,
                         makeRepositoryModel: {

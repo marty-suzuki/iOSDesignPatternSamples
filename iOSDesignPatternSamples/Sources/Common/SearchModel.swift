@@ -59,7 +59,7 @@ final class SearchModel: SearchModelType {
     private lazy var debounce: (_ action: @escaping () -> ()) -> () = {
         var lastFireTime: DispatchTime = .now()
         let delay: DispatchTimeInterval = .milliseconds(500)
-        return { [delay, asyncAfter] action in
+        return { [delay, asyncAfter, mainAsync] action in
             let deadline: DispatchTime = .now() + delay
             lastFireTime = .now()
             asyncAfter(deadline) { [delay] in
@@ -67,22 +67,23 @@ final class SearchModel: SearchModelType {
                 let when: DispatchTime = lastFireTime + delay
                 if now < when { return }
                 lastFireTime = .now()
-                DispatchQueue.main.async {
-                    action()
-                }
+                mainAsync(action)
             }
         }
     }()
 
     private let sendRequest: SendRequest<SearchUserRequest>
     private let asyncAfter: (DispatchTime, @escaping @convention(block) () -> Void) -> Void
+    private let mainAsync: (@escaping () -> Void) -> Void
 
     init(
         sendRequest: @escaping SendRequest<SearchUserRequest>,
-        asyncAfter: @escaping (DispatchTime, @escaping @convention(block) () -> Void) -> Void
+        asyncAfter: @escaping (DispatchTime, @escaping @convention(block) () -> Void) -> Void,
+        mainAsync: @escaping (@escaping () -> Void) -> Void
     ) {
         self.sendRequest = sendRequest
         self.asyncAfter = asyncAfter
+        self.mainAsync = mainAsync
     }
 
     func fetchUsers() {
