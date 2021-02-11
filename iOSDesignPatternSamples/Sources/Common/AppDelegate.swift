@@ -26,7 +26,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         searchPresenter: SearchViewPresenter(
                             model: SearchModel(
                                 sendRequest: ApiSession.shared.send,
-                                asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) }
+                                asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) },
+                                mainAsync: { work in DispatchQueue.main.async { work() } }
                             ),
                             mainAsync: { work in DispatchQueue.main.async { work() } },
                             notificationCenter: .default
