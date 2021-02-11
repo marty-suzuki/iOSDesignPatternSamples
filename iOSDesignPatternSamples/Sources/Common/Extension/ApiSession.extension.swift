@@ -6,6 +6,7 @@
 //  Copyright © 2018年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
 
 extension ApiSession {
@@ -14,3 +15,5 @@ extension ApiSession {
         return ApiSession(injectToken: { InjectableToken(token: token) })
     }()
 }
+
+typealias SendRequest<T: Request> = (T, @escaping (Result<T.ResponseType, Swift.Error>) -> ()) -> AnyCancellable
