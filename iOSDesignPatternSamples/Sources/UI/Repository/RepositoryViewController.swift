@@ -21,9 +21,9 @@ final class RepositoryViewController: SFSafariViewController {
     }()
     
     let repository: Repository
-    let favoriteModel: FavoriteModel
+    let favoriteModel: FavoriteModelType
     
-    init(repository: Repository, favoriteModel: FavoriteModel) {
+    init(repository: Repository, favoriteModel: FavoriteModelType) {
         self.repository = repository
         self.favoriteModel = favoriteModel
 
@@ -38,7 +38,7 @@ final class RepositoryViewController: SFSafariViewController {
     }
     
     @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
-        if favoriteModel.favorites.index(where: { $0.url == repository.url }) == nil {
+        if favoriteModel.favorites.first(where: { $0.url == repository.url }) == nil {
             favoriteModel.addFavorite(repository)
             favoriteButtonItem.title = "Remove"
         } else {

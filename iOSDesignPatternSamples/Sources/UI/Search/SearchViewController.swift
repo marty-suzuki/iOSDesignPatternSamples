@@ -6,9 +6,9 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
-import NoticeObserveKit
+import UIKit
 
 final class SearchViewController: UIViewController {
     
@@ -17,9 +17,9 @@ final class SearchViewController: UIViewController {
     @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
 
     let searchBar = UISearchBar(frame: .zero)
-    let loadingView = LoadingView.makeFromNib()
+    let loadingView = LoadingView()
 
-    private var pool = Notice.ObserverPool()
+    private var cancelllables = Set<AnyCancellable>()
     private var isReachedBottom: Bool = false {
         didSet {
             if isReachedBottom && isReachedBottom != oldValue {
@@ -28,12 +28,18 @@ final class SearchViewController: UIViewController {
         }
     }
     
-    let favoriteModel: FavoriteModel
-    let searchModel: SearchModel
+    let favoriteModel: FavoriteModelType
+    let searchModel: SearchModelType
+    private let makeRepositoryModel: (User) -> RepositoryModelType
 
-    init(searchModel: SearchModel, favoriteModel: FavoriteModel) {
+    init(
+        searchModel: SearchModelType,
+        favoriteModel: FavoriteModelType,
+        makeRepositoryModel: @escaping (User) -> RepositoryModelType
+    ) {
         self.searchModel = searchModel
         self.favoriteModel = favoriteModel
+        self.makeRepositoryModel = makeRepositoryModel
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
 
@@ -63,7 +69,7 @@ final class SearchViewController: UIViewController {
         if searchBar.isFirstResponder {
             searchBar.resignFirstResponder()
         }
-        pool = Notice.ObserverPool()
+        cancelllables.removeAll()
     }
     
     private func configure(with tableView: UITableView) {
@@ -75,28 +81,36 @@ final class SearchViewController: UIViewController {
     }
     
     private func observeKeyboard() {
-        NotificationCenter.default.nok.observe(name: .keyboardWillShow) { [weak self] in
-            self?.view.layoutIfNeeded()
-            let extra = self?.tabBarController?.tabBar.bounds.height ?? 0
-            self?.tableViewBottomConstraint.constant = $0.frame.size.height - extra
-            UIView.animate(withDuration: $0.animationDuration, delay: 0, options: $0.animationCurve, animations: {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            .sink { [weak self] notification in
+                guard let info = UIKeyboardInfo(notification: notification) else {
+                    return
+                }
                 self?.view.layoutIfNeeded()
-            }, completion: nil)
-        }
-        .invalidated(by: pool)
+                let extra = self?.tabBarController?.tabBar.bounds.height ?? 0
+                self?.tableViewBottomConstraint.constant = info.frame.size.height - extra
+                UIView.animate(withDuration: info.animationDuration, delay: 0, options: info.animationCurve, animations: {
+                    self?.view.layoutIfNeeded()
+                }, completion: nil)
+            }
+            .store(in: &cancelllables)
 
-        NotificationCenter.default.nok.observe(name: .keyboardWillHide) { [weak self] in
-            self?.view.layoutIfNeeded()
-            self?.tableViewBottomConstraint.constant = 0
-            UIView.animate(withDuration: $0.animationDuration, delay: 0, options: $0.animationCurve, animations: {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            .sink { [weak self] notification in
+                guard let info = UIKeyboardInfo(notification: notification) else {
+                    return
+                }
                 self?.view.layoutIfNeeded()
-            }, completion: nil)
-        }
-        .invalidated(by: pool)
+                self?.tableViewBottomConstraint.constant = 0
+                UIView.animate(withDuration: info.animationDuration, delay: 0, options: info.animationCurve, animations: {
+                    self?.view.layoutIfNeeded()
+                }, completion: nil)
+            }
+            .store(in: &cancelllables)
     }
     
     private func showUserRepository(with user: User) {
-        let repositoryModel = RepositoryModel(user: user)
+        let repositoryModel = makeRepositoryModel(user)
         let vc = UserRepositoryViewController(repositoryModel: repositoryModel, favoriteModel: favoriteModel)
         navigationController?.pushViewController(vc, animated: true)
     }

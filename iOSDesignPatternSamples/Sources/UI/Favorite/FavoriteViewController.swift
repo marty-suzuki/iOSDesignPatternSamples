@@ -12,9 +12,9 @@ import GithubKit
 final class FavoriteViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
     
-    let favoriteModel: FavoriteModel
+    let favoriteModel: FavoriteModelType
 
-    init(favoriteModel: FavoriteModel) {
+    init(favoriteModel: FavoriteModelType) {
         self.favoriteModel = favoriteModel
         super.init(nibName: FavoriteViewController.className, bundle: nil)
     }

@@ -14,7 +14,7 @@ final class UserRepositoryViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
     @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
-    let loadingView = LoadingView.makeFromNib()
+    let loadingView = LoadingView()
     
     private var isReachedBottom: Bool = false {
         didSet {
@@ -24,10 +24,10 @@ final class UserRepositoryViewController: UIViewController {
         }
     }
 
-    let favoriteModel: FavoriteModel
-    let repositoryModel: RepositoryModel
+    let favoriteModel: FavoriteModelType
+    let repositoryModel: RepositoryModelType
     
-    init(repositoryModel: RepositoryModel, favoriteModel: FavoriteModel) {
+    init(repositoryModel: RepositoryModelType, favoriteModel: FavoriteModelType) {
         self.repositoryModel = repositoryModel
         self.favoriteModel = favoriteModel
         
