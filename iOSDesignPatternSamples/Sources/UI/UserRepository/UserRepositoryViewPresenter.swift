@@ -37,11 +37,17 @@ final class UserRepositoryViewPresenter: UserRepositoryPresenter {
         return "\(model.user.login)'s Repositories"
     }
 
-    private let model: RepositoryModel
+    private let model: RepositoryModelType
+    private let mainAsync: (@escaping () -> Void) -> Void
+
     private var isReachedBottom: Bool = false
     
-    init(user: User) {
-        self.model = RepositoryModel(user: user, sendRequest: ApiSession.shared.send)
+    init(
+        model: RepositoryModelType,
+        mainAsync: @escaping (@escaping () -> Void) -> Void
+    ) {
+        self.model = model
+        self.mainAsync = mainAsync
         self.model.delegate = self
     }
     
@@ -73,14 +79,14 @@ final class UserRepositoryViewPresenter: UserRepositoryPresenter {
 
 extension UserRepositoryViewPresenter: RepositoryModelDelegate {
     func repositoryModel(_ repositoryModel: RepositoryModel, didChange isFetchingRepositories: Bool) {
-        DispatchQueue.main.async {
+        mainAsync {
             self.view?.reloadData()
         }
     }
 
     func repositoryModel(_ repositoryModel: RepositoryModel, didChange repositories: [Repository]) {
         let totalCount = repositoryModel.totalCount
-        DispatchQueue.main.async {
+        mainAsync {
             self.view?.updateTotalCountLabel("\(repositories.count) / \(totalCount)")
             self.view?.reloadData()
         }
@@ -88,7 +94,7 @@ extension UserRepositoryViewPresenter: RepositoryModelDelegate {
 
     func repositoryModel(_ repositoryModel: RepositoryModel, didChange totalCount: Int) {
         let repositories = repositoryModel.repositories
-        DispatchQueue.main.async {
+        mainAsync {
             self.view?.updateTotalCountLabel("\(repositories.count) / \(totalCount)")
             self.view?.reloadData()
         }
