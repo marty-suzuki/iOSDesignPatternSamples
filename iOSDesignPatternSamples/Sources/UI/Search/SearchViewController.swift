@@ -29,14 +29,21 @@ final class SearchViewController: UIViewController, SearchView {
     let searchBar = UISearchBar(frame: .zero)
     let loadingView = LoadingView()
 
-    let favoritePresenter: FavoritePresenter
     let searchPresenter: SearchPresenter
     let dataSource: SearchViewDataSource
 
-    init(searchPresenter: SearchPresenter, favoritePresenter: FavoritePresenter) {
+    private let makeRepositoryPresenter: (Repository) -> RepositoryPresenter
+    private let makeUserRepositoryPresenter: (User) -> UserRepositoryPresenter
+
+    init(
+        searchPresenter: SearchPresenter,
+        makeRepositoryPresenter: @escaping (Repository) -> RepositoryPresenter,
+        makeUserRepositoryPresenter: @escaping (User) -> UserRepositoryPresenter
+    ) {
         self.searchPresenter = searchPresenter
-        self.favoritePresenter = favoritePresenter
         self.dataSource = SearchViewDataSource(presenter: searchPresenter)
+        self.makeRepositoryPresenter = makeRepositoryPresenter
+        self.makeUserRepositoryPresenter = makeUserRepositoryPresenter
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
 
@@ -95,8 +102,11 @@ final class SearchViewController: UIViewController, SearchView {
     }
     
     func showUserRepository(with user: User) {
-        let presenter = UserRepositoryViewPresenter(user: user)
-        let vc = UserRepositoryViewController(userRepositoryPresenter: presenter, favoritePresenter: favoritePresenter)
+        let presenter = makeUserRepositoryPresenter(user)
+        let vc = UserRepositoryViewController(
+            userRepositoryPresenter: presenter,
+            makeRepositoryPresenter: makeRepositoryPresenter
+        )
         navigationController?.pushViewController(vc, animated: true)
     }
     

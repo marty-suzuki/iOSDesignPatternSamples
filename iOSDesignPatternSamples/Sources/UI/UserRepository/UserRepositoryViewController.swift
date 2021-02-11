@@ -6,8 +6,8 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
 import GithubKit
+import UIKit
 
 protocol UserRepositoryView: class {
     func reloadData()
@@ -23,15 +23,18 @@ final class UserRepositoryViewController: UIViewController, UserRepositoryView {
 
     let loadingView = LoadingView()
 
-    let favoritePresenter: FavoritePresenter
     let userRepositoryPresenter: UserRepositoryPresenter
     let dataSource: UserRepositoryViewDataSource
+
+    private let makeRepositoryPresenter: (Repository) -> RepositoryPresenter
     
-    init(userRepositoryPresenter: UserRepositoryPresenter, favoritePresenter: FavoritePresenter) {
-        self.favoritePresenter = favoritePresenter
+    init(
+        userRepositoryPresenter: UserRepositoryPresenter,
+        makeRepositoryPresenter: @escaping (Repository) -> RepositoryPresenter
+    ) {
         self.userRepositoryPresenter = userRepositoryPresenter
         self.dataSource = UserRepositoryViewDataSource(presenter: userRepositoryPresenter)
-
+        self.makeRepositoryPresenter = makeRepositoryPresenter
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -52,7 +55,7 @@ final class UserRepositoryViewController: UIViewController, UserRepositoryView {
     }
     
     func showRepository(with repository: Repository) {
-        let repositoryPresenter = RepositoryViewPresenter(repository: repository, favoritePresenter: favoritePresenter)
+        let repositoryPresenter = makeRepositoryPresenter(repository)
         let vc = RepositoryViewController(presenter: repositoryPresenter)
         navigationController?.pushViewController(vc, animated: true)
     }

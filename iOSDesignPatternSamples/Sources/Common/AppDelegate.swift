@@ -14,7 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    let favoritePresenter = FavoriteViewPresenter()
+    let favoriteModel = FavoriteModel()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
@@ -22,11 +22,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             for value in viewControllers.enumerated() {
                 switch value {
                 case let (0, nc as UINavigationController):
-                    let searchVC = SearchViewController(searchPresenter: SearchViewPresenter(), favoritePresenter: favoritePresenter)
+                    let searchVC = SearchViewController(
+                        searchPresenter: SearchViewPresenter(
+                            model: SearchModel(
+                                sendRequest: ApiSession.shared.send,
+                                asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) }
+                            ),
+                            mainAsync: { work in DispatchQueue.main.async { work() } },
+                            notificationCenter: .default
+                        ),
+                        makeRepositoryPresenter: { [favoriteModel] in
+                            RepositoryViewPresenter(
+                                repository: $0,
+                                favoriteModel: favoriteModel
+                            )
+                        },
+                        makeUserRepositoryPresenter: {
+                            UserRepositoryViewPresenter(
+                                model: RepositoryModel(
+                                    user: $0,
+                                    sendRequest: ApiSession.shared.send
+                                ),
+                                mainAsync: { work in DispatchQueue.main.async { work() } }
+                            )
+                        }
+                    )
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let favoriteVC = FavoriteViewController(presenter: favoritePresenter)
+                    let favoriteVC = FavoriteViewController(
+                        presenter: FavoriteViewPresenter(model: favoriteModel),
+                        makeRepositoryPresenter: { [favoriteModel] in
+                            RepositoryViewPresenter(
+                                repository: $0,
+                                favoriteModel: favoriteModel
+                            )
+                        }
+                    )
                     nc.setViewControllers([favoriteVC], animated: false)
 
                 default:

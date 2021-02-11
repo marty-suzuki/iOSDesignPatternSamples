@@ -20,9 +20,15 @@ final class FavoriteViewController: UIViewController, FavoriteView {
     let presenter: FavoritePresenter
     let dataSource: FavoriteViewDataSource
 
-    init(presenter: FavoritePresenter) {
+    private let makeRepositoryPresenter: (Repository) -> RepositoryPresenter
+
+    init(
+        presenter: FavoritePresenter,
+        makeRepositoryPresenter: @escaping (Repository) -> RepositoryPresenter
+    ) {
         self.presenter = presenter
         self.dataSource = FavoriteViewDataSource(presenter: presenter)
+        self.makeRepositoryPresenter = makeRepositoryPresenter
         super.init(nibName: FavoriteViewController.className, bundle: nil)
     }
 
@@ -40,7 +46,7 @@ final class FavoriteViewController: UIViewController, FavoriteView {
     }
     
     func showRepository(with repository: Repository) {
-        let repositoryPresenter = RepositoryViewPresenter(repository: repository, favoritePresenter: presenter)
+        let repositoryPresenter = makeRepositoryPresenter(repository)
         let vc = RepositoryViewController(presenter: repositoryPresenter)
         navigationController?.pushViewController(vc, animated: true)
     }
