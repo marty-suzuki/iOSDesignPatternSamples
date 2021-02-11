@@ -35,14 +35,21 @@ final class SearchViewPresenter: SearchPresenter {
         return model.isFetchingUsers
     }
 
-    private let model = SearchModel(
-        sendRequest: ApiSession.shared.send,
-        asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) }
-    )
+    private let model: SearchModelType
+    private let mainAsync: (@escaping () -> Void) -> Void
+    private let notificationCenter: NotificationCenter
+
     private var isReachedBottom: Bool = false
     private var cancellables = Set<AnyCancellable>()
 
-    init() {
+    init(
+        model: SearchModelType,
+        mainAsync: @escaping (@escaping () -> Void) -> Void,
+        notificationCenter: NotificationCenter
+    ) {
+        self.model = model
+        self.mainAsync = mainAsync
+        self.notificationCenter = notificationCenter
         self.model.delegate = self
     }
     
@@ -72,7 +79,7 @@ final class SearchViewPresenter: SearchPresenter {
     }
     
     func viewWillAppear() {
-        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+        notificationCenter.publisher(for: UIResponder.keyboardWillShowNotification)
             .sink { [weak self] notification in
                 guard let info = UIKeyboardInfo(notification: notification) else {
                     return
@@ -81,7 +88,7 @@ final class SearchViewPresenter: SearchPresenter {
             }
             .store(in: &cancellables)
 
-        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+        notificationCenter.publisher(for: UIResponder.keyboardWillHideNotification)
             .sink { [weak self] notification in
                 guard let info = UIKeyboardInfo(notification: notification) else {
                     return
@@ -102,20 +109,20 @@ final class SearchViewPresenter: SearchPresenter {
 
 extension SearchViewPresenter: SearchModelDelegate {
     func searchModel(_ searchModel: SearchModel, didRecieve errorMessage: ErrorMessage) {
-        DispatchQueue.main.async {
+        mainAsync {
             self.view?.showEmptyTokenError(errorMessage: errorMessage)
         }
     }
 
     func searchModel(_ searchModel: SearchModel, didChange isFetchingUsers: Bool) {
-        DispatchQueue.main.async {
+        mainAsync {
             self.view?.reloadData()
         }
     }
 
     func searchModel(_ searchModel: SearchModel, didChange users: [User]) {
         let totalCount = searchModel.totalCount
-        DispatchQueue.main.async {
+        mainAsync {
             self.view?.updateTotalCountLabel("\(users.count) / \(totalCount)")
             self.view?.reloadData()
         }
@@ -123,7 +130,7 @@ extension SearchViewPresenter: SearchModelDelegate {
 
     func searchModel(_ searchModel: SearchModel, didChange totalCount: Int) {
         let users = searchModel.users
-        DispatchQueue.main.async {
+        mainAsync {
             self.view?.updateTotalCountLabel("\(users.count) / \(totalCount)")
             self.view?.reloadData()
         }
