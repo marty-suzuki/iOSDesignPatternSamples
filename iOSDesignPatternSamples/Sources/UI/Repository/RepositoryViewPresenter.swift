@@ -10,7 +10,6 @@ import Foundation
 import GithubKit
 
 protocol RepositoryPresenter: class {
-    init(repository: Repository, favoritePresenter: FavoritePresenter)
     var view: RepositoryView? { get set }
     var url: URL { get }
     var favoriteButtonTitle: String { get }
@@ -19,28 +18,31 @@ protocol RepositoryPresenter: class {
 
 final class RepositoryViewPresenter: RepositoryPresenter {
     weak var view: RepositoryView?
-    private let favoritePresenter: FavoritePresenter
+    private let favoriteModel: FavoriteModelType
     private let repository: Repository
     
     var favoriteButtonTitle: String {
-        return favoritePresenter.contains(repository) ? "Remove" : "Add"
+        return favoriteModel.favorites.contains(repository) ? "Remove" : "Add"
     }
 
     var url: URL {
         return repository.url
     }
     
-    init(repository: Repository, favoritePresenter: FavoritePresenter) {
+    init(
+        repository: Repository,
+        favoriteModel: FavoriteModelType
+    ) {
         self.repository = repository
-        self.favoritePresenter = favoritePresenter
+        self.favoriteModel = favoriteModel
     }
     
     func favoriteButtonTap() {
-        if favoritePresenter.contains(repository) {
-            favoritePresenter.removeFavorite(repository)
+        if favoriteModel.favorites.contains(repository) {
+            favoriteModel.removeFavorite(repository)
             view?.updateFavoriteButtonTitle(favoriteButtonTitle)
         } else {
-            favoritePresenter.addFavorite(repository)
+            favoriteModel.addFavorite(repository)
             view?.updateFavoriteButtonTitle(favoriteButtonTitle)
         }
     }
