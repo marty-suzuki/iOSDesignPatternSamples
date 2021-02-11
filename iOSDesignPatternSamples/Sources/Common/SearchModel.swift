@@ -6,7 +6,9 @@
 //  Copyright © 2019 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
+import Foundation
 
 protocol SearchModelDelegate: AnyObject {
     func searchModel(_ searchModel: SearchModel, didRecieve errorMessage: ErrorMessage)
@@ -20,7 +22,17 @@ struct ErrorMessage {
     let message: String
 }
 
-final class SearchModel {
+protocol SearchModelType: AnyObject {
+    var delegate: SearchModelDelegate? { get set }
+    var query: String { get }
+    var totalCount: Int { get }
+    var users: [User] { get }
+    var isFetchingUsers: Bool { get }
+    func fetchUsers()
+    func fetchUsers(withQuery query: String)
+}
+
+final class SearchModel: SearchModelType {
 
     weak var delegate: SearchModelDelegate?
 
@@ -42,15 +54,15 @@ final class SearchModel {
     }
 
     private var pageInfo: PageInfo?
-    private var task: URLSessionTask?
+    private var cancellable: AnyCancellable?
 
-    private let debounce: (_ action: @escaping () -> ()) -> () = {
+    private lazy var debounce: (_ action: @escaping () -> ()) -> () = {
         var lastFireTime: DispatchTime = .now()
         let delay: DispatchTimeInterval = .milliseconds(500)
-        return { [delay] action in
+        return { [delay, asyncAfter] action in
             let deadline: DispatchTime = .now() + delay
             lastFireTime = .now()
-            DispatchQueue.global().asyncAfter(deadline: deadline) { [delay] in
+            asyncAfter(deadline) { [delay] in
                 let now: DispatchTime = .now()
                 let when: DispatchTime = lastFireTime + delay
                 if now < when { return }
@@ -62,12 +74,23 @@ final class SearchModel {
         }
     }()
 
+    private let sendRequest: SendRequest<SearchUserRequest>
+    private let asyncAfter: (DispatchTime, @escaping @convention(block) () -> Void) -> Void
+
+    init(
+        sendRequest: @escaping SendRequest<SearchUserRequest>,
+        asyncAfter: @escaping (DispatchTime, @escaping @convention(block) () -> Void) -> Void
+    ) {
+        self.sendRequest = sendRequest
+        self.asyncAfter = asyncAfter
+    }
+
     func fetchUsers() {
-        if query.isEmpty || task != nil { return }
+        if query.isEmpty || cancellable != nil { return }
         if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
         isFetchingUsers = true
         let request = SearchUserRequest(query: query, after: pageInfo?.endCursor)
-        self.task = ApiSession.shared.send(request) { [weak self] in
+        self.cancellable = sendRequest(request) { [weak self] in
             guard let me = self else {
                 return
             }
@@ -88,7 +111,7 @@ final class SearchModel {
             }
 
             me.isFetchingUsers = false
-            me.task = nil
+            me.cancellable = nil
         }
     }
 
@@ -105,8 +128,8 @@ final class SearchModel {
                 me.pageInfo = nil
                 me.totalCount = 0
             }
-            me.task?.cancel()
-            me.task = nil
+            me.cancellable?.cancel()
+            me.cancellable = nil
             me.fetchUsers()
         }
     }
