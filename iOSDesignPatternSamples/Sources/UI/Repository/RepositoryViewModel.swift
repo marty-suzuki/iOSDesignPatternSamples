@@ -6,21 +6,21 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import Foundation
 import GithubKit
-import RxSwift
-import RxCocoa
 
 final class RepositoryViewModel {
     let output: Output
     let input: Input
 
-    private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
 
-    init(repository: Repository,
-         favoritesOutput: Observable<[Repository]>,
-         favoritesInput: AnyObserver<[Repository]>) {
-
+    init(
+        repository: Repository,
+        favoritesOutput: AnyPublisher<[Repository], Never>,
+        favoritesInput: @escaping ([Repository]) -> Void
+    ) {
         let model = FavoriteModel(repository: repository,
                                   favoritesInput: favoritesInput,
                                   favoritesOutput: favoritesOutput)
@@ -28,33 +28,35 @@ final class RepositoryViewModel {
         do {
             let favoriteButtonTitle = model.contains
                 .map { $0.0 ? "Remove" : "Add" }
-                .share(replay: 1, scope: .whileConnected)
+                .eraseToAnyPublisher()
 
             self.output = Output(favoriteButtonTitle: favoriteButtonTitle)
         }
 
-        let favoriteButtonTap = PublishRelay<Void>()
-        self.input = Input(favoriteButtonTap: favoriteButtonTap.asObserver())
+        let favoriteButtonTap = PassthroughSubject<Void, Never>()
+        self.input = Input(favoriteButtonTap: favoriteButtonTap.send)
 
         favoriteButtonTap
-            .withLatestFrom(model.contains)
-            .subscribe(onNext: { contains, repository in
+            .flatMap { _ in
+                model.contains
+            }
+            .sink { contains, repository in
                 if contains {
                     model.removeFavorite(repository)
                 } else {
                     model.addFavorite(repository)
                 }
-            })
-            .disposed(by: disposeBag)
+            }
+            .store(in: &cancellables)
     }
 }
 
 extension RepositoryViewModel {
     struct Output {
-        let favoriteButtonTitle: Observable<String>
+        let favoriteButtonTitle: AnyPublisher<String, Never>
     }
 
     struct Input {
-        let favoriteButtonTap: AnyObserver<Void>
+        let favoriteButtonTap: () -> Void
     }
 }

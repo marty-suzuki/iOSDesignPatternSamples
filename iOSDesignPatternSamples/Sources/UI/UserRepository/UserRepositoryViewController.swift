@@ -6,26 +6,25 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
+import UIKit
 
 final class UserRepositoryViewController: UIViewController {
 
     @IBOutlet private(set) weak var tableView: UITableView!
     @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
-    let loadingView = LoadingView.makeFromNib()
+    let loadingView = LoadingView()
 
     let viewModel: UserRepositoryViewModel
     let dataSource: UserRepositoryViewDataSource
 
-    private let disposeBag = DisposeBag()
+    private var cacellables = Set<AnyCancellable>()
 
     init(user: User,
-         favoritesOutput: Observable<[Repository]>,
-         favoritesInput: AnyObserver<[Repository]>) {
+         favoritesOutput: AnyPublisher<[Repository], Never>,
+         favoritesInput: @escaping ([Repository]) -> Void) {
         self.viewModel = UserRepositoryViewModel(user: user,
                                                  favoritesOutput: favoritesOutput,
                                                  favoritesInput: favoritesInput)
@@ -33,11 +32,11 @@ final class UserRepositoryViewController: UIViewController {
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -46,44 +45,52 @@ final class UserRepositoryViewController: UIViewController {
         dataSource.configure(with: tableView)
 
         viewModel.output.showRepository
-            .bind(to: showRepository)
-            .disposed(by: disposeBag)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showRepository)
+            .store(in: &cacellables)
 
         viewModel.output.reloadData
-            .bind(to: reloadData)
-            .disposed(by: disposeBag)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
+            .store(in: &cacellables)
 
         viewModel.output.countString
-            .bind(to: totalCountLabel.rx.text)
-            .disposed(by: disposeBag)
-        
+            .map(Optional.some)
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.text, on: totalCountLabel)
+            .store(in: &cacellables)
+
         viewModel.output.updateLoadingView
-            .bind(to: updateLoadingView)
-            .disposed(by: disposeBag)
-        
-        viewModel.input.fetchRepositories.onNext(())
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: updateLoadingView)
+            .store(in: &cacellables)
+
+        viewModel.input.fetchRepositories()
     }
-    
-    private var showRepository: Binder<Repository> {
-        return Binder(self) { me, repository in
+
+    private var showRepository: (Repository) -> Void {
+        { [weak self] repository in
+            guard let me = self else {
+                return
+            }
             let vc = RepositoryViewController(repository: repository,
                                               favoritesOutput: me.viewModel.output.favorites,
                                               favoritesInput: me.viewModel.input.favorites)
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
-    
-    private var reloadData: Binder<Void> {
-        return Binder(tableView) { tableView, _ in
-            tableView.reloadData()
+
+    private var reloadData: () -> Void {
+        { [weak self] in
+            self?.tableView.reloadData()
         }
     }
-    
-    private var updateLoadingView: Binder<(UIView, Bool)> {
-        return Binder(loadingView) { (loadingView, value: (view: UIView, isLoading: Bool)) in
-            loadingView.removeFromSuperview()
-            loadingView.isLoading = value.isLoading
-            loadingView.add(to: value.view)
+
+    private var updateLoadingView: (UIView, Bool) -> Void {
+        { [weak self] view, isLoading in
+            self?.loadingView.removeFromSuperview()
+            self?.loadingView.isLoading = isLoading
+            self?.loadingView.add(to: view)
         }
     }
 }

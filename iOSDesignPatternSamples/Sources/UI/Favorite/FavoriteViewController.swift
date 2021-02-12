@@ -6,21 +6,20 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
+import UIKit
 
 final class FavoriteViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
 
     let viewModel: FavoriteViewModel
     let dataSource: FavoriteViewDataSource
-    
-    private let disposeBag = DisposeBag()
 
-    init(favoritesInput: AnyObserver<[Repository]>,
-         favoritesOutput: Observable<[Repository]>) {
+    private var cancellables = Set<AnyCancellable>()
+
+    init(favoritesInput: @escaping ([Repository]) -> Void,
+         favoritesOutput: AnyPublisher<[Repository], Never>) {
         self.viewModel = FavoriteViewModel(favoritesInput: favoritesInput,
                                            favoritesOutput: favoritesOutput)
         self.dataSource = FavoriteViewDataSource(viewModel: viewModel)
@@ -39,26 +38,31 @@ final class FavoriteViewController: UIViewController {
         dataSource.configure(with: tableView)
 
         viewModel.output.selectedRepository
-            .bind(to: showRepository)
-            .disposed(by: disposeBag)
-        
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showRepository)
+            .store(in: &cancellables)
+
         viewModel.output.relaodData
-            .bind(to: reloadData)
-            .disposed(by: disposeBag)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
+            .store(in: &cancellables)
     }
-    
-    private var showRepository: Binder<Repository> {
-        return Binder(self) { me, repository in
+
+    private var showRepository: (Repository) -> Void {
+        { [weak self] repository in
+            guard let me = self else {
+                return
+            }
             let vc = RepositoryViewController(repository: repository,
                                               favoritesOutput: me.viewModel.output.favorites,
                                               favoritesInput: me.viewModel.input.favorites)
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
-    
-    private var reloadData: Binder<Void> {
-        return Binder(tableView) { tableView, _ in
-            tableView.reloadData()
+
+    private var reloadData: () -> Void {
+        { [weak self] in
+            self?.tableView.reloadData()
         }
     }
 }

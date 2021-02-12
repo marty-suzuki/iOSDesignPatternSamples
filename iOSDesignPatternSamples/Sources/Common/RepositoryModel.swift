@@ -6,75 +6,96 @@
 //  Copyright © 2019 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
-import RxCocoa
-import RxSwift
 
-final class RepositoryModel {
+protocol RepositoryModelType: AnyObject {
+    var repositoriesPublisher: Published<[Repository]>.Publisher { get }
+    var isFetchingRepositoriesPublisher: Published<Bool>.Publisher { get }
+    var totalCountPublisher: Published<Int>.Publisher { get }
+    var repositories: [Repository] { get }
+    var isFetchingRepositories: Bool { get }
+    func fetchRepositories()
+}
 
-    let repositories: Observable<[Repository]>
-    let isFetchingRepositories: Observable<Bool>
-    let totalCount: Observable<Int>
+final class RepositoryModel: RepositoryModelType {
 
-    var repositoriesValue: [Repository] {
-        return _repositories.value
+    var repositoriesPublisher: Published<[Repository]>.Publisher {
+        $repositories
+    }
+    var isFetchingRepositoriesPublisher: Published<Bool>.Publisher {
+        $isFetchingRepositories
+    }
+    var totalCountPublisher: Published<Int>.Publisher {
+        $totalCount
     }
 
-    var isFetchingRepositoriesValue: Bool {
-        return _isFetchingRepositories.value
-    }
+    @Published
+    private(set) var repositories: [Repository] = []
+    @Published
+    private(set) var isFetchingRepositories = false
+    @Published
+    private var totalCount = 0
+    @Published
+    private var pageInfo: PageInfo?
 
-    private let _repositories = BehaviorRelay<[Repository]>(value: [])
-    private let _isFetchingRepositories = BehaviorRelay<Bool>(value: false)
-    private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
 
-    private let _fetchRepositories = PublishRelay<Void>()
+    private let _fetchRepositories = PassthroughSubject<Void, Never>()
 
     init(user: User) {
-
-        let _pageInfo = BehaviorRelay<PageInfo?>(value: nil)
-        let _totalCount = BehaviorRelay<Int>(value: 0)
-
-        self.totalCount = _totalCount.asObservable()
-        self.repositories = _repositories.asObservable()
-        self.isFetchingRepositories = _isFetchingRepositories.asObservable()
-
-        let requestTrigger = _pageInfo.map { (user, $0?.endCursor) }
-            .share(replay: 1, scope: .whileConnected)
+        let requestTrigger = $pageInfo
+            .map { (user, $0?.endCursor) }
 
         let initialLoadRequest = _fetchRepositories
-            .withLatestFrom(requestTrigger)
+            .map { _ -> AnyPublisher<(User, String?), Never> in
+                requestTrigger
+                    .prefix(1)
+                    .eraseToAnyPublisher()
+            }
+            .switchToLatest()
             .filter { $1 == nil }
 
         let loadMoreRequest = _fetchRepositories
-            .withLatestFrom(requestTrigger)
+            .map { _ -> AnyPublisher<(User, String?), Never> in
+                requestTrigger
+                    .prefix(1)
+                    .eraseToAnyPublisher()
+            }
+            .switchToLatest()
             .filter { $1 != nil }
 
-        let willStartRequest = Observable.merge(initialLoadRequest, loadMoreRequest)
+        let willStartRequest = initialLoadRequest
+            .merge(with: loadMoreRequest)
             .map { UserNodeRequest(id: $0.id, after: $1) }
-            .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
-            .share()
+            .removeDuplicates { $0.id == $1.id && $0.after == $1.after }
 
         willStartRequest
-            .do(onNext: { [_isFetchingRepositories] _ in
-                _isFetchingRepositories.accept(true)
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isFetchingRepositories = true
             })
-            .flatMap {
-                ApiSession.shared.rx.send($0)
-                    .catchError { _ in .empty() }
+            .flatMap { request -> AnyPublisher<Response<Repository>, Never> in
+                ApiSession.shared.send(request)
+                    .catch { _ -> AnyPublisher<Response<Repository>, Never> in
+                        Empty().eraseToAnyPublisher()
+                    }
+                    .eraseToAnyPublisher()
             }
-            .do(onNext: { [_isFetchingRepositories] _ in
-                _isFetchingRepositories.accept(false)
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isFetchingRepositories = false
             })
-            .subscribe(onNext: { [_repositories] response in
-                _pageInfo.accept(response.pageInfo)
-                _repositories.accept(_repositories.value + response.nodes)
-                _totalCount.accept(response.totalCount)
-            })
-            .disposed(by: disposeBag)
+            .sink { [weak self] response in
+                guard let me = self else {
+                    return
+                }
+                me.pageInfo = response.pageInfo
+                me.repositories = me.repositories + response.nodes
+                me.totalCount = response.totalCount
+            }
+            .store(in: &cancellables)
     }
 
     func fetchRepositories() {
-        _fetchRepositories.accept(())
+        _fetchRepositories.send()
     }
 }

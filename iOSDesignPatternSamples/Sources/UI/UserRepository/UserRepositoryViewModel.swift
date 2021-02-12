@@ -6,60 +6,68 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import Foundation
 import GithubKit
-import RxSwift
-import RxCocoa
+import UIKit
 
 final class UserRepositoryViewModel {
     let title: String
 
     var repositories: [Repository] {
-        return model.repositoriesValue
+        return model.repositories
     }
 
     var isFetchingRepositories: Bool {
-        return model.isFetchingRepositoriesValue
+        return model.isFetchingRepositories
     }
 
     let output: Output
     let input: Input
 
     private let model: RepositoryModel
-    private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
 
     init(user: User,
-         favoritesOutput: Observable<[Repository]>,
-         favoritesInput: AnyObserver<[Repository]>) {
+         favoritesOutput: AnyPublisher<[Repository], Never>,
+         favoritesInput: @escaping ([Repository]) -> Void) {
         self.title = "\(user.login)'s Repositories"
 
-        self.model = RepositoryModel(user: user)
+        let model = RepositoryModel(user: user)
+        self.model = model
 
-        let _fetchRepositories = PublishRelay<Void>()
-        let _selectedIndexPath = PublishRelay<IndexPath>()
-        let _isReachedBottom = PublishRelay<Bool>()
-        let _headerFooterView = PublishRelay<UIView>()
+        let _fetchRepositories = PassthroughSubject<Void, Never>()
+        let _selectedIndexPath = PassthroughSubject<IndexPath, Never>()
+        let _isReachedBottom = PassthroughSubject<Bool, Never>()
+        let _headerFooterView = PassthroughSubject<UIView, Never>()
 
-        self.input = Input(fetchRepositories: _fetchRepositories.asObserver(),
-                           selectedIndexPath: _selectedIndexPath.asObserver(),
-                           isReachedBottom: _isReachedBottom.asObserver(),
-                           headerFooterView: _headerFooterView.asObserver(),
+        self.input = Input(fetchRepositories: _fetchRepositories.send,
+                           selectedIndexPath: _selectedIndexPath.send,
+                           isReachedBottom: _isReachedBottom.send,
+                           headerFooterView: _headerFooterView.send,
                            favorites: favoritesInput)
 
         do {
-            let updateLoadingView = Observable.combineLatest(_headerFooterView,
-                                                             model.isFetchingRepositories)
+            let updateLoadingView = _headerFooterView
+                .combineLatest(model.isFetchingRepositoriesPublisher)
+                .eraseToAnyPublisher()
 
             let showRepository = _selectedIndexPath
-                .withLatestFrom(model.repositories) { $1[$0.row] }
+                .map { model.repositories[$0.row] }
+                .eraseToAnyPublisher()
 
-            let countString = Observable.combineLatest(model.totalCount, model.repositories)
+            let countString = model.totalCountPublisher
+                .combineLatest(model.repositoriesPublisher)
                 .map { "\($1.count) / \($0)" }
-                .share(replay: 1, scope: .whileConnected)
+                .eraseToAnyPublisher()
 
-            let reloadData = Observable.merge(model.repositories.map { _ in },
-                                              model.totalCount.map { _ in },
-                                              model.isFetchingRepositories.map { _ in })
+            let reloadData = model.repositoriesPublisher.map { _ in }
+                .merge(
+                    with:
+                        model.totalCountPublisher.map { _ in },
+                        model.isFetchingRepositoriesPublisher.map { _ in }
+                )
+                .eraseToAnyPublisher()
 
             self.output = Output(updateLoadingView: updateLoadingView,
                                  showRepository: showRepository,
@@ -69,12 +77,12 @@ final class UserRepositoryViewModel {
         }
 
         _isReachedBottom
-            .distinctUntilChanged()
+            .removeDuplicates()
             .filter { $0 }
-            .subscribe(onNext: { [model] _ in
+            .sink { _ in
                 model.fetchRepositories()
-            })
-            .disposed(by: disposeBag)
+            }
+            .store(in: &cancellables)
 
         model.fetchRepositories()
     }
@@ -82,18 +90,18 @@ final class UserRepositoryViewModel {
 
 extension UserRepositoryViewModel {
     struct Output {
-        let updateLoadingView: Observable<(UIView, Bool)>
-        let showRepository: Observable<Repository>
-        let countString: Observable<String>
-        let reloadData: Observable<Void>
-        let favorites: Observable<[Repository]>
+        let updateLoadingView: AnyPublisher<(UIView, Bool), Never>
+        let showRepository: AnyPublisher<Repository, Never>
+        let countString: AnyPublisher<String, Never>
+        let reloadData: AnyPublisher<Void, Never>
+        let favorites: AnyPublisher<[Repository], Never>
     }
 
     struct Input {
-        let fetchRepositories: AnyObserver<Void>
-        let selectedIndexPath: AnyObserver<IndexPath>
-        let isReachedBottom: AnyObserver<Bool>
-        let headerFooterView: AnyObserver<UIView>
-        let favorites: AnyObserver<[Repository]>
+        let fetchRepositories: () -> Void
+        let selectedIndexPath: (IndexPath) -> Void
+        let isReachedBottom: (Bool) -> Void
+        let headerFooterView: (UIView) -> Void
+        let favorites: ([Repository]) -> Void
     }
 }

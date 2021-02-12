@@ -7,9 +7,8 @@
 //
 
 import Foundation
-import UIKit
 import GithubKit
-import RxSwift
+import UIKit
 
 final class SearchViewDataSource: NSObject {
 
@@ -49,7 +48,7 @@ extension SearchViewDataSource: UITableViewDataSource {
         guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
             return nil
         }
-        viewModel.input.headerFooterView.onNext(view)
+        viewModel.input.headerFooterView(view)
         return view
     }
 }
@@ -57,7 +56,7 @@ extension SearchViewDataSource: UITableViewDataSource {
 extension SearchViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        viewModel.input.selectedIndexPath.onNext(indexPath)
+        viewModel.input.selectedIndexPath(indexPath)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -75,6 +74,6 @@ extension SearchViewDataSource: UITableViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        viewModel.input.isReachedBottom.onNext(maxScrollDistance <= scrollView.contentOffset.y)
+        viewModel.input.isReachedBottom(maxScrollDistance <= scrollView.contentOffset.y)
     }
 }

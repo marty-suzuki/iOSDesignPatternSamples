@@ -7,9 +7,8 @@
 //
 
 import Foundation
-import UIKit
 import GithubKit
-import RxSwift
+import UIKit
 
 final class FavoriteViewDataSource: NSObject {
     private let viewModel: FavoriteViewModel
@@ -42,7 +41,7 @@ extension FavoriteViewDataSource: UITableViewDataSource {
 extension FavoriteViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        viewModel.input.selectedIndexPath.onNext(indexPath)
+        viewModel.input.selectedIndexPath(indexPath)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

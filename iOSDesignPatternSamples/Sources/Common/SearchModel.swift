@@ -6,117 +6,140 @@
 //  Copyright © 2019 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
+import Foundation
 
 struct ErrorMessage {
     let title: String
     let message: String
 }
 
-final class SearchModel {
+protocol SearchModelType: AnyObject {
+    var errorMessage: AnyPublisher<ErrorMessage, Never> { get }
+    var usersPublisher: Published<[User]>.Publisher { get }
+    var isFetchingUsersPublisher: Published<Bool>.Publisher { get }
+    var totalCountPublisher: Published<Int>.Publisher { get }
+    var users: [User] { get }
+    var isFetchingUsers: Bool { get }
+    func fetchUsers()
+    func fetchUsers(withQuery query: String)
+}
 
-    let errorMessage: Observable<ErrorMessage>
-    let users: Observable<[User]>
-    let isFetchingUsers: Observable<Bool>
-    let totalCount: Observable<Int>
+final class SearchModel: SearchModelType {
+    let errorMessage: AnyPublisher<ErrorMessage, Never>
 
-    var usersValue: [User] {
-        return _users.value
+    var usersPublisher: Published<[User]>.Publisher {
+        $users
+    }
+    var isFetchingUsersPublisher: Published<Bool>.Publisher {
+        $isFetchingUsers
+    }
+    var totalCountPublisher: Published<Int>.Publisher {
+        $totalCount
     }
 
-    var isFetchingUsersValue: Bool {
-        return _isFetchingUsers.value
-    }
+    @Published
+    private(set) var users: [User] = []
+    @Published
+    private(set) var isFetchingUsers = false
+    @Published
+    private var totalCount = 0
+    @Published
+    private var pageInfo: PageInfo?
 
-    private let _users = BehaviorRelay<[User]>(value: [])
-    private let _isFetchingUsers = BehaviorRelay<Bool>(value: false)
+    private var cancellable = Set<AnyCancellable>()
 
-    private let disposeBag = DisposeBag()
-
-    private let _fetchUsers = PublishRelay<Void>()
-    private let _feachUsersWithQuery = PublishRelay<String>()
+    private let _fetchUsers = PassthroughSubject<Void, Never>()
+    private let _feachUsersWithQuery = PassthroughSubject<String, Never>()
 
     init() {
-        let _pageInfo = BehaviorRelay<PageInfo?>(value: nil)
-        let _totalCount = BehaviorRelay<Int>(value: 0)
-
-        self.totalCount = _totalCount.asObservable()
-        self.users = _users.asObservable()
-        self.isFetchingUsers = _isFetchingUsers.asObservable()
+        let _errorMessage = PassthroughSubject<ErrorMessage, Never>()
+        self.errorMessage = _errorMessage.eraseToAnyPublisher()
 
         let query = _feachUsersWithQuery
-            .debounce(0.3, scheduler: MainScheduler.instance)
-            .distinctUntilChanged()
-            .share()
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .removeDuplicates()
 
-        let endCousor = _pageInfo
+        let endCousor = $pageInfo
             .map { $0?.endCursor }
-            .share()
 
         let initialLoad = query
             .filter { !$0.isEmpty }
-            .withLatestFrom(endCousor) { ($0, $1) }
+            .flatMap { query in
+                endCousor
+                    .map { (query, $0) }
+                    .prefix(1)
+            }
 
         let loadMore = _fetchUsers
-            .withLatestFrom(Observable.combineLatest(query, endCousor)) { $1 }
+            .map { _ -> AnyPublisher<(String, String?), Never> in
+                query
+                    .combineLatest(endCousor)
+                    .prefix(1)
+                    .eraseToAnyPublisher()
+            }
+            .switchToLatest()
             .filter { !$0.isEmpty && $1 != nil }
 
         query
-            .subscribe(onNext: { [_users] _ in
-                _pageInfo.accept(nil)
-                _users.accept([])
-                _totalCount.accept(0)
-            })
-            .disposed(by: disposeBag)
+            .sink { [weak self] _ in
+                self?.pageInfo = nil
+                self?.users = []
+                self?.totalCount = 0
+            }
+            .store(in: &cancellable)
 
-        let requestWillStart = Observable.merge(initialLoad, loadMore)
+        let requestWillStart = initialLoad.merge(with: loadMore)
             .map { SearchUserRequest(query: $0, after: $1) }
-            .distinctUntilChanged { $0.query == $1.query && $0.after == $1.after }
-            .share()
+            .removeDuplicates { $0.query == $1.query && $0.after == $1.after }
 
         let response = requestWillStart
-            .do(onNext: { [_isFetchingUsers] _ in
-                _isFetchingUsers.accept(true)
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isFetchingUsers = true
             })
-            .flatMapLatest { request -> Observable<Event<Response<User>>> in
-                ApiSession.shared.rx.send(request)
-                    .materialize()
+            .map { request -> AnyPublisher<Result<Response<User>, Error>, Never> in
+                ApiSession.shared.send(request)
+                    .map { response in
+                        Result<Response<User>, Error>.success(response)
+                    }
+                    .catch { error in
+                        Just(Result<Response<User>, Error>.failure(error))
+                    }
+                    .eraseToAnyPublisher()
             }
-            .do(onNext: { [_isFetchingUsers] _ in
-                _isFetchingUsers.accept(false)
+            .switchToLatest()
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isFetchingUsers = false
             })
-            .share()
 
         response
-            .flatMap { response -> Observable<Response<User>> in
-                response.element.map(Observable.just) ?? .empty()
-            }
-            .subscribe(onNext: { [_users] response in
-                _pageInfo.accept(response.pageInfo)
-                _users.accept(_users.value + response.nodes)
-                _totalCount.accept(response.totalCount)
-            })
-            .disposed(by: disposeBag)
-
-        self.errorMessage = response
-            .flatMap { response -> Observable<ErrorMessage> in
-                guard case .emptyToken? = (response.error as? ApiSession.Error) else {
-                    return .empty()
+            .sink { [weak self] result in
+                guard let me = self else {
+                    return
                 }
-                let title = "Access Token Error"
-                let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
-                return .just(ErrorMessage(title: title, message: message))
+                switch result {
+                case let .success(response):
+                    me.pageInfo = response.pageInfo
+                    me.users = me.users + response.nodes
+                    me.totalCount = response.totalCount
+                case let .failure(error):
+                    guard case .emptyToken? = (error as? ApiSession.Error) else {
+                        return
+                    }
+                    let title = "Access Token Error"
+                    let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
+                    _errorMessage.send(ErrorMessage(title: title, message: message))
+                }
             }
-            .share()
+            .store(in: &cancellable)
     }
 
     func fetchUsers(withQuery query: String) {
-        _feachUsersWithQuery.accept(query)
+        _feachUsersWithQuery.send(query)
     }
 
     func fetchUsers() {
-        _fetchUsers.accept(())
+        _fetchUsers.send()
     }
 }

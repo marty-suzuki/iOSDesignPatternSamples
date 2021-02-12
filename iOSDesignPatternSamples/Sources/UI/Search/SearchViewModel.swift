@@ -6,84 +6,96 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import Foundation
 import GithubKit
-import NoticeObserveKit
-import RxSwift
-import RxCocoa
+import UIKit
 
 final class SearchViewModel {
     let output: Output
     let input: Input
 
     var users: [User] {
-        return model.usersValue
+        model.users
     }
 
     var isFetchingUsers: Bool {
-        return model.isFetchingUsersValue
+        model.isFetchingUsers
     }
 
     private let model: SearchModel
-    private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
 
-    init(favoritesOutput: Observable<[Repository]>,
-         favoritesInput: AnyObserver<[Repository]>) {
+    init(favoritesOutput: AnyPublisher<[Repository], Never>,
+         favoritesInput: @escaping ([Repository]) -> Void) {
+        let model = SearchModel()
+        self.model = model
 
-        self.model = SearchModel()
+        let viewDidAppear = PassthroughSubject<Void, Never>()
+        let viewDidDisappear = PassthroughSubject<Void, Never>()
+        let searchText = PassthroughSubject<String?, Never>()
+        let isReachedBottom = PassthroughSubject<Bool, Never>()
+        let selectedIndexPath = PassthroughSubject<IndexPath, Never>()
+        let headerFooterView = PassthroughSubject<UIView, Never>()
 
-        let viewDidAppear = PublishRelay<Void>()
-        let viewDidDisappear = PublishRelay<Void>()
-        let searchText = PublishRelay<String?>()
-        let isReachedBottom = PublishRelay<Bool>()
-        let selectedIndexPath = PublishRelay<IndexPath>()
-        let headerFooterView = PublishRelay<UIView>()
-
-        self.input = Input(viewDidAppear: viewDidAppear.asObserver(),
-                           viewDidDisappear: viewDidDisappear.asObserver(),
-                           searchText: searchText.asObserver(),
-                           isReachedBottom: isReachedBottom.asObserver(),
-                           selectedIndexPath: selectedIndexPath.asObserver(),
-                           headerFooterView: headerFooterView.asObserver(),
+        self.input = Input(viewDidAppear: viewDidAppear.send,
+                           viewDidDisappear: viewDidDisappear.send,
+                           searchText: searchText.send,
+                           isReachedBottom: isReachedBottom.send,
+                           selectedIndexPath: selectedIndexPath.send,
+                           headerFooterView: headerFooterView.send,
                            favorites: favoritesInput)
 
         do {
             let selectedUser = selectedIndexPath
-                .withLatestFrom(model.users) { $1[$0.row] }
+                .map { model.users[$0.row] }
+                .eraseToAnyPublisher()
 
-            let updateLoadingView = Observable.combineLatest(headerFooterView, model.isFetchingUsers)
+            let updateLoadingView = headerFooterView
+                .combineLatest(model.isFetchingUsersPublisher)
+                .eraseToAnyPublisher()
 
-            let countString = Observable.combineLatest(model.totalCount, model.users)
+            let countString = model.totalCountPublisher
+                .combineLatest(model.usersPublisher)
                 .map { "\($1.count) / \($0)" }
-                .share(replay: 1, scope: .whileConnected)
+                .eraseToAnyPublisher()
 
-            let reloadData = Observable.merge(model.users.map { _ in },
-                                              model.totalCount.map { _ in },
-                                              model.isFetchingUsers.map { _ in })
+            let reloadData = model.usersPublisher.map { _ in }
+                .merge(
+                    with:
+                        model.totalCountPublisher.map { _ in },
+                        model.isFetchingUsersPublisher.map { _ in }
+                )
+                .eraseToAnyPublisher()
 
             // keyboard notification
-            let isViewAppearing = Observable.merge(viewDidAppear.map { true },
-                                                   viewDidDisappear.map { false })
+            let isViewAppearing = viewDidAppear.map { true }
+                .merge(with: viewDidDisappear.map { false })
+                .eraseToAnyPublisher()
 
-            let makeKeyboardObservable: (Notice.Name<UIKeyboardInfo>, Bool) -> Observable<UIKeyboardInfo> = { name, isViewAppearing in
+            let makeKeyboardObservable: (Notification.Name, Bool) -> AnyPublisher<UIKeyboardInfo, Never> = { name, isViewAppearing in
                 guard isViewAppearing else {
-                    return .empty()
+                    return Empty().eraseToAnyPublisher()
                 }
-                return Observable.create { observer in
-                    let observation = NotificationCenter.default.nok.observe(name: name) {
-                        observer.onNext($0)
+                return NotificationCenter.default.publisher(for: name)
+                    .flatMap { notification -> AnyPublisher<UIKeyboardInfo, Never> in
+                        guard let info = UIKeyboardInfo(notification: notification) else {
+                            return Empty().eraseToAnyPublisher()
+                        }
+                        return Just(info).eraseToAnyPublisher()
                     }
-                    return Disposables.create {
-                        observation.invalidate()
-                    }
-                }
+                    .eraseToAnyPublisher()
             }
 
             let keyboardWillShow = isViewAppearing
-                .flatMapLatest { makeKeyboardObservable(.keyboardWillShow, $0) }
+                .map { makeKeyboardObservable(UIResponder.keyboardWillShowNotification, $0) }
+                .switchToLatest()
+                .eraseToAnyPublisher()
 
             let keyboardWillHide = isViewAppearing
-                .flatMapLatest { makeKeyboardObservable(.keyboardWillHide, $0) }
+                .map { makeKeyboardObservable(UIResponder.keyboardWillHideNotification, $0) }
+                .switchToLatest()
+                .eraseToAnyPublisher()
 
             self.output = Output(accessTokenAlert: model.errorMessage,
                                  updateLoadingView: updateLoadingView,
@@ -97,40 +109,40 @@ final class SearchViewModel {
 
         searchText
             .map { $0 ?? "" }
-            .subscribe(onNext: { [model] in
+            .sink {
                 model.fetchUsers(withQuery: $0)
-            })
-            .disposed(by: disposeBag)
+            }
+            .store(in: &cancellables)
 
         isReachedBottom
-            .distinctUntilChanged()
+            .removeDuplicates()
             .filter { $0 }
-            .subscribe(onNext: { [model] _ in
+            .sink { _ in
                 model.fetchUsers()
-            })
-            .disposed(by: disposeBag)
+            }
+            .store(in: &cancellables)
     }
 }
 
 extension SearchViewModel {
     struct Input {
-        let viewDidAppear: AnyObserver<Void>
-        let viewDidDisappear: AnyObserver<Void>
-        let searchText: AnyObserver<String?>
-        let isReachedBottom: AnyObserver<Bool>
-        let selectedIndexPath: AnyObserver<IndexPath>
-        let headerFooterView: AnyObserver<UIView>
-        let favorites: AnyObserver<[Repository]>
+        let viewDidAppear: () -> Void
+        let viewDidDisappear: () -> Void
+        let searchText: (String?) -> Void
+        let isReachedBottom: (Bool) -> Void
+        let selectedIndexPath: (IndexPath) -> Void
+        let headerFooterView: (UIView) -> Void
+        let favorites: ([Repository]) -> Void
     }
 
     struct Output {
-        let accessTokenAlert: Observable<ErrorMessage>
-        let updateLoadingView: Observable<(UIView, Bool)>
-        let selectedUser: Observable<User>
-        let keyboardWillShow: Observable<UIKeyboardInfo>
-        let keyboardWillHide: Observable<UIKeyboardInfo>
-        let countString: Observable<String>
-        let reloadData: Observable<Void>
-        let favorites: Observable<[Repository]>
+        let accessTokenAlert: AnyPublisher<ErrorMessage, Never>
+        let updateLoadingView: AnyPublisher<(UIView, Bool), Never>
+        let selectedUser: AnyPublisher<User, Never>
+        let keyboardWillShow: AnyPublisher<UIKeyboardInfo, Never>
+        let keyboardWillHide: AnyPublisher<UIKeyboardInfo, Never>
+        let countString: AnyPublisher<String, Never>
+        let reloadData: AnyPublisher<Void, Never>
+        let favorites: AnyPublisher<[Repository], Never>
     }
 }

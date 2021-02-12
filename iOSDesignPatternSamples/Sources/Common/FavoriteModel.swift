@@ -6,65 +6,83 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
 
-final class FavoriteModel {
+protocol FavoriteModelType: AnyObject {
+    var favorites: [Repository] { get }
+    var contains: AnyPublisher<(Bool, Repository), Never> { get }
+    func addFavorite(_ repository: Repository)
+    func removeFavorite(_ repository: Repository)
+}
 
-    let contains: Observable<(Bool, Repository)>
+final class FavoriteModel: FavoriteModelType {
 
-    private let _addFavorite = PublishRelay<Repository>()
-    private let _removeFavorite = PublishRelay<Repository>()
+    let contains: AnyPublisher<(Bool, Repository), Never>
 
-    private let disposeBag = DisposeBag()
+    private let _addFavorite = PassthroughSubject<Repository, Never>()
+    private let _removeFavorite = PassthroughSubject<Repository, Never>()
 
-    init(repository: Repository,
-         favoritesInput: AnyObserver<[Repository]>,
-         favoritesOutput: Observable<[Repository]>) {
+    @Published
+    private(set) var favorites: [Repository] = []
+    private var cancellables = Set<AnyCancellable>()
+
+    init(
+        repository: Repository,
+        favoritesInput: @escaping ([Repository]) -> Void,
+        favoritesOutput: AnyPublisher<[Repository], Never>
+    ) {
 
         self.contains = favoritesOutput
             .map { favorites in
                 (favorites.contains { $0.url == repository.url }, repository)
             }
-            .share(replay: 1, scope: .whileConnected)
+            .eraseToAnyPublisher()
 
         do {
             let favorites1 = _addFavorite
-                .withLatestFrom(favoritesOutput) { ($0, $1) }
-                .flatMap { repository, favorites -> Observable<[Repository]> in
-                    var favorites = favorites
-                    if favorites.lazy.index(where: { $0.url == repository.url }) != nil {
-                        return .empty()
+                .flatMap { [weak self] repository -> AnyPublisher<[Repository], Never> in
+                    guard let me = self else {
+                        return Empty().eraseToAnyPublisher()
+                    }
+                    var favorites = me.favorites
+                    if favorites.firstIndex(where: { $0.url == repository.url }) != nil {
+                        return Empty().eraseToAnyPublisher()
                     }
                     favorites.append(repository)
-                    return .just(favorites)
+                    return Just(favorites).eraseToAnyPublisher()
                 }
 
             let favorites2 = _removeFavorite
-                .withLatestFrom(favoritesOutput) { ($0, $1) }
-                .flatMap { repository, favorites -> Observable<[Repository]> in
-                    var favorites = favorites
-                    guard let index = favorites.lazy.index(where: { $0.url == repository.url }) else {
-                        return .empty()
+                .flatMap { [weak self] repository -> AnyPublisher<[Repository], Never> in
+                    guard let me = self else {
+                        return Empty().eraseToAnyPublisher()
+                    }
+                    var favorites = me.favorites
+                    guard let index = favorites.firstIndex(where: { $0.url == repository.url }) else {
+                        return Empty().eraseToAnyPublisher()
                     }
                     favorites.remove(at: index)
-                    return .just(favorites)
+                    return Just(favorites).eraseToAnyPublisher()
                 }
 
-            Observable.merge(favorites1, favorites2)
-                // to use ".concat(Observable.never())" because to avoid sending dispose
-                .concat(Observable.never())
-                .bind(to: favoritesInput)
-                .disposed(by: disposeBag)
+            favorites1.merge(with: favorites2)
+                .sink { favorites in
+                    favoritesInput(favorites)
+                }
+                .store(in: &cancellables)
         }
+
+        favoritesOutput
+            .assign(to: \.favorites, on: self)
+            .store(in: &cancellables)
     }
 
     func addFavorite(_ repository: Repository) {
-        _addFavorite.accept(repository)
+        _addFavorite.send(repository)
     }
-    
+
     func removeFavorite(_ repository: Repository) {
-        _removeFavorite.accept(repository)
+        _removeFavorite.send(repository)
     }
 }

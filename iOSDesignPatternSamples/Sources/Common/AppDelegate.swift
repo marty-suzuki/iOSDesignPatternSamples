@@ -6,22 +6,24 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
-import RxCocoa
-import RxSwift
+import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    let favoritesRelay = BehaviorRelay<[Repository]>(value: [])
+    @Published
+    private var favorites: [Repository] = []
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-        let favoritesOutput = favoritesRelay.asObservable()
-        let favoritesInput = favoritesRelay.asObserver()
+        let favoritesOutput = $favorites.eraseToAnyPublisher()
+        let favoritesInput: ([Repository]) -> Void = { [weak self] in
+            self?.favorites = $0
+        }
 
         if let viewControllers = (window?.rootViewController as? UITabBarController)?.viewControllers {
             for value in viewControllers.enumerated() {
@@ -43,4 +45,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 }
-

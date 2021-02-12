@@ -6,51 +6,62 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import Foundation
 import GithubKit
-import RxSwift
-import RxCocoa
 
 final class FavoriteViewModel {
     let output: Output
     let input: Input
 
-    var favorites: [Repository] {
-        return _favorites.value
-    }
+    @Published
+    private(set )var favorites: [Repository] = []
 
-    private let _favorites = BehaviorRelay<[Repository]>(value: [])
-    private let disposeBag = DisposeBag()
+    private var cancellable = Set<AnyCancellable>()
 
-    init(favoritesInput: AnyObserver<[Repository]>,
-         favoritesOutput: Observable<[Repository]>) {
+    init(
+        favoritesInput: @escaping ([Repository]) -> Void,
+        favoritesOutput: AnyPublisher<[Repository], Never>
+    ) {
+        let _selectedIndexPath = PassthroughSubject<IndexPath, Never>()
+        let _selectedRepository = PassthroughSubject<Repository, Never>()
 
-        let _selectedIndexPath = PublishRelay<IndexPath>()
-        let selectedRepository = _selectedIndexPath
-            .withLatestFrom(favoritesOutput) { $1[$0.row] }
 
         self.output = Output(favorites: favoritesOutput,
-                             relaodData: favoritesOutput.map { _ in },
-                             selectedRepository: selectedRepository)
+                             relaodData: favoritesOutput.map { _ in }.eraseToAnyPublisher(),
+                             selectedRepository: _selectedRepository.eraseToAnyPublisher())
 
-        self.input = Input(selectedIndexPath: _selectedIndexPath.asObserver(),
+        self.input = Input(selectedIndexPath: _selectedIndexPath.send,
                            favorites: favoritesInput)
+    _selectedIndexPath
+        .flatMap { [weak self] indexPath -> AnyPublisher<Repository, Never> in
+            guard let me = self else {
+                return Empty().eraseToAnyPublisher()
+            }
+            return Just(me.favorites[indexPath.row])
+                .eraseToAnyPublisher()
+        }
+        .sink {
+            _selectedRepository.send($0)
+        }
+        .store(in: &cancellable)
+
 
         favoritesOutput
-            .bind(to: _favorites)
-            .disposed(by: disposeBag)
+            .assign(to: \.favorites, on: self)
+            .store(in: &cancellable)
     }
 }
 
 extension FavoriteViewModel {
     struct Output {
-        let favorites: Observable<[Repository]>
-        let relaodData: Observable<Void>
-        let selectedRepository: Observable<Repository>
+        let favorites: AnyPublisher<[Repository], Never>
+        let relaodData: AnyPublisher<Void, Never>
+        let selectedRepository: AnyPublisher<Repository, Never>
     }
 
     struct Input {
-        let selectedIndexPath: AnyObserver<IndexPath>
-        let favorites: AnyObserver<[Repository]>
+        let selectedIndexPath: (IndexPath) -> Void
+        let favorites: ([Repository]) -> Void
     }
 }
