@@ -90,7 +90,7 @@ final class SearchViewController: UIViewController, SearchView {
                        animations: { self.view.layoutIfNeeded() },
                        completion: nil)
     }
-    
+
     func keyboardWillHide(with keyboardInfo: UIKeyboardInfo) {
         view.layoutIfNeeded()
         tableViewBottomConstraint.constant = 0
