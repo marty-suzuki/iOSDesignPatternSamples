@@ -11,97 +11,119 @@ import Foundation
 import GithubKit
 import UIKit
 
-final class UserRepositoryViewModel {
-    let title: String
+protocol UserRepositoryViewModelType: AnyObject {
+    var input: UserRepositoryViewModel.Input { get }
+    var output: UserRepositoryViewModel.Output { get }
+}
 
-    var repositories: [Repository] {
-        return model.repositories
-    }
-
-    var isFetchingRepositories: Bool {
-        return model.isFetchingRepositories
-    }
-
-    let output: Output
+final class UserRepositoryViewModel: UserRepositoryViewModelType {
     let input: Input
+    let output: Output
 
-    private let model: RepositoryModel
     private var cancellables = Set<AnyCancellable>()
 
-    init(user: User,
-         favoritesOutput: AnyPublisher<[Repository], Never>,
-         favoritesInput: @escaping ([Repository]) -> Void) {
-        self.title = "\(user.login)'s Repositories"
-
-        let model = RepositoryModel(user: user)
-        self.model = model
-
+    init(
+        user: User,
+        favoriteModel: FavoriteModelType,
+        repositoryModel: RepositoryModelType
+    ) {
         let _fetchRepositories = PassthroughSubject<Void, Never>()
         let _selectedIndexPath = PassthroughSubject<IndexPath, Never>()
         let _isReachedBottom = PassthroughSubject<Bool, Never>()
         let _headerFooterView = PassthroughSubject<UIView, Never>()
 
-        self.input = Input(fetchRepositories: _fetchRepositories.send,
-                           selectedIndexPath: _selectedIndexPath.send,
-                           isReachedBottom: _isReachedBottom.send,
-                           headerFooterView: _headerFooterView.send,
-                           favorites: favoritesInput)
+        self.input = Input(
+            fetchRepositories: _fetchRepositories.send,
+            selectedIndexPath: _selectedIndexPath.send,
+            isReachedBottom: _isReachedBottom.send,
+            headerFooterView: _headerFooterView.send
+        )
 
         do {
             let updateLoadingView = _headerFooterView
-                .combineLatest(model.isFetchingRepositoriesPublisher)
+                .combineLatest(repositoryModel.isFetchingRepositoriesPublisher)
                 .eraseToAnyPublisher()
 
             let showRepository = _selectedIndexPath
-                .map { model.repositories[$0.row] }
+                .map { repositoryModel.repositories[$0.row] }
                 .eraseToAnyPublisher()
 
-            let countString = model.totalCountPublisher
-                .combineLatest(model.repositoriesPublisher)
+            let countString = repositoryModel.totalCountPublisher
+                .combineLatest(repositoryModel.repositoriesPublisher)
                 .map { "\($1.count) / \($0)" }
                 .eraseToAnyPublisher()
 
-            let reloadData = model.repositoriesPublisher.map { _ in }
-                .merge(
-                    with:
-                        model.totalCountPublisher.map { _ in },
-                        model.isFetchingRepositoriesPublisher.map { _ in }
-                )
+            let reloadData = repositoryModel.repositoriesPublisher.map { _ in }
+                .merge(with: repositoryModel.totalCountPublisher.map { _ in },
+                       repositoryModel.isFetchingRepositoriesPublisher.map { _ in })
                 .eraseToAnyPublisher()
 
-            self.output = Output(updateLoadingView: updateLoadingView,
-                                 showRepository: showRepository,
-                                 countString: countString,
-                                 reloadData: reloadData,
-                                 favorites: favoritesOutput)
+            self.output = Output(
+                title: "\(user.login)'s Repositories",
+                repositories: repositoryModel.repositories,
+                isFetchingRepositories: repositoryModel.isFetchingRepositories,
+                updateLoadingView: updateLoadingView,
+                showRepository: showRepository,
+                countString: countString,
+                reloadData: reloadData
+            )
         }
 
         _isReachedBottom
             .removeDuplicates()
             .filter { $0 }
             .sink { _ in
-                model.fetchRepositories()
+                repositoryModel.fetchRepositories()
             }
             .store(in: &cancellables)
 
-        model.fetchRepositories()
+        repositoryModel.repositoriesPublisher
+            .assign(to: \.repositories, on: output)
+            .store(in: &cancellables)
+
+        repositoryModel.isFetchingRepositoriesPublisher
+            .assign(to: \.isFetchingRepositories, on: output)
+            .store(in: &cancellables)
+
+        repositoryModel.fetchRepositories()
     }
 }
 
 extension UserRepositoryViewModel {
-    struct Output {
-        let updateLoadingView: AnyPublisher<(UIView, Bool), Never>
-        let showRepository: AnyPublisher<Repository, Never>
-        let countString: AnyPublisher<String, Never>
-        let reloadData: AnyPublisher<Void, Never>
-        let favorites: AnyPublisher<[Repository], Never>
-    }
-
     struct Input {
         let fetchRepositories: () -> Void
         let selectedIndexPath: (IndexPath) -> Void
         let isReachedBottom: (Bool) -> Void
         let headerFooterView: (UIView) -> Void
-        let favorites: ([Repository]) -> Void
+    }
+
+    final class Output {
+        @Published
+        fileprivate(set) var title: String
+        @Published
+        fileprivate(set) var repositories: [Repository]
+        @Published
+        fileprivate(set) var isFetchingRepositories: Bool
+        let updateLoadingView: AnyPublisher<(UIView, Bool), Never>
+        let showRepository: AnyPublisher<Repository, Never>
+        let countString: AnyPublisher<String, Never>
+        let reloadData: AnyPublisher<Void, Never>
+        init(
+            title: String,
+            repositories: [Repository],
+            isFetchingRepositories: Bool,
+            updateLoadingView: AnyPublisher<(UIView, Bool), Never>,
+            showRepository: AnyPublisher<Repository, Never>,
+            countString: AnyPublisher<String, Never>,
+            reloadData: AnyPublisher<Void, Never>
+        ) {
+            self.title = title
+            self.repositories = repositories
+            self.isFetchingRepositories = isFetchingRepositories
+            self.updateLoadingView = updateLoadingView
+            self.showRepository = showRepository
+            self.countString = countString
+            self.reloadData = reloadData
+        }
     }
 }

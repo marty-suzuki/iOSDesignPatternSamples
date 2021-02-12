@@ -12,9 +12,9 @@ import UIKit
 
 final class UserRepositoryViewDataSource: NSObject {
 
-    private let viewModel: UserRepositoryViewModel
+    private let viewModel: UserRepositoryViewModelType
     
-    init(viewModel: UserRepositoryViewModel) {
+    init(viewModel: UserRepositoryViewModelType) {
         self.viewModel = viewModel
     }
     
@@ -30,12 +30,12 @@ final class UserRepositoryViewDataSource: NSObject {
 
 extension UserRepositoryViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.repositories.count
+        return viewModel.output.repositories.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(RepositoryViewCell.self, for: indexPath)
-        let repository = viewModel.repositories[indexPath.row]
+        let repository = viewModel.output.repositories[indexPath.row]
         cell.configure(with: repository)
         return cell
     }
@@ -60,7 +60,7 @@ extension UserRepositoryViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let repository = viewModel.repositories[indexPath.row]
+        let repository = viewModel.output.repositories[indexPath.row]
         return RepositoryViewCell.calculateHeight(with: repository, and: tableView)
     }
     
@@ -69,7 +69,7 @@ extension UserRepositoryViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return viewModel.isFetchingRepositories ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return viewModel.output.isFetchingRepositories ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

@@ -17,17 +17,18 @@ final class UserRepositoryViewController: UIViewController {
 
     let loadingView = LoadingView()
 
-    let viewModel: UserRepositoryViewModel
+    let viewModel: UserRepositoryViewModelType
     let dataSource: UserRepositoryViewDataSource
 
+    private let makeRepositoryViewModel: (Repository) -> RepositoryViewModelType
     private var cacellables = Set<AnyCancellable>()
 
-    init(user: User,
-         favoritesOutput: AnyPublisher<[Repository], Never>,
-         favoritesInput: @escaping ([Repository]) -> Void) {
-        self.viewModel = UserRepositoryViewModel(user: user,
-                                                 favoritesOutput: favoritesOutput,
-                                                 favoritesInput: favoritesInput)
+    init(
+        viewModel: UserRepositoryViewModelType,
+        makeRepositoryViewModel: @escaping (Repository) -> RepositoryViewModelType
+    ) {
+        self.makeRepositoryViewModel = makeRepositoryViewModel
+        self.viewModel = viewModel
         self.dataSource = UserRepositoryViewDataSource(viewModel: viewModel)
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
@@ -40,7 +41,7 @@ final class UserRepositoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = viewModel.title
+        title = viewModel.output.title
 
         dataSource.configure(with: tableView)
 
@@ -73,9 +74,8 @@ final class UserRepositoryViewController: UIViewController {
             guard let me = self else {
                 return
             }
-            let vc = RepositoryViewController(repository: repository,
-                                              favoritesOutput: me.viewModel.output.favorites,
-                                              favoritesInput: me.viewModel.input.favorites)
+            let vm = me.makeRepositoryViewModel(repository)
+            let vc = RepositoryViewController(viewModel: vm)
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
