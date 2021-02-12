@@ -43,31 +43,36 @@ final class RepositoryModel: RepositoryModelType {
 
     private let _fetchRepositories = PassthroughSubject<Void, Never>()
 
-    init(user: User) {
+    init(
+        user: User,
+        sendRequest: @escaping SendRequest<UserNodeRequest>
+    ) {
         let requestTrigger = $pageInfo
-            .map { (user, $0?.endCursor) }
+            .map { (user, $0) }
 
         let initialLoadRequest = _fetchRepositories
-            .map { _ -> AnyPublisher<(User, String?), Never> in
+            .flatMap { _ in
                 requestTrigger
                     .prefix(1)
-                    .eraseToAnyPublisher()
             }
-            .switchToLatest()
             .filter { $1 == nil }
 
         let loadMoreRequest = _fetchRepositories
-            .map { _ -> AnyPublisher<(User, String?), Never> in
+            .flatMap { _ in
                 requestTrigger
                     .prefix(1)
-                    .eraseToAnyPublisher()
             }
-            .switchToLatest()
             .filter { $1 != nil }
 
         let willStartRequest = initialLoadRequest
             .merge(with: loadMoreRequest)
-            .map { UserNodeRequest(id: $0.id, after: $1) }
+            .flatMap { user, pageInfo -> AnyPublisher<UserNodeRequest, Never> in
+                if let pageInfo = pageInfo, !pageInfo.hasNextPage {
+                    return Empty().eraseToAnyPublisher()
+                }
+                let request = UserNodeRequest(id: user.id, after: pageInfo?.endCursor)
+                return Just(request).eraseToAnyPublisher()
+            }
             .removeDuplicates { $0.id == $1.id && $0.after == $1.after }
 
         willStartRequest
@@ -75,10 +80,11 @@ final class RepositoryModel: RepositoryModelType {
                 self?.isFetchingRepositories = true
             })
             .flatMap { request -> AnyPublisher<Response<Repository>, Never> in
-                ApiSession.shared.send(request)
+                sendRequest(request)
                     .catch { _ -> AnyPublisher<Response<Repository>, Never> in
                         Empty().eraseToAnyPublisher()
                     }
+                    .prefix(1)
                     .eraseToAnyPublisher()
             }
             .handleEvents(receiveOutput: { [weak self] _ in
