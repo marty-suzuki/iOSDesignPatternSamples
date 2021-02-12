@@ -47,73 +47,80 @@ final class SearchModel: SearchModelType {
     private var totalCount = 0
     @Published
     private var pageInfo: PageInfo?
+    @Published
+    private var query: String?
 
     private var cancellable = Set<AnyCancellable>()
 
     private let _fetchUsers = PassthroughSubject<Void, Never>()
     private let _feachUsersWithQuery = PassthroughSubject<String, Never>()
 
-    init() {
+    init(
+        sendRequest: @escaping SendRequest<SearchUserRequest>
+    ) {
         let _errorMessage = PassthroughSubject<ErrorMessage, Never>()
         self.errorMessage = _errorMessage.eraseToAnyPublisher()
 
-        let query = _feachUsersWithQuery
-            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
-            .removeDuplicates()
+        let pageInfo = $pageInfo
 
-        let endCousor = $pageInfo
-            .map { $0?.endCursor }
+        let query = $query
+            .map { $0 ?? "" }
 
         let initialLoad = query
             .filter { !$0.isEmpty }
             .flatMap { query in
-                endCousor
+                pageInfo
                     .map { (query, $0) }
                     .prefix(1)
             }
 
         let loadMore = _fetchUsers
-            .map { _ -> AnyPublisher<(String, String?), Never> in
+            .flatMap { _ in
                 query
-                    .combineLatest(endCousor)
+                    .combineLatest(pageInfo)
                     .prefix(1)
-                    .eraseToAnyPublisher()
             }
-            .switchToLatest()
             .filter { !$0.isEmpty && $1 != nil }
 
-        query
-            .sink { [weak self] _ in
+        _feachUsersWithQuery
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { [weak self] in
                 self?.pageInfo = nil
                 self?.users = []
                 self?.totalCount = 0
+                self?.query = $0
             }
             .store(in: &cancellable)
 
         let requestWillStart = initialLoad.merge(with: loadMore)
-            .map { SearchUserRequest(query: $0, after: $1) }
+            .flatMap { query, pageInfo -> AnyPublisher<SearchUserRequest, Never> in
+                if let pageInfo = pageInfo, !pageInfo.hasNextPage {
+                    return Empty().eraseToAnyPublisher()
+                }
+                let request = SearchUserRequest(query: query, after: pageInfo?.endCursor)
+                return Just(request).eraseToAnyPublisher()
+            }
             .removeDuplicates { $0.query == $1.query && $0.after == $1.after }
 
-        let response = requestWillStart
+        requestWillStart
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.isFetchingUsers = true
             })
-            .map { request -> AnyPublisher<Result<Response<User>, Error>, Never> in
-                ApiSession.shared.send(request)
+            .flatMap { request -> AnyPublisher<Result<Response<User>, Error>, Never> in
+                sendRequest(request)
                     .map { response in
                         Result<Response<User>, Error>.success(response)
                     }
                     .catch { error in
                         Just(Result<Response<User>, Error>.failure(error))
                     }
+                    .prefix(1)
                     .eraseToAnyPublisher()
             }
-            .switchToLatest()
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.isFetchingUsers = false
             })
-
-        response
             .sink { [weak self] result in
                 guard let me = self else {
                     return
