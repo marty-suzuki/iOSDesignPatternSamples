@@ -31,7 +31,7 @@ Show local on memory favorite repositories
 ### [UserRepositoryViewController](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewController.swift)
 Show Github user's repositories
 
-![](./Images/user_reposiroty.png)
+![](./Images/user_repository.png)
 
 - [UserRepositoryView](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewController.swift)
 - [UserRepositoryPresenter](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewPresenter.swift)
