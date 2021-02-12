@@ -12,9 +12,9 @@ import UIKit
 
 final class SearchViewDataSource: NSObject {
 
-    private let viewModel: SearchViewModel
+    private let viewModel: SearchViewModelType
 
-    init(viewModel: SearchViewModel) {
+    init(viewModel: SearchViewModelType) {
         self.viewModel = viewModel
     }
     
@@ -30,12 +30,12 @@ final class SearchViewDataSource: NSObject {
 
 extension SearchViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.users.count
+        return viewModel.output.users.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(UserViewCell.self, for: indexPath)
-        let user = viewModel.users[indexPath.row]
+        let user = viewModel.output.users[indexPath.row]
         cell.configure(with: user)
         return cell
     }
@@ -60,7 +60,7 @@ extension SearchViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let user = viewModel.users[indexPath.row]
+        let user = viewModel.output.users[indexPath.row]
         return UserViewCell.calculateHeight(with: user, and: tableView)
     }
     
@@ -69,7 +69,7 @@ extension SearchViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return viewModel.isFetchingUsers ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return viewModel.output.isFetchingUsers ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

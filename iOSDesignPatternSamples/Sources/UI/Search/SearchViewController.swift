@@ -16,18 +16,24 @@ final class SearchViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
     @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
 
-
     let searchBar = UISearchBar(frame: .zero)
     let loadingView = LoadingView()
 
-    let viewModel: SearchViewModel
+    let viewModel: SearchViewModelType
     let dataSource: SearchViewDataSource
 
+    private let makeRepositoryViewModel: (Repository) -> RepositoryViewModelType
+    private let makeUserRepositoryViewModel: (User) -> UserRepositoryViewModelType
     private var cancellables = Set<AnyCancellable>()
 
-    init(favoritesInput: @escaping ([Repository]) -> Void,
-         favoritesOutput: AnyPublisher<[Repository], Never>) {
-        self.viewModel = SearchViewModel(favoritesOutput: favoritesOutput, favoritesInput: favoritesInput)
+    init(
+        viewModel: SearchViewModelType,
+        makeUserRepositoryViewModel: @escaping (User) -> UserRepositoryViewModelType,
+        makeRepositoryViewModel: @escaping (Repository) -> RepositoryViewModelType
+    ) {
+        self.makeRepositoryViewModel = makeRepositoryViewModel
+        self.makeUserRepositoryViewModel = makeUserRepositoryViewModel
+        self.viewModel = viewModel
         self.dataSource = SearchViewDataSource(viewModel: viewModel)
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
@@ -44,10 +50,6 @@ final class SearchViewController: UIViewController {
         searchBar.delegate = self
 
         dataSource.configure(with: tableView)
-
-//        searchBar.rx.text
-//            .bind(to: viewModel.input.searchText)
-//            .disposed(by: disposeBag)
 
         // observe viewModel
         viewModel.output.accessTokenAlert
@@ -154,9 +156,11 @@ final class SearchViewController: UIViewController {
             guard let me = self else {
                 return
             }
-            let vc = UserRepositoryViewController(user: user,
-                                                  favoritesOutput: me.viewModel.output.favorites,
-                                                  favoritesInput: me.viewModel.input.favorites)
+            let vm = me.makeUserRepositoryViewModel(user)
+            let vc = UserRepositoryViewController(
+                viewModel: vm,
+                makeRepositoryViewModel: me.makeRepositoryViewModel
+            )
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
@@ -186,5 +190,9 @@ extension SearchViewController: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
         searchBar.showsCancelButton = false
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        viewModel.input.searchText(searchBar.text)
     }
 }

@@ -11,26 +11,20 @@ import Foundation
 import GithubKit
 import UIKit
 
-final class SearchViewModel {
+protocol SearchViewModelType: AnyObject {
+    var input: SearchViewModel.Input { get }
+    var output: SearchViewModel.Output { get }
+}
+
+final class SearchViewModel: SearchViewModelType{
     let output: Output
     let input: Input
 
-    var users: [User] {
-        model.users
-    }
-
-    var isFetchingUsers: Bool {
-        model.isFetchingUsers
-    }
-
-    private let model: SearchModel
     private var cancellables = Set<AnyCancellable>()
 
-    init(favoritesOutput: AnyPublisher<[Repository], Never>,
-         favoritesInput: @escaping ([Repository]) -> Void) {
-        let model = SearchModel()
-        self.model = model
-
+    init(
+        searchModel: SearchModelType
+    ) {
         let viewDidAppear = PassthroughSubject<Void, Never>()
         let viewDidDisappear = PassthroughSubject<Void, Never>()
         let searchText = PassthroughSubject<String?, Never>()
@@ -38,34 +32,32 @@ final class SearchViewModel {
         let selectedIndexPath = PassthroughSubject<IndexPath, Never>()
         let headerFooterView = PassthroughSubject<UIView, Never>()
 
-        self.input = Input(viewDidAppear: viewDidAppear.send,
-                           viewDidDisappear: viewDidDisappear.send,
-                           searchText: searchText.send,
-                           isReachedBottom: isReachedBottom.send,
-                           selectedIndexPath: selectedIndexPath.send,
-                           headerFooterView: headerFooterView.send,
-                           favorites: favoritesInput)
+        self.input = Input(
+            viewDidAppear: viewDidAppear.send,
+            viewDidDisappear: viewDidDisappear.send,
+            searchText: searchText.send,
+            isReachedBottom: isReachedBottom.send,
+            selectedIndexPath: selectedIndexPath.send,
+            headerFooterView: headerFooterView.send
+        )
 
         do {
             let selectedUser = selectedIndexPath
-                .map { model.users[$0.row] }
+                .map { searchModel.users[$0.row] }
                 .eraseToAnyPublisher()
 
             let updateLoadingView = headerFooterView
-                .combineLatest(model.isFetchingUsersPublisher)
+                .combineLatest(searchModel.isFetchingUsersPublisher)
                 .eraseToAnyPublisher()
 
-            let countString = model.totalCountPublisher
-                .combineLatest(model.usersPublisher)
+            let countString = searchModel.totalCountPublisher
+                .combineLatest(searchModel.usersPublisher)
                 .map { "\($1.count) / \($0)" }
                 .eraseToAnyPublisher()
 
-            let reloadData = model.usersPublisher.map { _ in }
-                .merge(
-                    with:
-                        model.totalCountPublisher.map { _ in },
-                        model.isFetchingUsersPublisher.map { _ in }
-                )
+            let reloadData = searchModel.usersPublisher.map { _ in }
+                .merge(with: searchModel.totalCountPublisher.map { _ in },
+                       searchModel.isFetchingUsersPublisher.map { _ in })
                 .eraseToAnyPublisher()
 
             // keyboard notification
@@ -97,20 +89,23 @@ final class SearchViewModel {
                 .switchToLatest()
                 .eraseToAnyPublisher()
 
-            self.output = Output(accessTokenAlert: model.errorMessage,
-                                 updateLoadingView: updateLoadingView,
-                                 selectedUser: selectedUser,
-                                 keyboardWillShow: keyboardWillShow,
-                                 keyboardWillHide: keyboardWillHide,
-                                 countString: countString,
-                                 reloadData: reloadData,
-                                 favorites: favoritesOutput)
+            self.output = Output(
+                users: searchModel.users,
+                isFetchingUsers: searchModel.isFetchingUsers,
+                accessTokenAlert: searchModel.errorMessage,
+                updateLoadingView: updateLoadingView,
+                selectedUser: selectedUser,
+                keyboardWillShow: keyboardWillShow,
+                keyboardWillHide: keyboardWillHide,
+                countString: countString,
+                reloadData: reloadData
+            )
         }
 
         searchText
             .map { $0 ?? "" }
             .sink {
-                model.fetchUsers(withQuery: $0)
+                searchModel.fetchUsers(withQuery: $0)
             }
             .store(in: &cancellables)
 
@@ -118,8 +113,16 @@ final class SearchViewModel {
             .removeDuplicates()
             .filter { $0 }
             .sink { _ in
-                model.fetchUsers()
+                searchModel.fetchUsers()
             }
+            .store(in: &cancellables)
+
+        searchModel.usersPublisher
+            .assign(to: \.users, on: output)
+            .store(in: &cancellables)
+
+        searchModel.isFetchingUsersPublisher
+            .assign(to: \.isFetchingUsers, on: output)
             .store(in: &cancellables)
     }
 }
@@ -132,10 +135,13 @@ extension SearchViewModel {
         let isReachedBottom: (Bool) -> Void
         let selectedIndexPath: (IndexPath) -> Void
         let headerFooterView: (UIView) -> Void
-        let favorites: ([Repository]) -> Void
     }
 
-    struct Output {
+    final class Output {
+        @Published
+        fileprivate(set) var users: [User]
+        @Published
+        fileprivate(set) var isFetchingUsers: Bool
         let accessTokenAlert: AnyPublisher<ErrorMessage, Never>
         let updateLoadingView: AnyPublisher<(UIView, Bool), Never>
         let selectedUser: AnyPublisher<User, Never>
@@ -143,6 +149,26 @@ extension SearchViewModel {
         let keyboardWillHide: AnyPublisher<UIKeyboardInfo, Never>
         let countString: AnyPublisher<String, Never>
         let reloadData: AnyPublisher<Void, Never>
-        let favorites: AnyPublisher<[Repository], Never>
+        init(
+            users: [User],
+            isFetchingUsers: Bool,
+            accessTokenAlert: AnyPublisher<ErrorMessage, Never>,
+            updateLoadingView: AnyPublisher<(UIView, Bool), Never>,
+            selectedUser: AnyPublisher<User, Never>,
+            keyboardWillShow: AnyPublisher<UIKeyboardInfo, Never>,
+            keyboardWillHide: AnyPublisher<UIKeyboardInfo, Never>,
+            countString: AnyPublisher<String, Never>,
+            reloadData: AnyPublisher<Void, Never>
+        ) {
+            self.users = users
+            self.isFetchingUsers = isFetchingUsers
+            self.accessTokenAlert = accessTokenAlert
+            self.updateLoadingView = updateLoadingView
+            self.selectedUser = selectedUser
+            self.keyboardWillShow = keyboardWillShow
+            self.keyboardWillHide = keyboardWillHide
+            self.countString = countString
+            self.reloadData = reloadData
+        }
     }
 }
