@@ -15,25 +15,46 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    @Published
-    private var favorites: [Repository] = []
+    private let favoriteModel = FavoriteModel()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-
-        let favoritesOutput = $favorites.eraseToAnyPublisher()
-        let favoritesInput: ([Repository]) -> Void = { [weak self] in
-            self?.favorites = $0
-        }
 
         if let viewControllers = (window?.rootViewController as? UITabBarController)?.viewControllers {
             for value in viewControllers.enumerated() {
                 switch value {
                 case let (0, nc as UINavigationController):
-                    let searchVC = SearchViewController(favoritesInput: favoritesInput, favoritesOutput: favoritesOutput)
+                    let searchVC = SearchViewController(
+                        viewModel: SearchViewModel(
+                            searchModel: SearchModel(
+                                sendRequest: ApiSession.shared.send
+                            )
+                        ),
+                        makeUserRepositoryViewModel: { [favoriteModel] in
+                            UserRepositoryViewModel(
+                                user: $0,
+                                favoriteModel: favoriteModel,
+                                repositoryModel: RepositoryModel(
+                                    user: $0,
+                                    sendRequest: ApiSession.shared.send
+                                )
+                            )
+                        },
+                        makeRepositoryViewModel: { [favoriteModel] in
+                            RepositoryViewModel(
+                                repository: $0,
+                                favoritesModel: favoriteModel
+                            )
+                        }
+                    )
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let favoriteVC = FavoriteViewController(favoritesInput: favoritesInput, favoritesOutput: favoritesOutput)
+                    let favoriteVC = FavoriteViewController(
+                        viewModel: FavoriteViewModel(favoriteModel: favoriteModel),
+                        makeRepositoryViewModel: { [favoriteModel] in
+                            RepositoryViewModel(repository: $0, favoritesModel: favoriteModel)
+                        }
+                    )
                     nc.setViewControllers([favoriteVC], animated: false)
 
                 default:
