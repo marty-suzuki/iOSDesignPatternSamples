@@ -13,15 +13,18 @@ import UIKit
 final class FavoriteViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
 
-    let viewModel: FavoriteViewModel
+    let viewModel: FavoriteViewModelType
     let dataSource: FavoriteViewDataSource
 
+    private let makeRepositoryViewModel: (Repository) -> RepositoryViewModelType
     private var cancellables = Set<AnyCancellable>()
 
-    init(favoritesInput: @escaping ([Repository]) -> Void,
-         favoritesOutput: AnyPublisher<[Repository], Never>) {
-        self.viewModel = FavoriteViewModel(favoritesInput: favoritesInput,
-                                           favoritesOutput: favoritesOutput)
+    init(
+        viewModel: FavoriteViewModelType,
+        makeRepositoryViewModel: @escaping (Repository) -> RepositoryViewModelType
+    ) {
+        self.makeRepositoryViewModel = makeRepositoryViewModel
+        self.viewModel = viewModel
         self.dataSource = FavoriteViewDataSource(viewModel: viewModel)
         super.init(nibName: FavoriteViewController.className, bundle: nil)
     }
@@ -53,9 +56,8 @@ final class FavoriteViewController: UIViewController {
             guard let me = self else {
                 return
             }
-            let vc = RepositoryViewController(repository: repository,
-                                              favoritesOutput: me.viewModel.output.favorites,
-                                              favoritesInput: me.viewModel.input.favorites)
+            let vm = me.makeRepositoryViewModel(repository)
+            let vc = RepositoryViewController(viewModel: vm)
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }

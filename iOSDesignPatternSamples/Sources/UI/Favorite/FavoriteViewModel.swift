@@ -10,58 +10,68 @@ import Combine
 import Foundation
 import GithubKit
 
-final class FavoriteViewModel {
+protocol FavoriteViewModelType: AnyObject {
+    var output: FavoriteViewModel.Output { get }
+    var input: FavoriteViewModel.Input { get }
+}
+
+final class FavoriteViewModel: FavoriteViewModelType {
     let output: Output
     let input: Input
 
-    @Published
-    private(set )var favorites: [Repository] = []
+    var favorites: [Repository] {
+        favoriteModel.favorites
+    }
 
+    private let favoriteModel: FavoriteModelType
     private var cancellable = Set<AnyCancellable>()
 
     init(
-        favoritesInput: @escaping ([Repository]) -> Void,
-        favoritesOutput: AnyPublisher<[Repository], Never>
+        favoriteModel: FavoriteModelType
     ) {
+        self.favoriteModel = favoriteModel
         let _selectedIndexPath = PassthroughSubject<IndexPath, Never>()
         let _selectedRepository = PassthroughSubject<Repository, Never>()
+        
+        self.output = Output(
+            favorites: favoriteModel.favorites,
+            relaodData: favoriteModel.favoritePublisher.map { _ in }.eraseToAnyPublisher(),
+            selectedRepository: _selectedRepository.eraseToAnyPublisher()
+        )
 
+        self.input = Input(selectedIndexPath: _selectedIndexPath.send)
 
-        self.output = Output(favorites: favoritesOutput,
-                             relaodData: favoritesOutput.map { _ in }.eraseToAnyPublisher(),
-                             selectedRepository: _selectedRepository.eraseToAnyPublisher())
-
-        self.input = Input(selectedIndexPath: _selectedIndexPath.send,
-                           favorites: favoritesInput)
-    _selectedIndexPath
-        .flatMap { [weak self] indexPath -> AnyPublisher<Repository, Never> in
-            guard let me = self else {
-                return Empty().eraseToAnyPublisher()
+        _selectedIndexPath
+            .map { favoriteModel.favorites[$0.row] }
+            .sink {
+                _selectedRepository.send($0)
             }
-            return Just(me.favorites[indexPath.row])
-                .eraseToAnyPublisher()
-        }
-        .sink {
-            _selectedRepository.send($0)
-        }
-        .store(in: &cancellable)
+            .store(in: &cancellable)
 
-
-        favoritesOutput
-            .assign(to: \.favorites, on: self)
+        favoriteModel.favoritePublisher
+            .assign(to: \.favorites, on: output)
             .store(in: &cancellable)
     }
 }
 
 extension FavoriteViewModel {
-    struct Output {
-        let favorites: AnyPublisher<[Repository], Never>
-        let relaodData: AnyPublisher<Void, Never>
-        let selectedRepository: AnyPublisher<Repository, Never>
-    }
-
     struct Input {
         let selectedIndexPath: (IndexPath) -> Void
-        let favorites: ([Repository]) -> Void
+    }
+
+    final class Output {
+        @Published
+        fileprivate(set) var favorites: [Repository]
+        let relaodData: AnyPublisher<Void, Never>
+        let selectedRepository: AnyPublisher<Repository, Never>
+        init(
+            favorites: [Repository],
+            relaodData: AnyPublisher<Void, Never>,
+            selectedRepository: AnyPublisher<Repository, Never>
+        ) {
+            self.favorites = favorites
+            self.relaodData = relaodData
+            self.selectedRepository = selectedRepository
+        }
     }
 }

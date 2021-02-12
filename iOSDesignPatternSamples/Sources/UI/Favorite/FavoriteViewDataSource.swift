@@ -11,9 +11,9 @@ import GithubKit
 import UIKit
 
 final class FavoriteViewDataSource: NSObject {
-    private let viewModel: FavoriteViewModel
+    private let viewModel: FavoriteViewModelType
     
-    init(viewModel: FavoriteViewModel) {
+    init(viewModel: FavoriteViewModelType) {
         self.viewModel = viewModel
     }
     
@@ -27,12 +27,12 @@ final class FavoriteViewDataSource: NSObject {
 
 extension FavoriteViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.favorites.count
+        return viewModel.output.favorites.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(RepositoryViewCell.self, for: indexPath)
-        let repository = viewModel.favorites[indexPath.row]
+        let repository = viewModel.output.favorites[indexPath.row]
         cell.configure(with: repository)
         return cell
     }
@@ -45,7 +45,7 @@ extension FavoriteViewDataSource: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let repository = viewModel.favorites[indexPath.row]
+        let repository = viewModel.output.favorites[indexPath.row]
         return RepositoryViewCell.calculateHeight(with: repository, and: tableView)
     }
 }
