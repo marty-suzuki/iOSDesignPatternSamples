@@ -24,12 +24,15 @@ final class UserRepositoryViewController: UIViewController {
         }
     }
 
-    let favoriteModel: FavoriteModelType
     let repositoryModel: RepositoryModelType
+    private let makeFavoriteModel: () -> FavoriteModelType
     
-    init(repositoryModel: RepositoryModelType, favoriteModel: FavoriteModelType) {
+    init(
+        repositoryModel: RepositoryModelType,
+        makeFavoriteModel: @escaping () -> FavoriteModelType
+    ) {
         self.repositoryModel = repositoryModel
-        self.favoriteModel = favoriteModel
+        self.makeFavoriteModel = makeFavoriteModel
         
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
@@ -59,6 +62,7 @@ final class UserRepositoryViewController: UIViewController {
     }
     
     private func showRepository(with repository: Repository) {
+        let favoriteModel = makeFavoriteModel()
         let vc = RepositoryViewController(repository: repository, favoriteModel: favoriteModel)
         navigationController?.pushViewController(vc, animated: true)
     }

@@ -27,18 +27,18 @@ final class SearchViewController: UIViewController {
             }
         }
     }
-    
-    let favoriteModel: FavoriteModelType
+
     let searchModel: SearchModelType
+    private let makeFavoriteModel: () -> FavoriteModelType
     private let makeRepositoryModel: (User) -> RepositoryModelType
 
     init(
         searchModel: SearchModelType,
-        favoriteModel: FavoriteModelType,
+        makeFavoriteModel: @escaping () -> FavoriteModelType,
         makeRepositoryModel: @escaping (User) -> RepositoryModelType
     ) {
         self.searchModel = searchModel
-        self.favoriteModel = favoriteModel
+        self.makeFavoriteModel = makeFavoriteModel
         self.makeRepositoryModel = makeRepositoryModel
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
@@ -111,7 +111,10 @@ final class SearchViewController: UIViewController {
     
     private func showUserRepository(with user: User) {
         let repositoryModel = makeRepositoryModel(user)
-        let vc = UserRepositoryViewController(repositoryModel: repositoryModel, favoriteModel: favoriteModel)
+        let vc = UserRepositoryViewController(
+            repositoryModel: repositoryModel,
+            makeFavoriteModel: makeFavoriteModel
+        )
         navigationController?.pushViewController(vc, animated: true)
     }
 }

@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                             asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) },
                             mainAsync: { work in DispatchQueue.main.async { work() } }
                         ),
-                        favoriteModel: favoriteModel,
+                        makeFavoriteModel: { [favoriteModel] in favoriteModel },
                         makeRepositoryModel: {
                             RepositoryModel(
                                 user: $0,
