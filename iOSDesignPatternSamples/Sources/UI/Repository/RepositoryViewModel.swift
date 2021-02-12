@@ -10,41 +10,43 @@ import Combine
 import Foundation
 import GithubKit
 
-final class RepositoryViewModel {
-    let output: Output
+protocol RepositoryViewModelType: AnyObject {
+    var input: RepositoryViewModel.Input { get }
+    var output: RepositoryViewModel.Output { get }
+}
+
+final class RepositoryViewModel: RepositoryViewModelType {
     let input: Input
+    let output: Output
 
     private var cancellables = Set<AnyCancellable>()
 
     init(
         repository: Repository,
-        favoritesOutput: AnyPublisher<[Repository], Never>,
-        favoritesInput: @escaping ([Repository]) -> Void
+        favoritesModel: FavoriteModelType
     ) {
-        let model = FavoriteModel(repository: repository,
-                                  favoritesInput: favoritesInput,
-                                  favoritesOutput: favoritesOutput)
+        let favoriteButtonTitle = favoritesModel.contains(repository)
+            .map { $0 ? "Remove" : "Add" }
+            .eraseToAnyPublisher()
 
-        do {
-            let favoriteButtonTitle = model.contains
-                .map { $0.0 ? "Remove" : "Add" }
-                .eraseToAnyPublisher()
-
-            self.output = Output(favoriteButtonTitle: favoriteButtonTitle)
-        }
+        self.output = Output(
+            url: repository.url,
+            favoriteButtonTitle: favoriteButtonTitle
+        )
 
         let favoriteButtonTap = PassthroughSubject<Void, Never>()
         self.input = Input(favoriteButtonTap: favoriteButtonTap.send)
 
         favoriteButtonTap
-            .flatMap { _ in
-                model.contains
+            .map { _ in
+                favoritesModel.contains(repository).prefix(1)
             }
-            .sink { contains, repository in
+            .switchToLatest()
+            .sink { contains in
                 if contains {
-                    model.removeFavorite(repository)
+                    favoritesModel.removeFavorite(repository)
                 } else {
-                    model.addFavorite(repository)
+                    favoritesModel.addFavorite(repository)
                 }
             }
             .store(in: &cancellables)
@@ -52,11 +54,20 @@ final class RepositoryViewModel {
 }
 
 extension RepositoryViewModel {
-    struct Output {
-        let favoriteButtonTitle: AnyPublisher<String, Never>
-    }
-
     struct Input {
         let favoriteButtonTap: () -> Void
+    }
+
+    final class Output {
+        @Published
+        fileprivate(set) var url: URL
+        let favoriteButtonTitle: AnyPublisher<String, Never>
+        init(
+            url: URL,
+            favoriteButtonTitle: AnyPublisher<String, Never>
+        ) {
+            self.url = url
+            self.favoriteButtonTitle = favoriteButtonTitle
+        }
     }
 }

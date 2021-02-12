@@ -13,16 +13,11 @@ import UIKit
 
 final class RepositoryViewController: SFSafariViewController {
     private var cancellables = Set<AnyCancellable>()
-    private let viewModel: RepositoryViewModel
+    private let viewModel: RepositoryViewModelType
 
-    init(repository: Repository,
-         favoritesOutput: AnyPublisher<[Repository], Never>,
-         favoritesInput: @escaping ([Repository]) -> Void) {
-        self.viewModel = RepositoryViewModel(repository: repository,
-                                             favoritesOutput: favoritesOutput,
-                                             favoritesInput: favoritesInput)
-
-        super.init(url: repository.url, configuration: .init())
+    init(viewModel: RepositoryViewModelType) {
+        self.viewModel = viewModel
+        super.init(url: viewModel.output.url, configuration: .init())
         hidesBottomBarWhenPushed = true
     }
 
