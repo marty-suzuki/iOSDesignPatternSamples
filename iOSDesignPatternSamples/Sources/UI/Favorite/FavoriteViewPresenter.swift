@@ -12,11 +12,8 @@ import GithubKit
 protocol FavoritePresenter: class {
     var view: FavoriteView? { get set }
     var numberOfFavorites: Int { get }
-    func addFavorite(_ repository: Repository)
-    func removeFavorite(_ repository: Repository)
     func favoriteRepository(at index: Int) -> Repository
     func showFavoriteRepository(at index: Int)
-    func contains(_ repository: Repository) -> Bool
 }
 
 final class FavoriteViewPresenter: FavoritePresenter {
@@ -35,18 +32,6 @@ final class FavoriteViewPresenter: FavoritePresenter {
     
     func favoriteRepository(at index: Int) -> Repository {
         return model.favorites[index]
-    }
-    
-    func addFavorite(_ repository: Repository) {
-        model.addFavorite(repository)
-    }
-    
-    func removeFavorite(_ repository: Repository) {
-        model.removeFavorite(repository)
-    }
-    
-    func contains(_ repository: Repository) -> Bool {
-        return model.favorites.firstIndex { $0.url == repository.url } != nil
     }
     
     func showFavoriteRepository(at index: Int) {
