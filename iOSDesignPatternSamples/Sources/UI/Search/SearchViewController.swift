@@ -6,11 +6,9 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
-import NoticeObserveKit
+import UIKit
 
 final class SearchViewController: UIViewController {
 
@@ -19,12 +17,17 @@ final class SearchViewController: UIViewController {
     @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
 
     let searchBar = UISearchBar(frame: .zero)
-    let loadingView = LoadingView.makeFromNib()
+    let loadingView = LoadingView()
 
     private let flux: Flux
     let dataSource: SearchViewDataSource
 
-    private let disposeBag = DisposeBag()
+    @Published
+    private var query = ""
+    private let _searchText = PassthroughSubject<String?, Never>()
+    private let _viewDidAppear = PassthroughSubject<Void, Never>()
+    private let _viewDidDisappear = PassthroughSubject<Void, Never>()
+    private var cancellables = Set<AnyCancellable>()
 
     init(flux: Flux) {
         self.flux = flux
@@ -41,159 +44,177 @@ final class SearchViewController: UIViewController {
 
         navigationItem.titleView = searchBar
         searchBar.placeholder = "Input user name"
+        searchBar.delegate = self
         dataSource.configure(with: tableView)
 
         // observe store
         let store = flux.userStore
         let action = flux.userAction
-        let users = store.users.asObservable()
-        let totalCount = store.userTotalCount.asObservable()
-        let isFetching = store.isUserFetching.asObservable()
+        let users = store.$users
+        let totalCount = store.$userTotalCount
+        let isFetching = store.$isUserFetching
 
-        store.selectedUser
+        store.$selectedUser
             .filter { $0 != nil }
             .map { _ in }
-            .bind(to: showUserRepository)
-            .disposed(by: disposeBag)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showUserRepository)
+            .store(in: &cancellables)
 
-        Observable.merge(users.map { _ in },
-                         totalCount.map { _ in },
-                         isFetching.map { _ in })
-            .bind(to: reloadData)
-            .disposed(by: disposeBag)
+        users.map { _ in }
+            .merge(with: totalCount.map { _ in }, isFetching.map { _ in })
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
+            .store(in: &cancellables)
 
-        Observable.combineLatest(dataSource.headerFooterView, isFetching)
-            .bind(to: updateLoadingView)
-            .disposed(by: disposeBag)
+        dataSource.headerFooterView
+            .combineLatest(isFetching)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: updateLoadingView)
+            .store(in: &cancellables)
 
-        Observable.zip(totalCount, users)
-            .map { "\($1.count) / \($0)" }
-            .bind(to: totalCountLabel.rx.text)
-            .disposed(by: disposeBag)
-
-        // observe views
-        Observable.merge(searchBar.rx.searchButtonClicked.asObservable(),
-                         searchBar.rx.cancelButtonClicked.asObservable())
-            .bind(to: Binder(searchBar) { searchBar, _ in
-                searchBar.resignFirstResponder()
-                searchBar.showsCancelButton = false
-            })
-            .disposed(by: disposeBag)
-
-        searchBar.rx.textDidBeginEditing
-            .bind(to: Binder(searchBar) { searchBar, _ in
-                searchBar.showsCancelButton = true
-            })
-            .disposed(by: disposeBag)
-
-        let viewDidAppear = rx.methodInvoked(#selector(SearchViewController.viewDidAppear(_:)))
-        let viewDidDisappear = rx.methodInvoked(#selector(SearchViewController.viewDidDisappear(_:)))
-
-        viewDidDisappear
-            .bind(to: Binder(searchBar) { searchBar, _ in
-                searchBar.resignFirstResponder()
-            })
-            .disposed(by: disposeBag)
+        totalCount
+            .zip(users) { "\($1.count) / \($0)" }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.text, on: totalCountLabel)
+            .store(in: &cancellables)
 
         // keyboard notification
-        let isViewAppearing = Observable.merge(viewDidAppear.map { _ in true },
-                                               viewDidDisappear.map { _ in false })
+        let isViewAppearing = _viewDidAppear.map { true }
+            .merge(with: _viewDidDisappear.map { false })
 
         isViewAppearing
-            .flatMapLatest { isViewAppearing -> Observable<UIKeyboardInfo> in
+            .map { isViewAppearing -> AnyPublisher<UIKeyboardInfo, Never> in
                 guard isViewAppearing else {
-                    return .empty()
+                    return Empty().eraseToAnyPublisher()
                 }
-
-                return Observable.create { observer in
-                    let observation = NotificationCenter.default.nok.observe(name: .keyboardWillShow) {
-                        observer.onNext($0)
+                return NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+                    .flatMap { notification -> AnyPublisher<UIKeyboardInfo, Never> in
+                        guard let info = UIKeyboardInfo(notification: notification) else {
+                            return Empty().eraseToAnyPublisher()
+                        }
+                        return Just(info).eraseToAnyPublisher()
                     }
-                    return Disposables.create {
-                        observation.invalidate()
-                    }
-                }
+                    .eraseToAnyPublisher()
             }
-            .bind(to: keyboardWillShow)
-            .disposed(by: disposeBag)
+            .switchToLatest()
+            .sink(receiveValue: keyboardWillShow)
+            .store(in: &cancellables)
 
         isViewAppearing
-            .flatMapLatest { isViewAppearing -> Observable<UIKeyboardInfo> in
+            .map { isViewAppearing -> AnyPublisher<UIKeyboardInfo, Never> in
                 guard isViewAppearing else {
-                    return .empty()
+                    return Empty().eraseToAnyPublisher()
                 }
-
-                return Observable.create { observer in
-                    let observation = NotificationCenter.default.nok.observe(name: .keyboardWillHide) {
-                        observer.onNext($0)
+                return NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+                    .flatMap { notification -> AnyPublisher<UIKeyboardInfo, Never> in
+                        guard let info = UIKeyboardInfo(notification: notification) else {
+                            return Empty().eraseToAnyPublisher()
+                        }
+                        return Just(info).eraseToAnyPublisher()
                     }
-                    return Disposables.create {
-                        observation.invalidate()
-                    }
-                }
+                    .eraseToAnyPublisher()
             }
-            .bind(to: keyboardWillHide)
-            .disposed(by: disposeBag)
+            .switchToLatest()
+            .sink(receiveValue: keyboardWillHide)
+            .store(in: &cancellables)
 
         // search
-        let query = searchBar.rx.text.orEmpty
-            .debounce(0.3, scheduler: MainScheduler.instance)
-            .distinctUntilChanged()
-            .share()
+        _searchText
+            .map { $0 ?? "" }
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .assign(to: \.query, on: self)
+            .store(in: &cancellables)
 
-        let endCousor = store.lastPageInfo.asObservable()
+        let endCousor = store.$lastPageInfo
             .map { $0?.endCursor }
-            .share()
 
-        let initialLoad = query
+        let initialLoad = $query
             .filter { !$0.isEmpty }
-            .withLatestFrom(endCousor) { ($0, $1) }
+            .flatMap { query in
+                endCousor
+                    .map { (query, $0) }
+                    .prefix(1)
+            }
 
         let loadMore = dataSource.isReachedBottom
             .filter { $0 }
-            .withLatestFrom(Observable.combineLatest(query, endCousor)) { $1 }
+            .flatMap { [weak self] _ -> AnyPublisher<(String, String?), Never> in
+                guard let me = self else {
+                    return Empty().eraseToAnyPublisher()
+                }
+                return me.$query
+                    .combineLatest(endCousor)
+                    .eraseToAnyPublisher()
+            }
             .filter { !$0.isEmpty && $1 != nil }
 
-        query
-            .subscribe(onNext: { _ in
+        $query
+            .sink { _ in
                 action.clearPageInfo()
                 action.removeAllUsers()
                 action.userTotalCount(0)
-            })
-            .disposed(by: disposeBag)
-
-        Observable.merge(initialLoad, loadMore)
-            .map { SearchUserRequest(query: $0, after: $1) }
-            .distinctUntilChanged { $0.query == $1.query && $0.after == $1.after }
-            .subscribe(onNext: { request in
-                action.fetchUsers(withQuery: request.query, after: request.after)
-            })
-            .disposed(by: disposeBag)
-
-        Observable.merge(viewDidAppear.map { _ in true },
-                         viewDidDisappear.map { _ in false })
-            .flatMapLatest { isAppearing in
-                isAppearing ? store.fetchError : .empty()
             }
-            .bind(to: showAccessTokenAlert)
-            .disposed(by: disposeBag)
+            .store(in: &cancellables)
+
+        initialLoad
+            .merge(with: loadMore)
+            .map { SearchUserRequest(query: $0, after: $1) }
+            .removeDuplicates { $0.query == $1.query && $0.after == $1.after }
+            .sink { request in
+                //action.fetchUsers(withQuery: request.query, after: request.after)
+            }
+            .store(in: &cancellables)
+
+        isViewAppearing
+            .map { isAppearing -> AnyPublisher<ErrorMessage, Never> in
+                guard isAppearing else {
+                    return Empty().eraseToAnyPublisher()
+                }
+                return store.fetchError
+            }
+            .switchToLatest()
+            .sink(receiveValue: showAccessTokenAlert)
+            .store(in: &cancellables)
     }
 
-    private var showAccessTokenAlert: Binder<ErrorMessage> {
-        return Binder(self) { me, error in
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        _viewDidAppear.send()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        _viewDidDisappear.send()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        searchBar.resignFirstResponder()
+    }
+
+    private var showAccessTokenAlert: (ErrorMessage) -> Void {
+        { [weak self] error in
+            guard let me = self else {
+                return
+            }
             let alert = UIAlertController(title: error.title, message: error.message, preferredStyle: .alert)
             me.present(alert, animated: false, completion: nil)
         }
     }
 
-    private var reloadData: Binder<Void>  {
-        return Binder(self) { me, _ in
-            me.tableView.reloadData()
+    private var reloadData: () -> Void  {
+        { [weak self] in
+            self?.tableView.reloadData()
         }
     }
-    
-    private var keyboardWillShow: Binder<UIKeyboardInfo> {
-        return Binder(self) { me, keyboardInfo in
+
+    private var keyboardWillShow: (UIKeyboardInfo) -> Void {
+        { [weak self] keyboardInfo in
+            guard let me = self else {
+                return
+            }
             me.view.layoutIfNeeded()
             let extra = me.tabBarController?.tabBar.bounds.height ?? 0
             me.tableViewBottomConstraint.constant = keyboardInfo.frame.size.height - extra
@@ -204,9 +225,12 @@ final class SearchViewController: UIViewController {
                            completion: nil)
         }
     }
-    
-    private var keyboardWillHide: Binder<UIKeyboardInfo> {
-        return Binder(self) { me, keyboardInfo in
+
+    private var keyboardWillHide: (UIKeyboardInfo) -> Void {
+        { [weak self] keyboardInfo in
+            guard let me = self else {
+                return
+            }
             me.view.layoutIfNeeded()
             me.tableViewBottomConstraint.constant = 0
             UIView.animate(withDuration: keyboardInfo.animationDuration,
@@ -216,19 +240,45 @@ final class SearchViewController: UIViewController {
                            completion: nil)
         }
     }
-    
-    private var showUserRepository: Binder<Void> {
-        return Binder(self) { me, _ in
+
+    private var showUserRepository: () -> Void {
+        { [weak self] in
+            guard let me = self else {
+                return
+            }
             let vc = UserRepositoryViewController(flux: me.flux)
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
-    
-    private var updateLoadingView: Binder<(UIView, Bool)> {
-        return Binder(self) { (me, value: (view: UIView, isLoading: Bool)) in
+
+    private var updateLoadingView: (UIView, Bool) -> Void {
+        { [weak self] view, isLoading in
+            guard let me = self else {
+                return
+            }
             me.loadingView.removeFromSuperview()
-            me.loadingView.isLoading = value.isLoading
-            me.loadingView.add(to: value.view)
+            me.loadingView.isLoading = isLoading
+            me.loadingView.add(to: view)
         }
+    }
+}
+
+extension SearchViewController: UISearchBarDelegate {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchBar.showsCancelButton = true
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        searchBar.showsCancelButton = false
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        searchBar.showsCancelButton = false
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        _searchText.send(searchBar.text)
     }
 }

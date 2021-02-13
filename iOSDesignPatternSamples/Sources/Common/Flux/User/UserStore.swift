@@ -6,99 +6,66 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import Foundation
 import GithubKit
-import RxSwift
-import RxCocoa
 
 final class UserStore {
-    let isUserFetching: Observable<Bool>
-    fileprivate let _isUserFetching = BehaviorRelay<Bool>(value: false)
-    
-    let users: Observable<[User]>
-    fileprivate let _users = BehaviorRelay<[User]>(value: [])
-    
-    let selectedUser: Observable<User?>
-    fileprivate let _selectedUser = BehaviorRelay<User?>(value: nil)
-    
-    let lastPageInfo: Observable<PageInfo?>
-    fileprivate let _lastPageInfo = BehaviorRelay<PageInfo?>(value: nil)
-    
-    let lastSearchQuery: Observable<String>
-    fileprivate let _lastSearchQuery = BehaviorRelay<String>(value: "")
-    
-    let userTotalCount: Observable<Int>
-    fileprivate let _userTotalCount = BehaviorRelay<Int>(value: 0)
+    @Published
+    private(set) var isUserFetching = false
 
-    let fetchError: Observable<ErrorMessage>
+    @Published
+    private(set) var users: [User] = []
 
-    private let disposeBag = DisposeBag()
+    @Published
+    private(set) var selectedUser: User?
+
+    @Published
+    private(set) var lastPageInfo: PageInfo?
+
+    @Published
+    private(set) var lastSearchQuery = ""
+
+    @Published
+    private(set) var userTotalCount: Int = 0
+
+    let fetchError: AnyPublisher<ErrorMessage, Never>
+
+    private var cancellables = Set<AnyCancellable>()
 
     init(dispatcher: UserDispatcher) {
-        self.isUserFetching = _isUserFetching.asObservable()
-        self.users = _users.asObservable()
-        self.selectedUser = _selectedUser.asObservable()
-        self.lastPageInfo = _lastPageInfo.asObservable()
-        self.lastSearchQuery = _lastSearchQuery.asObservable()
-        self.userTotalCount = _userTotalCount.asObservable()
-        self.fetchError = dispatcher.fetchError.asObservable()
+        self.fetchError = dispatcher.fetchError.eraseToAnyPublisher()
 
         dispatcher.isUserFetching
-            .bind(to: _isUserFetching)
-            .disposed(by: disposeBag)
+            .assign(to: \.isUserFetching, on: self)
+            .store(in: &cancellables)
 
         dispatcher.addUsers
-            .withLatestFrom(_users) { $1 + $0 }
-            .bind(to: _users)
-            .disposed(by: disposeBag)
+            .map { [weak self] users in
+                self.map { $0.users + users } ?? []
+            }
+            .assign(to: \.users, on: self)
+            .store(in: &cancellables)
 
         dispatcher.removeAllUsers
             .map { [] }
-            .bind(to: _users)
-            .disposed(by: disposeBag)
+            .assign(to: \.users, on: self)
+            .store(in: &cancellables)
 
         dispatcher.selectedUser
-            .bind(to: _selectedUser)
-            .disposed(by: disposeBag)
+            .assign(to: \.selectedUser, on: self)
+            .store(in: &cancellables)
 
         dispatcher.lastPageInfo
-            .bind(to: _lastPageInfo)
-            .disposed(by: disposeBag)
+            .assign(to: \.lastPageInfo, on: self)
+            .store(in: &cancellables)
 
         dispatcher.lastSearchQuery
-            .bind(to: _lastSearchQuery)
-            .disposed(by: disposeBag)
+            .assign(to: \.lastSearchQuery, on: self)
+            .store(in: &cancellables)
 
         dispatcher.userTotalCount
-            .bind(to: _userTotalCount)
-            .disposed(by: disposeBag)
-    }
-}
-
-extension UserStore: ValueCompatible {}
-
-extension Value where Base == UserStore {
-    var isUserFetching: Bool {
-        return base._isUserFetching.value
-    }
-
-    var users: [User] {
-        return base._users.value
-    }
-
-    var selectedUse: User? {
-        return base._selectedUser.value
-    }
-
-    var lastPageInfo: PageInfo? {
-        return base._lastPageInfo.value
-    }
-
-    var lastSearchQuery: String {
-        return base._lastSearchQuery.value
-    }
-
-    var userTotalCount: Int {
-        return base._userTotalCount.value
+            .assign(to: \.userTotalCount, on: self)
+            .store(in: &cancellables)
     }
 }

@@ -6,17 +6,19 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
-import RxCocoa
-import RxSwift
+import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    let flux = Flux(searchModel: SearchModel(), repositoryModel: RepositoryModel())
+    let flux = Flux(
+        searchModel: SearchModel(sendRequest: ApiSession.shared.send),
+        repositoryModel: RepositoryModel(user: { fatalError() }(), sendRequest: ApiSession.shared.send)
+    )
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
@@ -40,4 +42,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 }
-

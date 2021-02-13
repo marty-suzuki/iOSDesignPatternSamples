@@ -16,7 +16,7 @@ final class Flux {
     init(searchModel: SearchModel,
          repositoryModel: RepositoryModel) {
         let userDispatcher = UserDispatcher()
-        self.userAction = UserAction(dispatcher: userDispatcher, model: searchModel)
+        self.userAction = UserAction(dispatcher: userDispatcher, searchModel: searchModel)
         self.userStore = UserStore(dispatcher: userDispatcher)
 
         let repositoryDispatcher = RepositoryDispatcher()

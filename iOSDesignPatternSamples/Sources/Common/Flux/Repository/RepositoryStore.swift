@@ -6,109 +6,77 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
 
 final class RepositoryStore {
-    let isRepositoryFetching: Observable<Bool>
-    fileprivate let _isRepositoryFetching = BehaviorRelay<Bool>(value: false)
-    
-    let favorites: Observable<[Repository]>
-    fileprivate let _favorites = BehaviorRelay<[Repository]>(value: [])
-    
-    let repositories: Observable<[Repository]>
-    fileprivate let _repositories = BehaviorRelay<[Repository]>(value: [])
-    
-    let selectedRepository: Observable<Repository?>
-    fileprivate let _selectedRepository = BehaviorRelay<Repository?>(value: nil)
-    
-    let lastPageInfo: Observable<PageInfo?>
-    fileprivate let _lastPageInfo = BehaviorRelay<PageInfo?>(value: nil)
-    
-    let repositoryTotalCount: Observable<Int>
-    fileprivate let _repositoryTotalCount = BehaviorRelay<Int>(value: 0)
+    @Published
+    private(set) var isRepositoryFetching = false
 
-    private let disposeBag = DisposeBag()
+    @Published
+    private(set) var favorites: [Repository] = []
+
+    @Published
+    private(set) var repositories: [Repository] = []
+
+    @Published
+    private(set) var selectedRepository: Repository?
+
+    @Published
+    private(set) var lastPageInfo: PageInfo?
+
+    @Published
+    private(set) var repositoryTotalCount: Int = 0
+
+    private var cancellable = Set<AnyCancellable>()
 
     init(dispatcher: RepositoryDispatcher) {
-        self.isRepositoryFetching = _isRepositoryFetching.asObservable()
-        self.favorites = _favorites.asObservable()
-        self.repositories = _repositories.asObservable()
-        self.selectedRepository = _selectedRepository.asObservable()
-        self.lastPageInfo = _lastPageInfo.asObservable()
-        self.repositoryTotalCount = _repositoryTotalCount.asObservable()
 
         dispatcher.isRepositoryFetching
-            .bind(to: _isRepositoryFetching)
-            .disposed(by: disposeBag)
+            .assign(to: \.isRepositoryFetching, on: self)
+            .store(in: &cancellable)
 
         dispatcher.addRepositories
-            .withLatestFrom(_repositories) { $1 + $0 }
-            .bind(to: _repositories)
-            .disposed(by: disposeBag)
+            .map { [weak self] repositories -> [Repository] in
+                self.map { $0.repositories + repositories } ?? []
+            }
+            .assign(to: \.repositories, on: self)
+            .store(in: &cancellable)
 
         dispatcher.removeAllRepositories
             .map { [] }
-            .bind(to: _repositories)
-            .disposed(by: disposeBag)
+            .assign(to: \.repositories, on: self)
+            .store(in: &cancellable)
 
         dispatcher.selectedRepository
-            .bind(to: _selectedRepository)
-            .disposed(by: disposeBag)
+            .assign(to: \.selectedRepository, on: self)
+            .store(in: &cancellable)
 
         dispatcher.lastPageInfo
-            .bind(to: _lastPageInfo)
-            .disposed(by: disposeBag)
+            .assign(to: \.lastPageInfo, on: self)
+            .store(in: &cancellable)
 
         dispatcher.repositoryTotalCount
-            .bind(to: _repositoryTotalCount)
-            .disposed(by: disposeBag)
+            .assign(to: \.repositoryTotalCount, on: self)
+            .store(in: &cancellable)
 
         dispatcher.addFavorite
-            .withLatestFrom(_favorites) { $1 + [$0] }
-            .bind(to: _favorites)
-            .disposed(by: disposeBag)
+            .map { [weak self] favorite -> [Repository] in
+                self.map { $0.favorites + [favorite] } ?? []
+            }
+            .assign(to: \.favorites, on: self)
+            .store(in: &cancellable)
 
         dispatcher.removeFavorite
-            .withLatestFrom(_favorites) { ($0, $1) }
-            .map { repository, favorites in
-                favorites.filter { $0.url != repository.url }
+            .map { [weak self] favorite -> [Repository] in
+                self.map { $0.favorites.filter { $0.url != favorite.url } } ?? []
             }
-            .bind(to: _favorites)
-            .disposed(by: disposeBag)
+            .assign(to: \.favorites, on: self)
+            .store(in: &cancellable)
 
         dispatcher.removeAllFavorites
             .map { [] }
-            .bind(to: _favorites)
-            .disposed(by: disposeBag)
-    }
-}
-
-extension RepositoryStore: ValueCompatible {}
-
-extension Value where Base == RepositoryStore {
-    var isRepositoryFetching: Bool {
-        return base._isRepositoryFetching.value
-    }
-
-    var favorites: [Repository] {
-        return base._favorites.value
-    }
-
-    var repositories: [Repository] {
-        return base._repositories.value
-    }
-
-    var selectedRepository: Repository? {
-        return base._selectedRepository.value
-    }
-
-    var lastPageInfo: PageInfo? {
-        return base._lastPageInfo.value
-    }
-
-    var repositoryTotalCount: Int {
-        return base._repositoryTotalCount.value
+            .assign(to: \.favorites, on: self)
+            .store(in: &cancellable)
     }
 }

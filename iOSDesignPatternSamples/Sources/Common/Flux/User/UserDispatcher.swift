@@ -6,16 +6,16 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import RxCocoa
+import Combine
 import GithubKit
 
 final class UserDispatcher {
-    let isUserFetching = PublishRelay<Bool>()
-    let addUsers = PublishRelay<[GithubKit.User]>()
-    let userTotalCount = PublishRelay<Int>()
-    let removeAllUsers = PublishRelay<Void>()
-    let selectedUser = PublishRelay<GithubKit.User?>()
-    let lastPageInfo = PublishRelay<PageInfo?>()
-    let lastSearchQuery = PublishRelay<String>()
-    let fetchError = PublishRelay<ErrorMessage>()
+    let isUserFetching = PassthroughSubject<Bool, Never>()
+    let addUsers = PassthroughSubject<[GithubKit.User], Never>()
+    let userTotalCount = PassthroughSubject<Int, Never>()
+    let removeAllUsers = PassthroughSubject<Void, Never>()
+    let selectedUser = PassthroughSubject<GithubKit.User?, Never>()
+    let lastPageInfo = PassthroughSubject<PageInfo?, Never>()
+    let lastSearchQuery = PassthroughSubject<String, Never>()
+    let fetchError = PassthroughSubject<ErrorMessage, Never>()
 }

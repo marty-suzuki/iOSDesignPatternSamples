@@ -6,10 +6,9 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
+import UIKit
 
 final class FavoriteViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
@@ -17,7 +16,10 @@ final class FavoriteViewController: UIViewController {
     let flux: Flux
     let dataSource: FavoriteViewDataSource
 
-    private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
+
+    private let _viewDidAppear = PassthroughSubject<Void, Never>()
+    private let _viewDidDisappear = PassthroughSubject<Void, Never>()
 
     init(flux: Flux) {
         self.flux = flux
@@ -37,36 +39,54 @@ final class FavoriteViewController: UIViewController {
 
         let store = flux.repositoryStore
 
-        Observable.merge(
-            rx.methodInvoked(#selector(FavoriteViewController.viewDidAppear(_:)))
-                .map { _ in true },
-            rx.sentMessage(#selector(FavoriteViewController.viewDidDisappear(_:)))
-                .map { _ in false }
-            )
-            .flatMapLatest { isAppearing -> Observable<Repository?> in
-                isAppearing ? store.selectedRepository : .empty()
+        _viewDidAppear
+            .map { true }
+            .merge(with: _viewDidDisappear.map { false })
+            .map { isAppearing -> AnyPublisher<Repository?, Never> in
+                guard isAppearing else {
+                    return Empty().eraseToAnyPublisher()
+                }
+                return store.$selectedRepository.eraseToAnyPublisher()
             }
+            .switchToLatest()
             .filter { $0 != nil }
             .map { _ in }
-            .bind(to: showRepository)
-            .disposed(by: disposeBag)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showRepository)
+            .store(in: &cancellables)
 
-        store.favorites
+        store.$favorites
             .map { _ in }
-            .bind(to: reloadData)
-            .disposed(by: disposeBag)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
+            .store(in: &cancellables)
     }
-    
-    private var showRepository: Binder<Void> {
-        return Binder(self) { me, _ in
-            guard let vc = RepositoryViewController(flux: me.flux) else { return }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        _viewDidAppear.send()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        _viewDidDisappear.send()
+    }
+
+    private var showRepository: () -> Void {
+        { [weak self] in
+            guard
+                let me = self,
+                let vc = RepositoryViewController(flux: me.flux)
+            else {
+                return
+            }
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
-    
-    private var reloadData: Binder<Void> {
-        return Binder(tableView) { tableView, _ in
-            tableView.reloadData()
+
+    private var reloadData: () -> Void {
+        { [weak self] in
+            self?.tableView.reloadData()
         }
     }
 }

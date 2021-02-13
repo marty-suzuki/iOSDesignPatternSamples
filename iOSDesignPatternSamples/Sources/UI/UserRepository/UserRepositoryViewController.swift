@@ -6,22 +6,21 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
+import UIKit
 
 final class UserRepositoryViewController: UIViewController {
 
     @IBOutlet private(set) weak var tableView: UITableView!
     @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
-    let loadingView = LoadingView.makeFromNib()
+    let loadingView = LoadingView()
 
     let flux: Flux
     let dataSource: UserRepositoryViewDataSource
 
-    private let disposeBag = DisposeBag()
+    private var cacellables = Set<AnyCancellable>()
 
     init(flux: Flux) {
         self.flux = flux
@@ -29,7 +28,7 @@ final class UserRepositoryViewController: UIViewController {
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -49,88 +48,118 @@ final class UserRepositoryViewController: UIViewController {
         let repositoryAction = flux.repositoryAction
         let repositoryStore = flux.repositoryStore
 
-        let repositories = repositoryStore.repositories.asObservable()
-        let totalCount = repositoryStore.repositoryTotalCount.asObservable()
-        let isFetching = repositoryStore.isRepositoryFetching.asObservable()
+        let repositories = repositoryStore.$repositories
+        let totalCount = repositoryStore.$repositoryTotalCount
+        let isFetching = repositoryStore.$isRepositoryFetching
 
-        repositoryStore.selectedRepository
+        repositoryStore.$selectedRepository
             .filter { $0 != nil }
             .map { _ in }
-            .bind(to: showRepository)
-            .disposed(by: disposeBag)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showRepository)
+            .store(in: &cacellables)
 
-        Observable.merge(repositories.map { _ in },
-                         totalCount.map { _ in },
-                         isFetching.map { _ in })
-            .bind(to: reloadData)
-            .disposed(by: disposeBag)
+        repositories.map { _ in }
+            .merge(with: totalCount.map { _ in }, isFetching.map { _ in })
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
+            .store(in: &cacellables)
 
-        Observable.combineLatest(dataSource.headerFooterView, isFetching)
-            .bind(to: updateLoadingView)
-            .disposed(by: disposeBag)
+        dataSource.headerFooterView
+            .combineLatest(isFetching)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: updateLoadingView)
+            .store(in: &cacellables)
 
-        Observable.combineLatest(repositories, totalCount)
-            .map { (repos, count) in "\(repos.count) / \(count)" }
-            .bind(to: totalCountLabel.rx.text)
-            .disposed(by: disposeBag)
+        repositories
+            .combineLatest(totalCount) { repos, count in
+                "\(repos.count) / \(count)"
+            }
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.text, on: totalCountLabel)
+            .store(in: &cacellables)
 
-        let user = flux.userStore.selectedUser
-            .flatMap { $0.map(Observable.just) ?? .empty() }
+        let user = flux.userStore.$selectedUser
+            .flatMap { user -> AnyPublisher<User, Never> in
+                guard let user = user else {
+                    return Empty().eraseToAnyPublisher()
+                }
+                return Just(user).eraseToAnyPublisher()
+            }
 
         user
             .map { "\($0.login)'s Repositories" }
-            .bind(to: rx.title)
-            .disposed(by: disposeBag)
+            .assign(to: \.title, on: self)
+            .store(in: &cacellables)
 
         // fetch repositories
-        let fetchRepositories = PublishSubject<Void>()
-        let _fetchTrigger = PublishSubject<(User, String?)>()
+        let fetchRepositories = PassthroughSubject<Void, Never>()
+        var _fetchTrigger: (User, String?)?
 
         let initialLoadRequest = fetchRepositories
-            .withLatestFrom(_fetchTrigger)
+            .flatMap { _ -> AnyPublisher<(User, String?), Never> in
+                guard let param = _fetchTrigger else {
+                    return Empty().eraseToAnyPublisher()
+                }
+                return Just(param).eraseToAnyPublisher()
+            }
 
         let loadMoreRequest = dataSource.isReachedBottom
             .filter { $0 }
-            .withLatestFrom(_fetchTrigger)
+            .flatMap { _ -> AnyPublisher<(User, String?), Never> in
+                guard let param = _fetchTrigger else {
+                    return Empty().eraseToAnyPublisher()
+                }
+                return Just(param).eraseToAnyPublisher()
+            }
             .filter { $1 != nil }
         
-        Observable.merge(initialLoadRequest, loadMoreRequest)
+        initialLoadRequest
+            .merge(with: loadMoreRequest)
             .map { UserNodeRequest(id: $0.id, after: $1) }
-            .distinctUntilChanged { $0.id == $1.id && $0.after == $1.after }
-            .subscribe(onNext: { request in
-                repositoryAction.fetchRepositories(withUserID: request.id,
-                                                   after: request.after)
-            })
-            .disposed(by: disposeBag)
+            .removeDuplicates { $0.id == $1.id && $0.after == $1.after }
+            .sink { request in
+//                repositoryAction.fetchRepositories(withUserID: request.id,
+//                                                   after: request.after)
+            }
+            .store(in: &cacellables)
 
-        let endCousor = repositoryStore.lastPageInfo.asObservable()
+        let endCousor = repositoryStore.$lastPageInfo
             .map { $0?.endCursor }
 
-        Observable.combineLatest(user, endCousor)
-            .bind(to: _fetchTrigger)
-            .disposed(by: disposeBag)
+        user
+            .combineLatest(endCousor)
+            .sink {
+                _fetchTrigger = $0
+            }
+            .store(in: &cacellables)
 
-        fetchRepositories.onNext(())
+        fetchRepositories.send()
     }
-    
-    private var showRepository: Binder<Void> {
-        return Binder(self) { me, repository in
-            guard let vc = RepositoryViewController(flux: me.flux) else { return }
+
+    private var showRepository: () -> Void {
+        { [weak self] in
+            guard
+                let me = self,
+                let vc = RepositoryViewController(flux: me.flux)
+            else {
+                return
+            }
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
-    
-    private var reloadData: Binder<Void> {
-        return Binder(tableView) { tableView, _ in
-            tableView.reloadData()
+
+    private var reloadData: () -> Void {
+        { [weak self] in
+            self?.tableView.reloadData()
         }
     }
-    
-    private var updateLoadingView: Binder<(UIView, Bool)> {
-        return Binder(loadingView) { (loadingView, value: (view: UIView, isLoading: Bool)) in
-            loadingView.removeFromSuperview()
-            loadingView.isLoading = value.isLoading
-            loadingView.add(to: value.view)
+
+    private var updateLoadingView: (UIView, Bool) -> Void {
+        { [weak self] view, isLoading in
+            self?.loadingView.removeFromSuperview()
+            self?.loadingView.isLoading = isLoading
+            self?.loadingView.add(to: view)
         }
     }
 }

@@ -6,18 +6,17 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
-import RxCocoa
-import RxSwift
 
 final class RepositoryDispatcher {
-    let isRepositoryFetching = PublishRelay<Bool>()
-    let addRepositories = PublishRelay<[GithubKit.Repository]>()
-    let removeAllRepositories = PublishRelay<Void>()
-    let selectedRepository = PublishRelay<GithubKit.Repository?>()
-    let lastPageInfo = PublishRelay<PageInfo?>()
-    let repositoryTotalCount = PublishRelay<Int>()
-    let addFavorite = PublishRelay<GithubKit.Repository>()
-    let removeFavorite = PublishRelay<GithubKit.Repository>()
-    let removeAllFavorites = PublishRelay<Void>()
+    let isRepositoryFetching = PassthroughSubject<Bool, Never>()
+    let addRepositories = PassthroughSubject<[GithubKit.Repository], Never>()
+    let removeAllRepositories = PassthroughSubject<Void, Never>()
+    let selectedRepository = PassthroughSubject<GithubKit.Repository?, Never>()
+    let lastPageInfo = PassthroughSubject<PageInfo?, Never>()
+    let repositoryTotalCount = PassthroughSubject<Int, Never>()
+    let addFavorite = PassthroughSubject<GithubKit.Repository, Never>()
+    let removeFavorite = PassthroughSubject<GithubKit.Repository, Never>()
+    let removeAllFavorites = PassthroughSubject<Void, Never>()
 }
