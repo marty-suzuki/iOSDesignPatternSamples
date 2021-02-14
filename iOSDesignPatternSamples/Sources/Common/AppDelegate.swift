@@ -15,10 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    let flux = Flux(
-        searchModel: SearchModel(sendRequest: ApiSession.shared.send),
-        repositoryModel: RepositoryModel(user: { fatalError() }(), sendRequest: ApiSession.shared.send)
-    )
+    let favoriteModel = FavoriteModel()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
@@ -26,11 +23,76 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             for value in viewControllers.enumerated() {
                 switch value {
                 case let (0, nc as UINavigationController):
-                    let searchVC = SearchViewController(flux: flux)
+                    let repositoryDispatcher = RepositoryDispatcher()
+                    let searchDispatcher = SearchDispatcher()
+                    let userRepositoryDispatcher = UserRepositoryDispatcher()
+                    let searchVC = SearchViewController(
+                        action: SearchAction(
+                            notificationCenter: .default,
+                            dispatcher: searchDispatcher,
+                            searchModel: SearchModel(
+                                sendRequest: ApiSession.shared.send
+                            )
+                        ),
+                        store: SearchStore(
+                            dispatcher: searchDispatcher
+                        ),
+                        makeUserRepositoryAction: { user in
+                            UserRepositoryAction(
+                                dispatcher: userRepositoryDispatcher,
+                                repositoryModel: RepositoryModel(
+                                    user: user,
+                                    sendRequest: ApiSession.shared.send
+                                )
+                            )
+                        },
+                        makeUserRepositoryStore: { user in
+                            UserRepositoryStore(
+                                user: user,
+                                dispatcher: userRepositoryDispatcher
+                            )
+                        },
+                        makeRepositoryAction: { [favoriteModel] repository in
+                            RepositoryAction(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher,
+                                favoriteModel: favoriteModel
+                            )
+                        },
+                        makeRepositoryStore: { repository in
+                            RepositoryStore(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher
+                            )
+                        }
+                    )
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let favoriteVC = FavoriteViewController(flux: flux)
+                    let favoriteDispatcher = FavoriteDispatcher()
+                    let repositoryDispatcher = RepositoryDispatcher()
+                    let favoriteVC = FavoriteViewController(
+                        action: FavoriteAction(
+                            dispatcher: favoriteDispatcher,
+                            favoriteModel: favoriteModel
+                        ),
+                        store: FavoriteStore(
+                            dispatcher: favoriteDispatcher
+                        ),
+                        makeRepositoryAction: { [favoriteModel] repository in
+                            RepositoryAction(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher,
+                                favoriteModel: favoriteModel
+                            )
+                        },
+                        makeRepositoryStore: { repository in
+                            RepositoryStore(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher
+                            )
+                        }
+                    )
                     nc.setViewControllers([favoriteVC], animated: false)
 
                 default:
