@@ -12,20 +12,15 @@ import GithubKit
 import UIKit
 
 final class UserRepositoryViewDataSource: NSObject {
-    let isReachedBottom: AnyPublisher<Bool, Never>
-    let headerFooterView: AnyPublisher<UIView, Never>
+    private let action: UserRepositoryActionType
+    private let store: UserRepositoryStoreType
 
-    private let _isReachedBottom = PassthroughSubject<Bool, Never>()
-    private let _headerFooterView = PassthroughSubject<UIView, Never>()
-
-    private let action: RepositoryAction
-    private let store: RepositoryStore
-
-    init(flux: Flux) {
-        self.action = flux.repositoryAction
-        self.store = flux.repositoryStore
-        self.isReachedBottom = _isReachedBottom.removeDuplicates().eraseToAnyPublisher()
-        self.headerFooterView = _headerFooterView.eraseToAnyPublisher()
+    init(
+        action: UserRepositoryActionType,
+        store: UserRepositoryStoreType
+    ) {
+        self.action = action
+        self.store = store
     }
 
     func configure(with tableView: UITableView) {
@@ -58,7 +53,7 @@ extension UserRepositoryViewDataSource: UITableViewDataSource {
         guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
             return nil
         }
-        _headerFooterView.send(view)
+        action.headerFooterView(view)
         return view
     }
 }
@@ -66,8 +61,7 @@ extension UserRepositoryViewDataSource: UITableViewDataSource {
 extension UserRepositoryViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        let repository = store.repositories[indexPath.row]
-        action.selectRepository(repository)
+        action.select(from: store.repositories, at: indexPath)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -85,6 +79,6 @@ extension UserRepositoryViewDataSource: UITableViewDelegate {
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        _isReachedBottom.send(maxScrollDistance <= scrollView.contentOffset.y)
+        action.isReachedBottom(maxScrollDistance <= scrollView.contentOffset.y)
     }
 }

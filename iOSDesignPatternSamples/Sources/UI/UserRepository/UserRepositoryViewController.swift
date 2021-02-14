@@ -17,14 +17,29 @@ final class UserRepositoryViewController: UIViewController {
 
     let loadingView = LoadingView()
 
-    let flux: Flux
+    let action: UserRepositoryActionType
+    let store: UserRepositoryStoreType
     let dataSource: UserRepositoryViewDataSource
 
+    private let makeRepositoryAction: (Repository) -> RepositoryActionType
+    private let makeRepositoryStore: (Repository) -> RepositoryStoreType
     private var cacellables = Set<AnyCancellable>()
 
-    init(flux: Flux) {
-        self.flux = flux
-        self.dataSource = UserRepositoryViewDataSource(flux: flux)
+    init(
+        action: UserRepositoryActionType,
+        store: UserRepositoryStoreType,
+        makeRepositoryAction: @escaping (Repository) -> RepositoryActionType,
+        makeRepositoryStore: @escaping (Repository) -> RepositoryStoreType
+
+    ) {
+        self.action = action
+        self.store = store
+        self.makeRepositoryAction = makeRepositoryAction
+        self.makeRepositoryStore = makeRepositoryStore
+        self.dataSource = UserRepositoryViewDataSource(
+            action: action,
+            store: store
+        )
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -33,118 +48,47 @@ final class UserRepositoryViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    deinit {
-        flux.userAction.clearSelectedUser()
-        flux.repositoryAction.removeAllRepositories()
-        flux.repositoryAction.repositoryTotalCount(0)
-        flux.repositoryAction.clearPageInfo()
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        title = store.title
+
         dataSource.configure(with: tableView)
 
-        let repositoryAction = flux.repositoryAction
-        let repositoryStore = flux.repositoryStore
-
-        let repositories = repositoryStore.$repositories
-        let totalCount = repositoryStore.$repositoryTotalCount
-        let isFetching = repositoryStore.$isRepositoryFetching
-
-        repositoryStore.$selectedRepository
-            .filter { $0 != nil }
-            .map { _ in }
+        store.selectedRepository
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: showRepository)
             .store(in: &cacellables)
 
-        repositories.map { _ in }
-            .merge(with: totalCount.map { _ in }, isFetching.map { _ in })
+        store.reloadData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: reloadData)
             .store(in: &cacellables)
 
-        dataSource.headerFooterView
-            .combineLatest(isFetching)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: updateLoadingView)
-            .store(in: &cacellables)
-
-        repositories
-            .combineLatest(totalCount) { repos, count in
-                "\(repos.count) / \(count)"
-            }
+        store.countStringPublisher
+            .map(Optional.some)
             .receive(on: DispatchQueue.main)
             .assign(to: \.text, on: totalCountLabel)
             .store(in: &cacellables)
 
-        let user = flux.userStore.$selectedUser
-            .flatMap { user -> AnyPublisher<User, Never> in
-                guard let user = user else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                return Just(user).eraseToAnyPublisher()
-            }
-
-        user
-            .map { "\($0.login)'s Repositories" }
-            .assign(to: \.title, on: self)
+        store.updateLoadingView
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: updateLoadingView)
             .store(in: &cacellables)
 
-        // fetch repositories
-        let fetchRepositories = PassthroughSubject<Void, Never>()
-        var _fetchTrigger: (User, String?)?
-
-        let initialLoadRequest = fetchRepositories
-            .flatMap { _ -> AnyPublisher<(User, String?), Never> in
-                guard let param = _fetchTrigger else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                return Just(param).eraseToAnyPublisher()
-            }
-
-        let loadMoreRequest = dataSource.isReachedBottom
-            .filter { $0 }
-            .flatMap { _ -> AnyPublisher<(User, String?), Never> in
-                guard let param = _fetchTrigger else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                return Just(param).eraseToAnyPublisher()
-            }
-            .filter { $1 != nil }
-        
-        initialLoadRequest
-            .merge(with: loadMoreRequest)
-            .map { UserNodeRequest(id: $0.id, after: $1) }
-            .removeDuplicates { $0.id == $1.id && $0.after == $1.after }
-            .sink { request in
-//                repositoryAction.fetchRepositories(withUserID: request.id,
-//                                                   after: request.after)
-            }
-            .store(in: &cacellables)
-
-        let endCousor = repositoryStore.$lastPageInfo
-            .map { $0?.endCursor }
-
-        user
-            .combineLatest(endCousor)
-            .sink {
-                _fetchTrigger = $0
-            }
-            .store(in: &cacellables)
-
-        fetchRepositories.send()
+        action.load()
+        action.fetchRepositories()
     }
 
-    private var showRepository: () -> Void {
-        { [weak self] in
-            guard
-                let me = self,
-                let vc = RepositoryViewController(flux: me.flux)
-            else {
+    private var showRepository: (Repository) -> Void {
+        { [weak self] repository in
+            guard let me = self else {
                 return
             }
+            let vc = RepositoryViewController(
+                action: me.makeRepositoryAction(repository),
+                store: me.makeRepositoryStore(repository)
+            )
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
