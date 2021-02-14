@@ -19,174 +19,97 @@ final class SearchViewController: UIViewController {
     let searchBar = UISearchBar(frame: .zero)
     let loadingView = LoadingView()
 
-    private let flux: Flux
+    let action: SearchActionType
+    let store: SearchStoreType
     let dataSource: SearchViewDataSource
 
-    @Published
-    private var query = ""
-    private let _searchText = PassthroughSubject<String?, Never>()
-    private let _viewDidAppear = PassthroughSubject<Void, Never>()
-    private let _viewDidDisappear = PassthroughSubject<Void, Never>()
+    private let makeUserRepositoryAction: (User) -> UserRepositoryActionType
+    private let makeUserRepositoryStore: (User) -> UserRepositoryStoreType
+
+    private let makeRepositoryAction: (Repository) -> RepositoryActionType
+    private let makeRepositoryStore: (Repository) -> RepositoryStoreType
+
     private var cancellables = Set<AnyCancellable>()
 
-    init(flux: Flux) {
-        self.flux = flux
-        self.dataSource = SearchViewDataSource(flux: flux)
+    init(
+        action: SearchActionType,
+        store: SearchStoreType,
+        makeUserRepositoryAction: @escaping (User) -> UserRepositoryActionType,
+        makeUserRepositoryStore: @escaping (User) -> UserRepositoryStoreType,
+        makeRepositoryAction: @escaping (Repository) -> RepositoryActionType,
+        makeRepositoryStore: @escaping (Repository) -> RepositoryStoreType
+    ) {
+        self.action = action
+        self.store = store
+        self.makeUserRepositoryAction = makeUserRepositoryAction
+        self.makeUserRepositoryStore = makeUserRepositoryStore
+        self.makeRepositoryAction = makeRepositoryAction
+        self.makeRepositoryStore = makeRepositoryStore
+        self.dataSource = SearchViewDataSource(action: action, store: store)
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         navigationItem.titleView = searchBar
         searchBar.placeholder = "Input user name"
         searchBar.delegate = self
+
         dataSource.configure(with: tableView)
 
-        // observe store
-        let store = flux.userStore
-        let action = flux.userAction
-        let users = store.$users
-        let totalCount = store.$userTotalCount
-        let isFetching = store.$isUserFetching
-
-        store.$selectedUser
-            .filter { $0 != nil }
-            .map { _ in }
+        // observe viewModel
+        store.accessTokenAlert
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: showUserRepository)
+            .sink(receiveValue: showAccessTokenAlert)
             .store(in: &cancellables)
 
-        users.map { _ in }
-            .merge(with: totalCount.map { _ in }, isFetching.map { _ in })
+        store.keyboardWillShow
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: reloadData)
+            .sink(receiveValue: keyboardWillShow)
             .store(in: &cancellables)
 
-        dataSource.headerFooterView
-            .combineLatest(isFetching)
+        store.keyboardWillHide
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: updateLoadingView)
+            .sink(receiveValue: keyboardWillHide)
             .store(in: &cancellables)
 
-        totalCount
-            .zip(users) { "\($1.count) / \($0)" }
+        store.countStringPublisher
+            .map(Optional.some)
             .receive(on: DispatchQueue.main)
             .assign(to: \.text, on: totalCountLabel)
             .store(in: &cancellables)
 
-        // keyboard notification
-        let isViewAppearing = _viewDidAppear.map { true }
-            .merge(with: _viewDidDisappear.map { false })
-
-        isViewAppearing
-            .map { isViewAppearing -> AnyPublisher<UIKeyboardInfo, Never> in
-                guard isViewAppearing else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                return NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
-                    .flatMap { notification -> AnyPublisher<UIKeyboardInfo, Never> in
-                        guard let info = UIKeyboardInfo(notification: notification) else {
-                            return Empty().eraseToAnyPublisher()
-                        }
-                        return Just(info).eraseToAnyPublisher()
-                    }
-                    .eraseToAnyPublisher()
-            }
-            .switchToLatest()
-            .sink(receiveValue: keyboardWillShow)
+        store.reloadData
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
             .store(in: &cancellables)
 
-        isViewAppearing
-            .map { isViewAppearing -> AnyPublisher<UIKeyboardInfo, Never> in
-                guard isViewAppearing else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                return NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
-                    .flatMap { notification -> AnyPublisher<UIKeyboardInfo, Never> in
-                        guard let info = UIKeyboardInfo(notification: notification) else {
-                            return Empty().eraseToAnyPublisher()
-                        }
-                        return Just(info).eraseToAnyPublisher()
-                    }
-                    .eraseToAnyPublisher()
-            }
-            .switchToLatest()
-            .sink(receiveValue: keyboardWillHide)
+        store.selectedUser
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showUserRepository)
             .store(in: &cancellables)
 
-        // search
-        _searchText
-            .map { $0 ?? "" }
-            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
-            .removeDuplicates()
-            .assign(to: \.query, on: self)
+        store.updateLoadingView
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: updateLoadingView)
             .store(in: &cancellables)
 
-        let endCousor = store.$lastPageInfo
-            .map { $0?.endCursor }
-
-        let initialLoad = $query
-            .filter { !$0.isEmpty }
-            .flatMap { query in
-                endCousor
-                    .map { (query, $0) }
-                    .prefix(1)
-            }
-
-        let loadMore = dataSource.isReachedBottom
-            .filter { $0 }
-            .flatMap { [weak self] _ -> AnyPublisher<(String, String?), Never> in
-                guard let me = self else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                return me.$query
-                    .combineLatest(endCousor)
-                    .eraseToAnyPublisher()
-            }
-            .filter { !$0.isEmpty && $1 != nil }
-
-        $query
-            .sink { _ in
-                action.clearPageInfo()
-                action.removeAllUsers()
-                action.userTotalCount(0)
-            }
-            .store(in: &cancellables)
-
-        initialLoad
-            .merge(with: loadMore)
-            .map { SearchUserRequest(query: $0, after: $1) }
-            .removeDuplicates { $0.query == $1.query && $0.after == $1.after }
-            .sink { request in
-                //action.fetchUsers(withQuery: request.query, after: request.after)
-            }
-            .store(in: &cancellables)
-
-        isViewAppearing
-            .map { isAppearing -> AnyPublisher<ErrorMessage, Never> in
-                guard isAppearing else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                return store.fetchError
-            }
-            .switchToLatest()
-            .sink(receiveValue: showAccessTokenAlert)
-            .store(in: &cancellables)
+        action.load()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        _viewDidAppear.send()
+        action.isViewAppearing(true)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        _viewDidDisappear.send()
+        action.isViewAppearing(false)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -241,12 +164,17 @@ final class SearchViewController: UIViewController {
         }
     }
 
-    private var showUserRepository: () -> Void {
-        { [weak self] in
+    private var showUserRepository: (User) -> Void {
+        { [weak self] user in
             guard let me = self else {
                 return
             }
-            let vc = UserRepositoryViewController(flux: me.flux)
+            let vc = UserRepositoryViewController(
+                action: me.makeUserRepositoryAction(user),
+                store: me.makeUserRepositoryStore(user),
+                makeRepositoryAction: me.makeRepositoryAction,
+                makeRepositoryStore: me.makeRepositoryStore
+            )
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }
@@ -279,6 +207,6 @@ extension SearchViewController: UISearchBarDelegate {
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        _searchText.send(searchBar.text)
+        action.searchText(searchBar.text)
     }
 }

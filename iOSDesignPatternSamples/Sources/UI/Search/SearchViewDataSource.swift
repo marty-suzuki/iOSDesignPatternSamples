@@ -12,20 +12,15 @@ import GithubKit
 import UIKit
 
 final class SearchViewDataSource: NSObject {
-    let isReachedBottom: AnyPublisher<Bool, Never>
-    let headerFooterView: AnyPublisher<UIView, Never>
+    private let action: SearchActionType
+    private let store: SearchStoreType
 
-    private let _isReachedBottom = PassthroughSubject<Bool, Never>()
-    private let _headerFooterView = PassthroughSubject<UIView, Never>()
-
-    private let store: UserStore
-    private let action: UserAction
-
-    init(flux: Flux) {
-        self.action = flux.userAction
-        self.store = flux.userStore
-        self.isReachedBottom = _isReachedBottom.removeDuplicates().eraseToAnyPublisher()
-        self.headerFooterView = _headerFooterView.eraseToAnyPublisher()
+    init(
+        action: SearchActionType,
+        store: SearchStoreType
+    ) {
+        self.action = action
+        self.store = store
     }
 
     func configure(with tableView: UITableView) {
@@ -58,7 +53,7 @@ extension SearchViewDataSource: UITableViewDataSource {
         guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
             return nil
         }
-        _headerFooterView.send(view)
+        action.headerFooterView(view)
         return view
     }
 }
@@ -66,8 +61,7 @@ extension SearchViewDataSource: UITableViewDataSource {
 extension SearchViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        let user = store.users[indexPath.row]
-        action.selectUser(user)
+        action.setlect(from: store.users, at: indexPath)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -80,11 +74,11 @@ extension SearchViewDataSource: UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return store.isUserFetching ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return store.isFetchingUsers ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        _isReachedBottom.send(maxScrollDistance <= scrollView.contentOffset.y)
+        action.isViewAppearing(maxScrollDistance <= scrollView.contentOffset.y)
     }
 }
