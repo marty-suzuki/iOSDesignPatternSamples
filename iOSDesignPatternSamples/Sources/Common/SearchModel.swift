@@ -10,22 +10,16 @@ import Combine
 import GithubKit
 import Foundation
 
-protocol SearchModelDelegate: AnyObject {
-    func searchModel(_ searchModel: SearchModel, didRecieve errorMessage: ErrorMessage)
-    func searchModel(_ searchModel: SearchModel, didChange isFetchingUsers: Bool)
-    func searchModel(_ searchModel: SearchModel, didChange users: [User])
-    func searchModel(_ searchModel: SearchModel, didChange totalCount: Int)
-}
-
 struct ErrorMessage {
     let title: String
     let message: String
 }
 
 protocol SearchModelType: AnyObject {
-    var delegate: SearchModelDelegate? { get set }
-    var query: String { get }
-    var totalCount: Int { get }
+    var errorMessage: AnyPublisher<ErrorMessage, Never> { get }
+    var usersPublisher: Published<[User]>.Publisher { get }
+    var isFetchingUsersPublisher: Published<Bool>.Publisher { get }
+    var totalCountPublisher: Published<Int>.Publisher { get }
     var users: [User] { get }
     var isFetchingUsers: Bool { get }
     func fetchUsers()
@@ -33,105 +27,126 @@ protocol SearchModelType: AnyObject {
 }
 
 final class SearchModel: SearchModelType {
+    let errorMessage: AnyPublisher<ErrorMessage, Never>
 
-    weak var delegate: SearchModelDelegate?
-
-    private(set) var query: String = ""
-    private(set) var totalCount: Int = 0 {
-        didSet {
-            delegate?.searchModel(self, didChange: totalCount)
-        }
+    var usersPublisher: Published<[User]>.Publisher {
+        $users
     }
-    private(set) var users: [User] = [] {
-        didSet {
-            delegate?.searchModel(self, didChange: users)
-        }
+    var isFetchingUsersPublisher: Published<Bool>.Publisher {
+        $isFetchingUsers
     }
-    private(set) var isFetchingUsers = false {
-        didSet {
-            delegate?.searchModel(self, didChange: isFetchingUsers)
-        }
+    var totalCountPublisher: Published<Int>.Publisher {
+        $totalCount
     }
 
+    @Published
+    private(set) var users: [User] = []
+    @Published
+    private(set) var isFetchingUsers = false
+    @Published
+    private var totalCount = 0
+    @Published
     private var pageInfo: PageInfo?
-    private var cancellable: AnyCancellable?
+    @Published
+    private var query: String?
 
-    private lazy var debounce: (_ action: @escaping () -> ()) -> () = {
-        var lastFireTime: DispatchTime = .now()
-        let delay: DispatchTimeInterval = .milliseconds(500)
-        return { [delay, asyncAfter, mainAsync] action in
-            let deadline: DispatchTime = .now() + delay
-            lastFireTime = .now()
-            asyncAfter(deadline) { [delay] in
-                let now: DispatchTime = .now()
-                let when: DispatchTime = lastFireTime + delay
-                if now < when { return }
-                lastFireTime = .now()
-                mainAsync(action)
-            }
-        }
-    }()
+    private var cancellable = Set<AnyCancellable>()
 
-    private let sendRequest: SendRequest<SearchUserRequest>
-    private let asyncAfter: (DispatchTime, @escaping @convention(block) () -> Void) -> Void
-    private let mainAsync: (@escaping () -> Void) -> Void
+    private let _fetchUsers = PassthroughSubject<Void, Never>()
+    private let _feachUsersWithQuery = PassthroughSubject<String, Never>()
 
     init(
-        sendRequest: @escaping SendRequest<SearchUserRequest>,
-        asyncAfter: @escaping (DispatchTime, @escaping @convention(block) () -> Void) -> Void,
-        mainAsync: @escaping (@escaping () -> Void) -> Void
+        sendRequest: @escaping SendRequest<SearchUserRequest>
     ) {
-        self.sendRequest = sendRequest
-        self.asyncAfter = asyncAfter
-        self.mainAsync = mainAsync
-    }
+        let _errorMessage = PassthroughSubject<ErrorMessage, Never>()
+        self.errorMessage = _errorMessage.eraseToAnyPublisher()
 
-    func fetchUsers() {
-        if query.isEmpty || cancellable != nil { return }
-        if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
-        isFetchingUsers = true
-        let request = SearchUserRequest(query: query, after: pageInfo?.endCursor)
-        self.cancellable = sendRequest(request) { [weak self] in
-            guard let me = self else {
-                return
+        let pageInfo = $pageInfo
+
+        let query = $query
+            .map { $0 ?? "" }
+
+        let initialLoad = query
+            .filter { !$0.isEmpty }
+            .flatMap { query in
+                pageInfo
+                    .map { (query, $0) }
+                    .prefix(1)
             }
 
-            switch $0 {
-            case .success(let value):
-                me.pageInfo = value.pageInfo
-                me.users.append(contentsOf: value.nodes)
-                me.totalCount = value.totalCount
+        let loadMore = _fetchUsers
+            .flatMap { _ in
+                query
+                    .combineLatest(pageInfo)
+                    .prefix(1)
+            }
+            .filter { !$0.isEmpty && $1 != nil }
 
-            case .failure(let error):
-                if case .emptyToken? = (error as? ApiSession.Error) {
+        _feachUsersWithQuery
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { [weak self] in
+                self?.pageInfo = nil
+                self?.users = []
+                self?.totalCount = 0
+                self?.query = $0
+            }
+            .store(in: &cancellable)
+
+        let requestWillStart = initialLoad.merge(with: loadMore)
+            .flatMap { query, pageInfo -> AnyPublisher<SearchUserRequest, Never> in
+                if let pageInfo = pageInfo, !pageInfo.hasNextPage {
+                    return Empty().eraseToAnyPublisher()
+                }
+                let request = SearchUserRequest(query: query, after: pageInfo?.endCursor)
+                return Just(request).eraseToAnyPublisher()
+            }
+            .removeDuplicates { $0.query == $1.query && $0.after == $1.after }
+
+        requestWillStart
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isFetchingUsers = true
+            })
+            .flatMap { request -> AnyPublisher<Result<Response<User>, Error>, Never> in
+                sendRequest(request)
+                    .map { response in
+                        Result<Response<User>, Error>.success(response)
+                    }
+                    .catch { error in
+                        Just(Result<Response<User>, Error>.failure(error))
+                    }
+                    .prefix(1)
+                    .eraseToAnyPublisher()
+            }
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isFetchingUsers = false
+            })
+            .sink { [weak self] result in
+                guard let me = self else {
+                    return
+                }
+                switch result {
+                case let .success(response):
+                    me.pageInfo = response.pageInfo
+                    me.users = me.users + response.nodes
+                    me.totalCount = response.totalCount
+                case let .failure(error):
+                    guard case .emptyToken? = (error as? ApiSession.Error) else {
+                        return
+                    }
                     let title = "Access Token Error"
                     let message = "\"Github Personal Access Token\" is Required.\n Please set it in ApiSession.extension.swift!"
-                    let errorMessage = ErrorMessage(title: title, message: message)
-                    me.delegate?.searchModel(me, didRecieve: errorMessage)
+                    _errorMessage.send(ErrorMessage(title: title, message: message))
                 }
             }
-
-            me.isFetchingUsers = false
-            me.cancellable = nil
-        }
+            .store(in: &cancellable)
     }
 
     func fetchUsers(withQuery query: String) {
-        debounce { [weak self] in
-            guard let me = self else {
-                return
-            }
+        _feachUsersWithQuery.send(query)
+    }
 
-            let oldValue = me.query
-            me.query = query
-            if query != oldValue {
-                me.users.removeAll()
-                me.pageInfo = nil
-                me.totalCount = 0
-            }
-            me.cancellable?.cancel()
-            me.cancellable = nil
-            me.fetchUsers()
-        }
+    func fetchUsers() {
+        _fetchUsers.send()
     }
 }

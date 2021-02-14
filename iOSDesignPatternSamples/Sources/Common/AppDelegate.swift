@@ -6,15 +6,16 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
+import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    let favoriteModel = FavoriteModel()
+    private let favoriteModel = FavoriteModel()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
@@ -23,23 +24,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 switch value {
                 case let (0, nc as UINavigationController):
                     let searchVC = SearchViewController(
-                        searchModel: SearchModel(
-                            sendRequest: ApiSession.shared.send,
-                            asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) },
-                            mainAsync: { work in DispatchQueue.main.async { work() } }
-                        ),
-                        makeFavoriteModel: { [favoriteModel] in favoriteModel },
-                        makeRepositoryModel: {
-                            RepositoryModel(
-                                user: $0,
+                        viewModel: SearchViewModel(
+                            searchModel: SearchModel(
                                 sendRequest: ApiSession.shared.send
+                            ),
+                            notificationCenter: .default
+                        ),
+                        makeUserRepositoryViewModel: { [favoriteModel] in
+                            UserRepositoryViewModel(
+                                user: $0,
+                                favoriteModel: favoriteModel,
+                                repositoryModel: RepositoryModel(
+                                    user: $0,
+                                    sendRequest: ApiSession.shared.send
+                                )
+                            )
+                        },
+                        makeRepositoryViewModel: { [favoriteModel] in
+                            RepositoryViewModel(
+                                repository: $0,
+                                favoritesModel: favoriteModel
                             )
                         }
                     )
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let favoriteVC = FavoriteViewController(favoriteModel: favoriteModel)
+                    let favoriteVC = FavoriteViewController(
+                        viewModel: FavoriteViewModel(favoriteModel: favoriteModel),
+                        makeRepositoryViewModel: { [favoriteModel] in
+                            RepositoryViewModel(repository: $0, favoritesModel: favoriteModel)
+                        }
+                    )
                     nc.setViewControllers([favoriteVC], animated: false)
 
                 default:
@@ -51,4 +67,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 }
-

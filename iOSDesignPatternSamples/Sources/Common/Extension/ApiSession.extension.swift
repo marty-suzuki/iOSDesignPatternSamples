@@ -16,4 +16,4 @@ extension ApiSession {
     }()
 }
 
-typealias SendRequest<T: Request> = (T, @escaping (Result<T.ResponseType, Swift.Error>) -> ()) -> AnyCancellable
+typealias SendRequest<T: Request> = (T) -> AnyPublisher<T.ResponseType, Swift.Error>
