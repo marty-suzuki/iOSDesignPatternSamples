@@ -13,17 +13,27 @@ import UIKit
 final class FavoriteViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
 
-    let flux: Flux
+    let action: FavoriteActionType
+    let store: FavoriteStoreType
     let dataSource: FavoriteViewDataSource
-
+    private let makeRepositoryAction: (Repository) -> RepositoryActionType
+    private let makeRepositoryStore: (Repository) -> RepositoryStoreType
     private var cancellables = Set<AnyCancellable>()
 
-    private let _viewDidAppear = PassthroughSubject<Void, Never>()
-    private let _viewDidDisappear = PassthroughSubject<Void, Never>()
-
-    init(flux: Flux) {
-        self.flux = flux
-        self.dataSource = FavoriteViewDataSource(flux: flux)
+    init(
+        action: FavoriteActionType,
+        store: FavoriteStoreType,
+        makeRepositoryAction: @escaping (Repository) -> RepositoryActionType,
+        makeRepositoryStore: @escaping (Repository) -> RepositoryStoreType
+    ) {
+        self.action = action
+        self.store = store
+        self.dataSource = FavoriteViewDataSource(
+            action: action,
+            store: store
+        )
+        self.makeRepositoryAction = makeRepositoryAction
+        self.makeRepositoryStore = makeRepositoryStore
         super.init(nibName: FavoriteViewController.className, bundle: nil)
     }
 
@@ -37,49 +47,29 @@ final class FavoriteViewController: UIViewController {
         title = "On Memory Favorite"
         dataSource.configure(with: tableView)
 
-        let store = flux.repositoryStore
-
-        _viewDidAppear
-            .map { true }
-            .merge(with: _viewDidDisappear.map { false })
-            .map { isAppearing -> AnyPublisher<Repository?, Never> in
-                guard isAppearing else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                return store.$selectedRepository.eraseToAnyPublisher()
-            }
-            .switchToLatest()
-            .filter { $0 != nil }
-            .map { _ in }
+        store.selectedRepository
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: showRepository)
             .store(in: &cancellables)
 
-        store.$favorites
-            .map { _ in }
+        store.reloadData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: reloadData)
             .store(in: &cancellables)
+
+        action.load()
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        _viewDidAppear.send()
-    }
-
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        _viewDidDisappear.send()
-    }
-
-    private var showRepository: () -> Void {
-        { [weak self] in
-            guard
-                let me = self,
-                let vc = RepositoryViewController(flux: me.flux)
-            else {
+    private var showRepository: (Repository) -> Void {
+        { [weak self] repository in
+            guard let me = self else {
                 return
             }
+
+            let vc = RepositoryViewController(
+                action: me.makeRepositoryAction(repository),
+                store: me.makeRepositoryStore(repository)
+            )
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }

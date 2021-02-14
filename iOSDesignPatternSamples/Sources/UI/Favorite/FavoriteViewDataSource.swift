@@ -11,12 +11,15 @@ import GithubKit
 import UIKit
 
 final class FavoriteViewDataSource: NSObject {
-    private let store: RepositoryStore
-    private let action: RepositoryAction
+    private let action: FavoriteActionType
+    private let store: FavoriteStoreType
 
-    init(flux: Flux) {
-        self.store = flux.repositoryStore
-        self.action = flux.repositoryAction
+    init(
+        action: FavoriteActionType,
+        store: FavoriteStoreType
+    ) {
+        self.action = action
+        self.store = store
     }
 
     func configure(with tableView: UITableView) {
@@ -43,8 +46,7 @@ extension FavoriteViewDataSource: UITableViewDataSource {
 extension FavoriteViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        let repository = store.favorites[indexPath.row]
-        action.selectRepository(repository)
+        action.select(from: store.favorites, for: indexPath)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
