@@ -34,9 +34,7 @@ You can compare differences like this.
 
 ## Run
 
-To run this example, you need `make install`.
-
-In addition, you need to set `Github Personal Access Token` like this.
+You need to set `Github Personal Access Token` like this.
 
 ```swift
 extension ApiSession {
@@ -49,17 +47,13 @@ extension ApiSession {
 
 ## Requirements
 
-- Xcode 10.1 or later
-- iOS 11 or later
-- Swift 4.2 or later
+- Xcode 12 or later
+- iOS 13 or later
+- Swift 5 or later
 
 ## Special Thanks
 
-- [RxSwift](https://github.com/ReactiveX/RxSwift)
-- [Nuke](https://github.com/kean/Nuke)
-- [SwiftIconFont](https://github.com/0x73/SwiftIconFont)
 - [GithubKitForSample](https://github.com/marty-suzuki/GithubKitForSample)
-- [NoticeObserveKit](https://github.com/marty-suzuki/NoticeObserveKit)
 
 ## Author
 

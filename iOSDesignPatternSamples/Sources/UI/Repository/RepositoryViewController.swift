@@ -6,66 +6,49 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
-import SafariServices
+import Combine
 import GithubKit
-import RxSwift
-import RxCocoa
+import SafariServices
+import UIKit
 
 final class RepositoryViewController: SFSafariViewController {
-    private let disposeBag = DisposeBag()
-    private let flux: Flux
+    private var cancellables = Set<AnyCancellable>()
+    private let action: RepositoryActionType
+    private let store: RepositoryStoreType
 
-    init?(flux: Flux) {
-        guard let repository = flux.repositoryStore.value.selectedRepository else { return nil }
-        self.flux = flux
-        super.init(url: repository.url, configuration: .init())
+    private let _favoriteButtonTap = PassthroughSubject<Void, Never>()
+
+    init(
+        action: RepositoryActionType,
+        store: RepositoryStoreType
+    ) {
+        self.action = action
+        self.store = store
+        super.init(url: store.repository.url, configuration: .init())
         hidesBottomBarWhenPushed = true
-
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let favoriteButtonItem = UIBarButtonItem(title: nil, style: .plain, target: nil, action: nil)
+        let favoriteButtonItem = UIBarButtonItem(
+            title: nil,
+            style: .plain,
+            target: self,
+            action: #selector(self.favoriteButtonTap(_:))
+        )
         navigationItem.rightBarButtonItem = favoriteButtonItem
 
-        let store = flux.repositoryStore
-        let action = flux.repositoryAction
+        store.favoriteButtonTitlePublisher
+            .map(Optional.some)
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.title, on: favoriteButtonItem)
+            .store(in: &cancellables)
 
-        let repository = store.selectedRepository
-            .flatMap { $0.map(Observable.just) ?? .empty() }
+        action.load()
+    }
 
-        let containsRepository = Observable.combineLatest(repository, store.favorites)
-            { repo, favs in (favs.contains { $0.url == repo.url }, repo) }
-
-        let buttonTapAndRepository = favoriteButtonItem.rx.tap
-            .withLatestFrom(containsRepository)
-            .share()
-
-        buttonTapAndRepository
-            .filter { $0.0 }
-            .subscribe(onNext: {
-                action.removeFavorite($1)
-            })
-            .disposed(by: disposeBag)
-
-        buttonTapAndRepository
-            .filter { !$0.0 }
-            .subscribe(onNext: {
-                action.addFavorite($1)
-            })
-            .disposed(by: disposeBag)
-
-        containsRepository
-            .map { $0.0 ? "Remove" : "Add" }
-            .bind(to: favoriteButtonItem.rx.title)
-            .disposed(by: disposeBag)
-
-        rx.sentMessage(#selector(RepositoryViewController.viewDidDisappear(_:)))
-            .subscribe(onNext: { _ in
-                action.clearSelectedRepository()
-            })
-            .disposed(by: disposeBag)
+    @objc private func favoriteButtonTap(_: UIBarButtonItem) {
+        action.toggleFavorite()
     }
 }
