@@ -32,8 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                             dispatcher: searchDispatcher,
                             searchModel: SearchModel(
                                 sendRequest: ApiSession.shared.send
-                            ),
-                            notificationCenter: .default
+                            )
                         ),
                         store: SearchStore(
                             dispatcher: searchDispatcher

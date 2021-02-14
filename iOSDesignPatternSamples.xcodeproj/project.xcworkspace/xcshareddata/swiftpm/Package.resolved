@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "GithubKit",
+        "repositoryURL": "https://github.com/marty-suzuki/GithubKitForSample",
+        "state": {
+          "branch": null,
+          "revision": "f7bd7db22f19574d2686c82165ef37b148075eb8",
+          "version": "0.5.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
