@@ -23,7 +23,8 @@ final class SearchViewModel: SearchViewModelType{
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        searchModel: SearchModelType
+        searchModel: SearchModelType,
+        notificationCenter: NotificationCenter
     ) {
         let viewDidAppear = PassthroughSubject<Void, Never>()
         let viewDidDisappear = PassthroughSubject<Void, Never>()
@@ -69,7 +70,7 @@ final class SearchViewModel: SearchViewModelType{
                 guard isViewAppearing else {
                     return Empty().eraseToAnyPublisher()
                 }
-                return NotificationCenter.default.publisher(for: name)
+                return notificationCenter.publisher(for: name)
                     .flatMap { notification -> AnyPublisher<UIKeyboardInfo, Never> in
                         guard let info = UIKeyboardInfo(notification: notification) else {
                             return Empty().eraseToAnyPublisher()

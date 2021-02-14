@@ -27,7 +27,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         viewModel: SearchViewModel(
                             searchModel: SearchModel(
                                 sendRequest: ApiSession.shared.send
-                            )
+                            ),
+                            notificationCenter: .default
                         ),
                         makeUserRepositoryViewModel: { [favoriteModel] in
                             UserRepositoryViewModel(
