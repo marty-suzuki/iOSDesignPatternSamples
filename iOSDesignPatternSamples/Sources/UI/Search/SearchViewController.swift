@@ -10,8 +10,18 @@ import Combine
 import GithubKit
 import UIKit
 
-final class SearchViewController: UIViewController {
-    
+protocol SearchView: class {
+    func reloadData()
+    func keyboardWillShow(with keyboardInfo: UIKeyboardInfo)
+    func keyboardWillHide(with keyboardInfo: UIKeyboardInfo)
+    func showUserRepository(with user: User)
+    func updateTotalCountLabel(_ countText: String)
+    func updateLoadingView(with view: UIView, isLoading: Bool)
+    func showEmptyTokenError(errorMessage: ErrorMessage)
+}
+
+final class SearchViewController: UIViewController, SearchView {
+
     @IBOutlet private(set) weak var totalCountLabel: UILabel!
     @IBOutlet private(set) weak var tableView: UITableView!
     @IBOutlet private(set) weak var tableViewBottomConstraint: NSLayoutConstraint!
@@ -19,27 +29,21 @@ final class SearchViewController: UIViewController {
     let searchBar = UISearchBar(frame: .zero)
     let loadingView = LoadingView()
 
-    private var cancelllables = Set<AnyCancellable>()
-    private var isReachedBottom: Bool = false {
-        didSet {
-            if isReachedBottom && isReachedBottom != oldValue {
-                searchModel.fetchUsers()
-            }
-        }
-    }
+    let searchPresenter: SearchPresenter
+    let dataSource: SearchViewDataSource
 
-    let searchModel: SearchModelType
-    private let makeFavoriteModel: () -> FavoriteModelType
-    private let makeRepositoryModel: (User) -> RepositoryModelType
+    private let makeRepositoryPresenter: (Repository) -> RepositoryPresenter
+    private let makeUserRepositoryPresenter: (User) -> UserRepositoryPresenter
 
     init(
-        searchModel: SearchModelType,
-        makeFavoriteModel: @escaping () -> FavoriteModelType,
-        makeRepositoryModel: @escaping (User) -> RepositoryModelType
+        searchPresenter: SearchPresenter,
+        makeRepositoryPresenter: @escaping (Repository) -> RepositoryPresenter,
+        makeUserRepositoryPresenter: @escaping (User) -> UserRepositoryPresenter
     ) {
-        self.searchModel = searchModel
-        self.makeFavoriteModel = makeFavoriteModel
-        self.makeRepositoryModel = makeRepositoryModel
+        self.searchPresenter = searchPresenter
+        self.dataSource = SearchViewDataSource(presenter: searchPresenter)
+        self.makeRepositoryPresenter = makeRepositoryPresenter
+        self.makeUserRepositoryPresenter = makeUserRepositoryPresenter
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
 
@@ -54,14 +58,14 @@ final class SearchViewController: UIViewController {
         searchBar.delegate = self
         searchBar.placeholder = "Input user name"
         
-        configure(with: tableView)
+        dataSource.configure(with: tableView)
 
-        searchModel.delegate = self
+        searchPresenter.view = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        observeKeyboard()
+        searchPresenter.viewWillAppear()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -69,85 +73,58 @@ final class SearchViewController: UIViewController {
         if searchBar.isFirstResponder {
             searchBar.resignFirstResponder()
         }
-        cancelllables.removeAll()
+        searchPresenter.viewWillDisappear()
     }
     
-    private func configure(with tableView: UITableView) {
-        tableView.dataSource = self
-        tableView.delegate = self
-        
-        tableView.register(UserViewCell.self)
-        tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
+    func reloadData() {
+        tableView.reloadData()
     }
-    
-    private func observeKeyboard() {
-        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
-            .sink { [weak self] notification in
-                guard let info = UIKeyboardInfo(notification: notification) else {
-                    return
-                }
-                self?.view.layoutIfNeeded()
-                let extra = self?.tabBarController?.tabBar.bounds.height ?? 0
-                self?.tableViewBottomConstraint.constant = info.frame.size.height - extra
-                UIView.animate(withDuration: info.animationDuration, delay: 0, options: info.animationCurve, animations: {
-                    self?.view.layoutIfNeeded()
-                }, completion: nil)
-            }
-            .store(in: &cancelllables)
 
-        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
-            .sink { [weak self] notification in
-                guard let info = UIKeyboardInfo(notification: notification) else {
-                    return
-                }
-                self?.view.layoutIfNeeded()
-                self?.tableViewBottomConstraint.constant = 0
-                UIView.animate(withDuration: info.animationDuration, delay: 0, options: info.animationCurve, animations: {
-                    self?.view.layoutIfNeeded()
-                }, completion: nil)
-            }
-            .store(in: &cancelllables)
+    func keyboardWillShow(with keyboardInfo: UIKeyboardInfo) {
+        view.layoutIfNeeded()
+        let extra = tabBarController?.tabBar.bounds.height ?? 0
+        tableViewBottomConstraint.constant = keyboardInfo.frame.size.height - extra
+        UIView.animate(withDuration: keyboardInfo.animationDuration,
+                       delay: 0,
+                       options: keyboardInfo.animationCurve,
+                       animations: { self.view.layoutIfNeeded() },
+                       completion: nil)
+    }
+
+    func keyboardWillHide(with keyboardInfo: UIKeyboardInfo) {
+        view.layoutIfNeeded()
+        tableViewBottomConstraint.constant = 0
+        UIView.animate(withDuration: keyboardInfo.animationDuration,
+                       delay: 0,
+                       options: keyboardInfo.animationCurve,
+                       animations: { self.view.layoutIfNeeded() },
+                       completion: nil)
     }
     
-    private func showUserRepository(with user: User) {
-        let repositoryModel = makeRepositoryModel(user)
+    func showUserRepository(with user: User) {
+        let presenter = makeUserRepositoryPresenter(user)
         let vc = UserRepositoryViewController(
-            repositoryModel: repositoryModel,
-            makeFavoriteModel: makeFavoriteModel
+            userRepositoryPresenter: presenter,
+            makeRepositoryPresenter: makeRepositoryPresenter
         )
         navigationController?.pushViewController(vc, animated: true)
     }
-}
-
-extension SearchViewController: SearchModelDelegate {
-    func searchModel(_ searchModel: SearchModel, didRecieve errorMessage: ErrorMessage) {
-        DispatchQueue.main.async {
-            let alert = UIAlertController(title: errorMessage.title,
-                                          message: errorMessage.message,
-                                          preferredStyle: .alert)
-            self.present(alert, animated: false, completion: nil)
-        }
+    
+    func updateTotalCountLabel(_ countText: String) {
+        totalCountLabel.text = countText
+    }
+    
+    func updateLoadingView(with view: UIView, isLoading: Bool) {
+        loadingView.removeFromSuperview()
+        loadingView.isLoading = isLoading
+        loadingView.add(to: view)
     }
 
-    func searchModel(_ searchModel: SearchModel, didChange isFetchingUsers: Bool) {
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-        }
-    }
-
-    func searchModel(_ searchModel: SearchModel, didChange users: [User]) {
-        let totalCount = searchModel.totalCount
-        DispatchQueue.main.async {
-            self.totalCountLabel.text = "\(users.count) / \(totalCount)"
-            self.tableView.reloadData()
-        }
-    }
-
-    func searchModel(_ searchModel: SearchModel, didChange totalCount: Int) {
-        let users = searchModel.users
-        DispatchQueue.main.async {
-            self.totalCountLabel.text = "\(users.count) / \(totalCount)"
-        }
+    func showEmptyTokenError(errorMessage: ErrorMessage) {
+        let alert = UIAlertController(title: errorMessage.message,
+                                      message: errorMessage.message,
+                                      preferredStyle: .alert)
+        present(alert, animated: false, completion: nil)
     }
 }
 
@@ -167,58 +144,6 @@ extension SearchViewController: UISearchBarDelegate {
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        searchModel.fetchUsers(withQuery: searchText)
-    }
-}
-
-extension SearchViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return searchModel.users.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeue(UserViewCell.self, for: indexPath)
-        cell.configure(with: searchModel.users[indexPath.row])
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return nil
-    }
-    
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
-            return nil
-        }
-        loadingView.removeFromSuperview()
-        loadingView.isLoading = searchModel.isFetchingUsers
-        loadingView.add(to: view)
-        return view
-    }
-}
-
-extension SearchViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: false)
-        
-        let user = searchModel.users[indexPath.row]
-        showUserRepository(with: user)
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UserViewCell.calculateHeight(with: searchModel.users[indexPath.row], and: tableView)
-    }
-    
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return .leastNormalMagnitude
-    }
-    
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return searchModel.isFetchingUsers ? LoadingView.defaultHeight : .leastNormalMagnitude
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        isReachedBottom = maxScrollDistance <= scrollView.contentOffset.y
+        searchPresenter.search(queryIfNeeded: searchText)
     }
 }

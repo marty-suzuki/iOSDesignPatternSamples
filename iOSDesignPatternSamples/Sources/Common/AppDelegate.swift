@@ -23,23 +23,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 switch value {
                 case let (0, nc as UINavigationController):
                     let searchVC = SearchViewController(
-                        searchModel: SearchModel(
-                            sendRequest: ApiSession.shared.send,
-                            asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) },
-                            mainAsync: { work in DispatchQueue.main.async { work() } }
+                        searchPresenter: SearchViewPresenter(
+                            model: SearchModel(
+                                sendRequest: ApiSession.shared.send,
+                                asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) },
+                                mainAsync: { work in DispatchQueue.main.async { work() } }
+                            ),
+                            mainAsync: { work in DispatchQueue.main.async { work() } },
+                            notificationCenter: .default
                         ),
-                        makeFavoriteModel: { [favoriteModel] in favoriteModel },
-                        makeRepositoryModel: {
-                            RepositoryModel(
-                                user: $0,
-                                sendRequest: ApiSession.shared.send
+                        makeRepositoryPresenter: { [favoriteModel] in
+                            RepositoryViewPresenter(
+                                repository: $0,
+                                favoriteModel: favoriteModel
+                            )
+                        },
+                        makeUserRepositoryPresenter: {
+                            UserRepositoryViewPresenter(
+                                model: RepositoryModel(
+                                    user: $0,
+                                    sendRequest: ApiSession.shared.send
+                                ),
+                                mainAsync: { work in DispatchQueue.main.async { work() } }
                             )
                         }
                     )
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let favoriteVC = FavoriteViewController(favoriteModel: favoriteModel)
+                    let favoriteVC = FavoriteViewController(
+                        presenter: FavoriteViewPresenter(model: favoriteModel),
+                        makeRepositoryPresenter: { [favoriteModel] in
+                            RepositoryViewPresenter(
+                                repository: $0,
+                                favoriteModel: favoriteModel
+                            )
+                        }
+                    )
                     nc.setViewControllers([favoriteVC], animated: false)
 
                 default:
