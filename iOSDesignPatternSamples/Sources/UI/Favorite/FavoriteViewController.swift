@@ -6,29 +6,34 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
+import UIKit
 
-protocol FavoriteView: class {
-    func reloadData()
-    func showRepository(with repository: Repository)
-}
-
-final class FavoriteViewController: UIViewController, FavoriteView {
+final class FavoriteViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
 
-    let presenter: FavoritePresenter
+    let action: FavoriteActionType
+    let store: FavoriteStoreType
     let dataSource: FavoriteViewDataSource
-
-    private let makeRepositoryPresenter: (Repository) -> RepositoryPresenter
+    private let makeRepositoryAction: (Repository) -> RepositoryActionType
+    private let makeRepositoryStore: (Repository) -> RepositoryStoreType
+    private var cancellables = Set<AnyCancellable>()
 
     init(
-        presenter: FavoritePresenter,
-        makeRepositoryPresenter: @escaping (Repository) -> RepositoryPresenter
+        action: FavoriteActionType,
+        store: FavoriteStoreType,
+        makeRepositoryAction: @escaping (Repository) -> RepositoryActionType,
+        makeRepositoryStore: @escaping (Repository) -> RepositoryStoreType
     ) {
-        self.presenter = presenter
-        self.dataSource = FavoriteViewDataSource(presenter: presenter)
-        self.makeRepositoryPresenter = makeRepositoryPresenter
+        self.action = action
+        self.store = store
+        self.dataSource = FavoriteViewDataSource(
+            action: action,
+            store: store
+        )
+        self.makeRepositoryAction = makeRepositoryAction
+        self.makeRepositoryStore = makeRepositoryStore
         super.init(nibName: FavoriteViewController.className, bundle: nil)
     }
 
@@ -40,18 +45,38 @@ final class FavoriteViewController: UIViewController, FavoriteView {
         super.viewDidLoad()
 
         title = "On Memory Favorite"
-
-        presenter.view = self
         dataSource.configure(with: tableView)
+
+        store.selectedRepository
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showRepository)
+            .store(in: &cancellables)
+
+        store.reloadData
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
+            .store(in: &cancellables)
+
+        action.load()
     }
-    
-    func showRepository(with repository: Repository) {
-        let repositoryPresenter = makeRepositoryPresenter(repository)
-        let vc = RepositoryViewController(presenter: repositoryPresenter)
-        navigationController?.pushViewController(vc, animated: true)
+
+    private var showRepository: (Repository) -> Void {
+        { [weak self] repository in
+            guard let me = self else {
+                return
+            }
+
+            let vc = RepositoryViewController(
+                action: me.makeRepositoryAction(repository),
+                store: me.makeRepositoryStore(repository)
+            )
+            me.navigationController?.pushViewController(vc, animated: true)
+        }
     }
-    
-    func reloadData() {
-        tableView?.reloadData()
+
+    private var reloadData: () -> Void {
+        { [weak self] in
+            self?.tableView.reloadData()
+        }
     }
 }

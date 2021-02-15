@@ -6,71 +6,104 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import GithubKit
 import UIKit
 
-protocol UserRepositoryView: class {
-    func reloadData()
-    func showRepository(with repository: Repository)
-    func updateTotalCountLabel(_ countText: String)
-    func updateLoadingView(with view: UIView, isLoading: Bool)
-}
-
-final class UserRepositoryViewController: UIViewController, UserRepositoryView {
+final class UserRepositoryViewController: UIViewController {
 
     @IBOutlet private(set) weak var tableView: UITableView!
     @IBOutlet private(set) weak var totalCountLabel: UILabel!
 
     let loadingView = LoadingView()
 
-    let userRepositoryPresenter: UserRepositoryPresenter
+    let action: UserRepositoryActionType
+    let store: UserRepositoryStoreType
     let dataSource: UserRepositoryViewDataSource
 
-    private let makeRepositoryPresenter: (Repository) -> RepositoryPresenter
-    
+    private let makeRepositoryAction: (Repository) -> RepositoryActionType
+    private let makeRepositoryStore: (Repository) -> RepositoryStoreType
+    private var cacellables = Set<AnyCancellable>()
+
     init(
-        userRepositoryPresenter: UserRepositoryPresenter,
-        makeRepositoryPresenter: @escaping (Repository) -> RepositoryPresenter
+        action: UserRepositoryActionType,
+        store: UserRepositoryStoreType,
+        makeRepositoryAction: @escaping (Repository) -> RepositoryActionType,
+        makeRepositoryStore: @escaping (Repository) -> RepositoryStoreType
+
     ) {
-        self.userRepositoryPresenter = userRepositoryPresenter
-        self.dataSource = UserRepositoryViewDataSource(presenter: userRepositoryPresenter)
-        self.makeRepositoryPresenter = makeRepositoryPresenter
+        self.action = action
+        self.store = store
+        self.makeRepositoryAction = makeRepositoryAction
+        self.makeRepositoryStore = makeRepositoryStore
+        self.dataSource = UserRepositoryViewDataSource(
+            action: action,
+            store: store
+        )
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        title = userRepositoryPresenter.title
-        
+
+        title = store.title
+
         dataSource.configure(with: tableView)
 
-        userRepositoryPresenter.view = self
-        userRepositoryPresenter.fetchRepositories()
+        store.selectedRepository
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showRepository)
+            .store(in: &cacellables)
+
+        store.reloadData
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
+            .store(in: &cacellables)
+
+        store.countStringPublisher
+            .map(Optional.some)
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.text, on: totalCountLabel)
+            .store(in: &cacellables)
+
+        store.updateLoadingView
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: updateLoadingView)
+            .store(in: &cacellables)
+
+        action.load()
+        action.fetchRepositories()
     }
-    
-    func showRepository(with repository: Repository) {
-        let repositoryPresenter = makeRepositoryPresenter(repository)
-        let vc = RepositoryViewController(presenter: repositoryPresenter)
-        navigationController?.pushViewController(vc, animated: true)
+
+    private var showRepository: (Repository) -> Void {
+        { [weak self] repository in
+            guard let me = self else {
+                return
+            }
+            let vc = RepositoryViewController(
+                action: me.makeRepositoryAction(repository),
+                store: me.makeRepositoryStore(repository)
+            )
+            me.navigationController?.pushViewController(vc, animated: true)
+        }
     }
-    
-    func reloadData() {
-        tableView.reloadData()
+
+    private var reloadData: () -> Void {
+        { [weak self] in
+            self?.tableView.reloadData()
+        }
     }
-    
-    func updateTotalCountLabel(_ countText: String) {
-        totalCountLabel.text = countText
-    }
-    
-    func updateLoadingView(with view: UIView, isLoading: Bool) {
-        loadingView.removeFromSuperview()
-        loadingView.isLoading = isLoading
-        loadingView.add(to: view)
+
+    private var updateLoadingView: (UIView, Bool) -> Void {
+        { [weak self] view, isLoading in
+            self?.loadingView.removeFromSuperview()
+            self?.loadingView.isLoading = isLoading
+            self?.loadingView.add(to: view)
+        }
     }
 }

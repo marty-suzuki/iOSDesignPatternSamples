@@ -6,8 +6,9 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
+import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -22,41 +23,73 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             for value in viewControllers.enumerated() {
                 switch value {
                 case let (0, nc as UINavigationController):
+                    let repositoryDispatcher = RepositoryDispatcher()
+                    let searchDispatcher = SearchDispatcher()
+                    let userRepositoryDispatcher = UserRepositoryDispatcher()
                     let searchVC = SearchViewController(
-                        searchPresenter: SearchViewPresenter(
-                            model: SearchModel(
-                                sendRequest: ApiSession.shared.send,
-                                asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) },
-                                mainAsync: { work in DispatchQueue.main.async { work() } }
-                            ),
-                            mainAsync: { work in DispatchQueue.main.async { work() } },
-                            notificationCenter: .default
+                        action: SearchAction(
+                            notificationCenter: .default,
+                            dispatcher: searchDispatcher,
+                            searchModel: SearchModel(
+                                sendRequest: ApiSession.shared.send
+                            )
                         ),
-                        makeRepositoryPresenter: { [favoriteModel] in
-                            RepositoryViewPresenter(
-                                repository: $0,
+                        store: SearchStore(
+                            dispatcher: searchDispatcher
+                        ),
+                        makeUserRepositoryAction: { user in
+                            UserRepositoryAction(
+                                dispatcher: userRepositoryDispatcher,
+                                repositoryModel: RepositoryModel(
+                                    user: user,
+                                    sendRequest: ApiSession.shared.send
+                                )
+                            )
+                        },
+                        makeUserRepositoryStore: { user in
+                            UserRepositoryStore(
+                                user: user,
+                                dispatcher: userRepositoryDispatcher
+                            )
+                        },
+                        makeRepositoryAction: { [favoriteModel] repository in
+                            RepositoryAction(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher,
                                 favoriteModel: favoriteModel
                             )
                         },
-                        makeUserRepositoryPresenter: {
-                            UserRepositoryViewPresenter(
-                                model: RepositoryModel(
-                                    user: $0,
-                                    sendRequest: ApiSession.shared.send
-                                ),
-                                mainAsync: { work in DispatchQueue.main.async { work() } }
+                        makeRepositoryStore: { repository in
+                            RepositoryStore(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher
                             )
                         }
                     )
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
+                    let favoriteDispatcher = FavoriteDispatcher()
+                    let repositoryDispatcher = RepositoryDispatcher()
                     let favoriteVC = FavoriteViewController(
-                        presenter: FavoriteViewPresenter(model: favoriteModel),
-                        makeRepositoryPresenter: { [favoriteModel] in
-                            RepositoryViewPresenter(
-                                repository: $0,
+                        action: FavoriteAction(
+                            dispatcher: favoriteDispatcher,
+                            favoriteModel: favoriteModel
+                        ),
+                        store: FavoriteStore(
+                            dispatcher: favoriteDispatcher
+                        ),
+                        makeRepositoryAction: { [favoriteModel] repository in
+                            RepositoryAction(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher,
                                 favoriteModel: favoriteModel
+                            )
+                        },
+                        makeRepositoryStore: { repository in
+                            RepositoryStore(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher
                             )
                         }
                     )
@@ -71,4 +104,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 }
-
