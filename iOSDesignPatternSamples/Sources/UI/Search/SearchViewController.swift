@@ -10,17 +10,7 @@ import Combine
 import GithubKit
 import UIKit
 
-protocol SearchView: class {
-    func reloadData()
-    func keyboardWillShow(with keyboardInfo: UIKeyboardInfo)
-    func keyboardWillHide(with keyboardInfo: UIKeyboardInfo)
-    func showUserRepository(with user: User)
-    func updateTotalCountLabel(_ countText: String)
-    func updateLoadingView(with view: UIView, isLoading: Bool)
-    func showEmptyTokenError(errorMessage: ErrorMessage)
-}
-
-final class SearchViewController: UIViewController, SearchView {
+final class SearchViewController: UIViewController {
 
     @IBOutlet private(set) weak var totalCountLabel: UILabel!
     @IBOutlet private(set) weak var tableView: UITableView!
@@ -29,21 +19,22 @@ final class SearchViewController: UIViewController, SearchView {
     let searchBar = UISearchBar(frame: .zero)
     let loadingView = LoadingView()
 
-    let searchPresenter: SearchPresenter
+    let viewModel: SearchViewModelType
     let dataSource: SearchViewDataSource
 
-    private let makeRepositoryPresenter: (Repository) -> RepositoryPresenter
-    private let makeUserRepositoryPresenter: (User) -> UserRepositoryPresenter
+    private let makeRepositoryViewModel: (Repository) -> RepositoryViewModelType
+    private let makeUserRepositoryViewModel: (User) -> UserRepositoryViewModelType
+    private var cancellables = Set<AnyCancellable>()
 
     init(
-        searchPresenter: SearchPresenter,
-        makeRepositoryPresenter: @escaping (Repository) -> RepositoryPresenter,
-        makeUserRepositoryPresenter: @escaping (User) -> UserRepositoryPresenter
+        viewModel: SearchViewModelType,
+        makeUserRepositoryViewModel: @escaping (User) -> UserRepositoryViewModelType,
+        makeRepositoryViewModel: @escaping (Repository) -> RepositoryViewModelType
     ) {
-        self.searchPresenter = searchPresenter
-        self.dataSource = SearchViewDataSource(presenter: searchPresenter)
-        self.makeRepositoryPresenter = makeRepositoryPresenter
-        self.makeUserRepositoryPresenter = makeUserRepositoryPresenter
+        self.makeRepositoryViewModel = makeRepositoryViewModel
+        self.makeUserRepositoryViewModel = makeUserRepositoryViewModel
+        self.viewModel = viewModel
+        self.dataSource = SearchViewDataSource(viewModel: viewModel)
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
 
@@ -55,95 +46,153 @@ final class SearchViewController: UIViewController, SearchView {
         super.viewDidLoad()
 
         navigationItem.titleView = searchBar
-        searchBar.delegate = self
         searchBar.placeholder = "Input user name"
-        
+        searchBar.delegate = self
+
         dataSource.configure(with: tableView)
 
-        searchPresenter.view = self
+        // observe viewModel
+        viewModel.output.accessTokenAlert
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showAccessTokenAlert)
+            .store(in: &cancellables)
+
+        viewModel.output.keyboardWillShow
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: keyboardWillShow)
+            .store(in: &cancellables)
+
+        viewModel.output.keyboardWillHide
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: keyboardWillHide)
+            .store(in: &cancellables)
+
+        viewModel.output.countString
+            .map(Optional.some)
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.text, on: totalCountLabel)
+            .store(in: &cancellables)
+
+        viewModel.output.reloadData
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: reloadData)
+            .store(in: &cancellables)
+
+        viewModel.output.selectedUser
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: showUserRepository)
+            .store(in: &cancellables)
+
+        viewModel.output.updateLoadingView
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: updateLoadingView)
+            .store(in: &cancellables)
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        searchPresenter.viewWillAppear()
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        viewModel.input.viewDidAppear()
     }
-    
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        viewModel.input.viewDidDisappear()
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if searchBar.isFirstResponder {
-            searchBar.resignFirstResponder()
+        searchBar.resignFirstResponder()
+    }
+
+    private var showAccessTokenAlert: (ErrorMessage) -> Void {
+        { [weak self] error in
+            guard let me = self else {
+                return
+            }
+            let alert = UIAlertController(title: error.title, message: error.message, preferredStyle: .alert)
+            me.present(alert, animated: false, completion: nil)
         }
-        searchPresenter.viewWillDisappear()
-    }
-    
-    func reloadData() {
-        tableView.reloadData()
     }
 
-    func keyboardWillShow(with keyboardInfo: UIKeyboardInfo) {
-        view.layoutIfNeeded()
-        let extra = tabBarController?.tabBar.bounds.height ?? 0
-        tableViewBottomConstraint.constant = keyboardInfo.frame.size.height - extra
-        UIView.animate(withDuration: keyboardInfo.animationDuration,
-                       delay: 0,
-                       options: keyboardInfo.animationCurve,
-                       animations: { self.view.layoutIfNeeded() },
-                       completion: nil)
+    private var reloadData: () -> Void  {
+        { [weak self] in
+            self?.tableView.reloadData()
+        }
     }
 
-    func keyboardWillHide(with keyboardInfo: UIKeyboardInfo) {
-        view.layoutIfNeeded()
-        tableViewBottomConstraint.constant = 0
-        UIView.animate(withDuration: keyboardInfo.animationDuration,
-                       delay: 0,
-                       options: keyboardInfo.animationCurve,
-                       animations: { self.view.layoutIfNeeded() },
-                       completion: nil)
-    }
-    
-    func showUserRepository(with user: User) {
-        let presenter = makeUserRepositoryPresenter(user)
-        let vc = UserRepositoryViewController(
-            userRepositoryPresenter: presenter,
-            makeRepositoryPresenter: makeRepositoryPresenter
-        )
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    func updateTotalCountLabel(_ countText: String) {
-        totalCountLabel.text = countText
-    }
-    
-    func updateLoadingView(with view: UIView, isLoading: Bool) {
-        loadingView.removeFromSuperview()
-        loadingView.isLoading = isLoading
-        loadingView.add(to: view)
+    private var keyboardWillShow: (UIKeyboardInfo) -> Void {
+        { [weak self] keyboardInfo in
+            guard let me = self else {
+                return
+            }
+            me.view.layoutIfNeeded()
+            let extra = me.tabBarController?.tabBar.bounds.height ?? 0
+            me.tableViewBottomConstraint.constant = keyboardInfo.frame.size.height - extra
+            UIView.animate(withDuration: keyboardInfo.animationDuration,
+                           delay: 0,
+                           options: keyboardInfo.animationCurve,
+                           animations: { me.view.layoutIfNeeded() },
+                           completion: nil)
+        }
     }
 
-    func showEmptyTokenError(errorMessage: ErrorMessage) {
-        let alert = UIAlertController(title: errorMessage.message,
-                                      message: errorMessage.message,
-                                      preferredStyle: .alert)
-        present(alert, animated: false, completion: nil)
+    private var keyboardWillHide: (UIKeyboardInfo) -> Void {
+        { [weak self] keyboardInfo in
+            guard let me = self else {
+                return
+            }
+            me.view.layoutIfNeeded()
+            me.tableViewBottomConstraint.constant = 0
+            UIView.animate(withDuration: keyboardInfo.animationDuration,
+                           delay: 0,
+                           options: keyboardInfo.animationCurve,
+                           animations: { me.view.layoutIfNeeded() },
+                           completion: nil)
+        }
+    }
+
+    private var showUserRepository: (User) -> Void {
+        { [weak self] user in
+            guard let me = self else {
+                return
+            }
+            let vm = me.makeUserRepositoryViewModel(user)
+            let vc = UserRepositoryViewController(
+                viewModel: vm,
+                makeRepositoryViewModel: me.makeRepositoryViewModel
+            )
+            me.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+
+    private var updateLoadingView: (UIView, Bool) -> Void {
+        { [weak self] view, isLoading in
+            guard let me = self else {
+                return
+            }
+            me.loadingView.removeFromSuperview()
+            me.loadingView.isLoading = isLoading
+            me.loadingView.add(to: view)
+        }
     }
 }
 
 extension SearchViewController: UISearchBarDelegate {
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
-        searchBar.showsCancelButton = false
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchBar.showsCancelButton = true
     }
-    
+
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
         searchBar.showsCancelButton = false
     }
-    
-    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        searchBar.showsCancelButton = true
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        searchBar.showsCancelButton = false
     }
-    
+
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        searchPresenter.search(queryIfNeeded: searchText)
+        viewModel.input.searchText(searchBar.text)
     }
 }

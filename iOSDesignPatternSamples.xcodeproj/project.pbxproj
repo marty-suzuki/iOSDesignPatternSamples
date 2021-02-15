@@ -10,20 +10,20 @@
 		0706D2760E1B3A990D0C277A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64602919324DEDBC0429D452 /* AppDelegate.swift */; };
 		072EB0FFF0B72F37C8CF669A /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED48619F4A0CDE4B2D46702 /* SearchModel.swift */; };
 		1791BB0E1AEB38868026578F /* RepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D51BC0E506CEA4C9ACAA8DB /* RepositoryViewController.swift */; };
-		1E393F73F3CAF019A44B3983 /* UserRepositoryViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520A5CA79771517368B8C2A3 /* UserRepositoryViewPresenter.swift */; };
+		1B6B63FE22A5A86F6028991E /* UserRepositoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85BA8AC18BFBE203EBECBDF0 /* UserRepositoryViewModel.swift */; };
+		450252B4BA07F8D498E608EF /* RepositoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42AAD61E2A4041414E741BC4 /* RepositoryViewModel.swift */; };
 		4EF255BBD109181D8AD5058F /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 208BE35457B09256BF71DAD1 /* SearchViewController.swift */; };
-		518405AF0C382898D4127681 /* FavoriteViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6911B8218A916C540302FD01 /* FavoriteViewPresenter.swift */; };
 		5A6EC25DC03393E8F8E064FF /* ApiSession.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34175ABC0E7BB9870D592CEF /* ApiSession.extension.swift */; };
+		651202151F5333A9ABE09B22 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8FB5FFB17FCEE46B7E72E4 /* SearchViewModel.swift */; };
 		68266EFC53379F0728F6B00B /* FavoriteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E0D61178C6EC742BD2F981F1 /* FavoriteViewController.xib */; };
-		6A27621B3A685D90F105BD65 /* SearchViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6BDED3310BF09C5AD910C87 /* SearchViewPresenter.swift */; };
 		6D22F97989A935ECA42DB3CA /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5EDBADE530FE153A9651F109 /* SearchViewController.xib */; };
 		6EC13FBC2AE1E8DBEBE88804 /* FavoriteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AFD90EB20BB491847814C5E /* FavoriteViewController.swift */; };
 		71E4B210FC5945A53739149D /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2B00ED49EA7B8CD6C7C4F5 /* LoadingView.swift */; };
+		72E107687058F53E4B2EF247 /* FavoriteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A35DE51E635D96C6FB469DF /* FavoriteViewModel.swift */; };
 		7D1CB8434AAE6D1FC50B9D2E /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA63604B63E10BD6DC6520D0 /* SafariServices.framework */; };
 		7F3AC0844FF343E754FD4431 /* SearchViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E02ECB42B97D30045AF6AB2 /* SearchViewDataSource.swift */; };
 		811C3B9B712E3B67E5AD73FD /* UIKeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 711633F4B85B3F76D0C88E41 /* UIKeyboardInfo.swift */; };
 		82992D62FE8ED0043356C237 /* FavoriteViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DE1FF29F81CED271FD929C2 /* FavoriteViewDataSource.swift */; };
-		94966F6B922927E4091D087E /* RepositoryViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DEBBF60E2AEFF712AA52C37 /* RepositoryViewPresenter.swift */; };
 		9B515DE20E1424AC3D1F08CF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AE92440962235D7ABB12EAFA /* Main.storyboard */; };
 		B7B8D28336669C7BF3C29BEC /* UserRepositoryViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969B79174D1421B0FCFE7154 /* UserRepositoryViewDataSource.swift */; };
 		C3F5B4AE9DAFA2095EBCB56A /* NSObjectProtocol.extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186C7AADB8679B060E7A2C1B /* NSObjectProtocol.extension.swift */; };
@@ -42,24 +42,24 @@
 		208BE35457B09256BF71DAD1 /* SearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		260D4E07190EC496827E1037 /* iOSDesignPatternSamples.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = iOSDesignPatternSamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34175ABC0E7BB9870D592CEF /* ApiSession.extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiSession.extension.swift; sourceTree = "<group>"; };
+		3A35DE51E635D96C6FB469DF /* FavoriteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewModel.swift; sourceTree = "<group>"; };
+		3B8FB5FFB17FCEE46B7E72E4 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		3D51BC0E506CEA4C9ACAA8DB /* RepositoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewController.swift; sourceTree = "<group>"; };
+		42AAD61E2A4041414E741BC4 /* RepositoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewModel.swift; sourceTree = "<group>"; };
 		482D2D42402C917E5C0069BC /* FavoriteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteModel.swift; sourceTree = "<group>"; };
-		520A5CA79771517368B8C2A3 /* UserRepositoryViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewPresenter.swift; sourceTree = "<group>"; };
 		5DE1FF29F81CED271FD929C2 /* FavoriteViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewDataSource.swift; sourceTree = "<group>"; };
 		5EDBADE530FE153A9651F109 /* SearchViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchViewController.xib; sourceTree = "<group>"; };
 		64602919324DEDBC0429D452 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		6911B8218A916C540302FD01 /* FavoriteViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewPresenter.swift; sourceTree = "<group>"; };
 		6AE9204A886B2448F36B9293 /* UserRepositoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewController.swift; sourceTree = "<group>"; };
 		6AFD90EB20BB491847814C5E /* FavoriteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewController.swift; sourceTree = "<group>"; };
 		711633F4B85B3F76D0C88E41 /* UIKeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKeyboardInfo.swift; sourceTree = "<group>"; };
 		7E02ECB42B97D30045AF6AB2 /* SearchViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewDataSource.swift; sourceTree = "<group>"; };
+		85BA8AC18BFBE203EBECBDF0 /* UserRepositoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewModel.swift; sourceTree = "<group>"; };
 		969B79174D1421B0FCFE7154 /* UserRepositoryViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepositoryViewDataSource.swift; sourceTree = "<group>"; };
 		9ABD5244E170566F15BBA15E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B5B08A007452F84452B3F0D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9DEBBF60E2AEFF712AA52C37 /* RepositoryViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewPresenter.swift; sourceTree = "<group>"; };
 		9E2B00ED49EA7B8CD6C7C4F5 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		9ED48619F4A0CDE4B2D46702 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
-		B6BDED3310BF09C5AD910C87 /* SearchViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewPresenter.swift; sourceTree = "<group>"; };
 		B7D7B4F908B5F135EC242E10 /* RepositoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryModel.swift; sourceTree = "<group>"; };
 		C86990A891A2828A45CDAF7A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		E0D61178C6EC742BD2F981F1 /* FavoriteViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FavoriteViewController.xib; sourceTree = "<group>"; };
@@ -94,7 +94,7 @@
 				6AE9204A886B2448F36B9293 /* UserRepositoryViewController.swift */,
 				1F905F35ABF1B1579FEE2B5A /* UserRepositoryViewController.xib */,
 				969B79174D1421B0FCFE7154 /* UserRepositoryViewDataSource.swift */,
-				520A5CA79771517368B8C2A3 /* UserRepositoryViewPresenter.swift */,
+				85BA8AC18BFBE203EBECBDF0 /* UserRepositoryViewModel.swift */,
 			);
 			path = UserRepository;
 			sourceTree = "<group>";
@@ -105,7 +105,7 @@
 				208BE35457B09256BF71DAD1 /* SearchViewController.swift */,
 				5EDBADE530FE153A9651F109 /* SearchViewController.xib */,
 				7E02ECB42B97D30045AF6AB2 /* SearchViewDataSource.swift */,
-				B6BDED3310BF09C5AD910C87 /* SearchViewPresenter.swift */,
+				3B8FB5FFB17FCEE46B7E72E4 /* SearchViewModel.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -130,7 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				3D51BC0E506CEA4C9ACAA8DB /* RepositoryViewController.swift */,
-				9DEBBF60E2AEFF712AA52C37 /* RepositoryViewPresenter.swift */,
+				42AAD61E2A4041414E741BC4 /* RepositoryViewModel.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -172,7 +172,7 @@
 				6AFD90EB20BB491847814C5E /* FavoriteViewController.swift */,
 				E0D61178C6EC742BD2F981F1 /* FavoriteViewController.xib */,
 				5DE1FF29F81CED271FD929C2 /* FavoriteViewDataSource.swift */,
-				6911B8218A916C540302FD01 /* FavoriteViewPresenter.swift */,
+				3A35DE51E635D96C6FB469DF /* FavoriteViewModel.swift */,
 			);
 			path = Favorite;
 			sourceTree = "<group>";
@@ -305,20 +305,20 @@
 				D84737DB64A88B1888B8465D /* FavoriteModel.swift in Sources */,
 				6EC13FBC2AE1E8DBEBE88804 /* FavoriteViewController.swift in Sources */,
 				82992D62FE8ED0043356C237 /* FavoriteViewDataSource.swift in Sources */,
-				518405AF0C382898D4127681 /* FavoriteViewPresenter.swift in Sources */,
+				72E107687058F53E4B2EF247 /* FavoriteViewModel.swift in Sources */,
 				71E4B210FC5945A53739149D /* LoadingView.swift in Sources */,
 				C3F5B4AE9DAFA2095EBCB56A /* NSObjectProtocol.extension.swift in Sources */,
 				ED8C1E52A3D6C0097A18601E /* RepositoryModel.swift in Sources */,
 				1791BB0E1AEB38868026578F /* RepositoryViewController.swift in Sources */,
-				94966F6B922927E4091D087E /* RepositoryViewPresenter.swift in Sources */,
+				450252B4BA07F8D498E608EF /* RepositoryViewModel.swift in Sources */,
 				072EB0FFF0B72F37C8CF669A /* SearchModel.swift in Sources */,
 				4EF255BBD109181D8AD5058F /* SearchViewController.swift in Sources */,
 				7F3AC0844FF343E754FD4431 /* SearchViewDataSource.swift in Sources */,
-				6A27621B3A685D90F105BD65 /* SearchViewPresenter.swift in Sources */,
+				651202151F5333A9ABE09B22 /* SearchViewModel.swift in Sources */,
 				811C3B9B712E3B67E5AD73FD /* UIKeyboardInfo.swift in Sources */,
 				C69B1DDE761E0663FDE1E947 /* UserRepositoryViewController.swift in Sources */,
 				B7B8D28336669C7BF3C29BEC /* UserRepositoryViewDataSource.swift in Sources */,
-				1E393F73F3CAF019A44B3983 /* UserRepositoryViewPresenter.swift in Sources */,
+				1B6B63FE22A5A86F6028991E /* UserRepositoryViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

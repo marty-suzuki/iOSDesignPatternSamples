@@ -6,43 +6,40 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
-import SafariServices
+import Combine
 import GithubKit
+import SafariServices
+import UIKit
 
-protocol RepositoryView: class {
-    func updateFavoriteButtonTitle(_ title: String)
-}
+final class RepositoryViewController: SFSafariViewController {
+    private var cancellables = Set<AnyCancellable>()
+    private let viewModel: RepositoryViewModelType
 
-final class RepositoryViewController: SFSafariViewController, RepositoryView {
-    private(set) lazy var favoriteButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(title: self.presenter.favoriteButtonTitle,
-                               style: .plain,
-                               target: self,
-                               action: #selector(RepositoryViewController.favoriteButtonTap(_:)))
-    }()
-    private let presenter: RepositoryPresenter
-    
-    init(presenter: RepositoryPresenter) {
-        self.presenter = presenter
-        super.init(url: presenter.url, configuration: .init())
+    init(viewModel: RepositoryViewModelType) {
+        self.viewModel = viewModel
+        super.init(url: viewModel.output.url, configuration: .init())
         hidesBottomBarWhenPushed = true
-
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        let favoriteButtonItem = UIBarButtonItem(
+            title: nil,
+            style: .plain,
+            target: self,
+            action: #selector(self.favoriteButtonTap(_:))
+        )
         navigationItem.rightBarButtonItem = favoriteButtonItem
 
-        presenter.view = self
+        viewModel.output.favoriteButtonTitle
+            .map(Optional.some)
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.title, on: favoriteButtonItem)
+            .store(in: &cancellables)
     }
-    
-    @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
-        presenter.favoriteButtonTap()
-    }
-    
-    func updateFavoriteButtonTitle(_ title: String) {
-        favoriteButtonItem.title = title
+
+    @objc private func favoriteButtonTap(_: UIBarButtonItem) {
+        viewModel.input.favoriteButtonTap()
     }
 }
