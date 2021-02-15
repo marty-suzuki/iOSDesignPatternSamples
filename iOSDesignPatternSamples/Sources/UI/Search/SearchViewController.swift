@@ -19,22 +19,33 @@ final class SearchViewController: UIViewController {
     let searchBar = UISearchBar(frame: .zero)
     let loadingView = LoadingView()
 
-    let viewModel: SearchViewModelType
+    let action: SearchActionType
+    let store: SearchStoreType
     let dataSource: SearchViewDataSource
 
-    private let makeRepositoryViewModel: (Repository) -> RepositoryViewModelType
-    private let makeUserRepositoryViewModel: (User) -> UserRepositoryViewModelType
+    private let makeUserRepositoryAction: (User) -> UserRepositoryActionType
+    private let makeUserRepositoryStore: (User) -> UserRepositoryStoreType
+
+    private let makeRepositoryAction: (Repository) -> RepositoryActionType
+    private let makeRepositoryStore: (Repository) -> RepositoryStoreType
+
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        viewModel: SearchViewModelType,
-        makeUserRepositoryViewModel: @escaping (User) -> UserRepositoryViewModelType,
-        makeRepositoryViewModel: @escaping (Repository) -> RepositoryViewModelType
+        action: SearchActionType,
+        store: SearchStoreType,
+        makeUserRepositoryAction: @escaping (User) -> UserRepositoryActionType,
+        makeUserRepositoryStore: @escaping (User) -> UserRepositoryStoreType,
+        makeRepositoryAction: @escaping (Repository) -> RepositoryActionType,
+        makeRepositoryStore: @escaping (Repository) -> RepositoryStoreType
     ) {
-        self.makeRepositoryViewModel = makeRepositoryViewModel
-        self.makeUserRepositoryViewModel = makeUserRepositoryViewModel
-        self.viewModel = viewModel
-        self.dataSource = SearchViewDataSource(viewModel: viewModel)
+        self.action = action
+        self.store = store
+        self.makeUserRepositoryAction = makeUserRepositoryAction
+        self.makeUserRepositoryStore = makeUserRepositoryStore
+        self.makeRepositoryAction = makeRepositoryAction
+        self.makeRepositoryStore = makeRepositoryStore
+        self.dataSource = SearchViewDataSource(action: action, store: store)
         super.init(nibName: SearchViewController.className, bundle: nil)
     }
 
@@ -52,51 +63,53 @@ final class SearchViewController: UIViewController {
         dataSource.configure(with: tableView)
 
         // observe viewModel
-        viewModel.output.accessTokenAlert
+        store.accessTokenAlert
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: showAccessTokenAlert)
             .store(in: &cancellables)
 
-        viewModel.output.keyboardWillShow
+        store.keyboardWillShow
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: keyboardWillShow)
             .store(in: &cancellables)
 
-        viewModel.output.keyboardWillHide
+        store.keyboardWillHide
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: keyboardWillHide)
             .store(in: &cancellables)
 
-        viewModel.output.countString
+        store.countStringPublisher
             .map(Optional.some)
             .receive(on: DispatchQueue.main)
             .assign(to: \.text, on: totalCountLabel)
             .store(in: &cancellables)
 
-        viewModel.output.reloadData
+        store.reloadData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: reloadData)
             .store(in: &cancellables)
 
-        viewModel.output.selectedUser
+        store.selectedUser
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: showUserRepository)
             .store(in: &cancellables)
 
-        viewModel.output.updateLoadingView
+        store.updateLoadingView
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: updateLoadingView)
             .store(in: &cancellables)
+
+        action.load()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        viewModel.input.viewDidAppear()
+        action.isViewAppearing(true)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        viewModel.input.viewDidDisappear()
+        action.isViewAppearing(false)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -156,10 +169,11 @@ final class SearchViewController: UIViewController {
             guard let me = self else {
                 return
             }
-            let vm = me.makeUserRepositoryViewModel(user)
             let vc = UserRepositoryViewController(
-                viewModel: vm,
-                makeRepositoryViewModel: me.makeRepositoryViewModel
+                action: me.makeUserRepositoryAction(user),
+                store: me.makeUserRepositoryStore(user),
+                makeRepositoryAction: me.makeRepositoryAction,
+                makeRepositoryStore: me.makeRepositoryStore
             )
             me.navigationController?.pushViewController(vc, animated: true)
         }
@@ -193,6 +207,6 @@ extension SearchViewController: UISearchBarDelegate {
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        viewModel.input.searchText(searchBar.text)
+        action.searchText(searchBar.text)
     }
 }

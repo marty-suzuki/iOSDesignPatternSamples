@@ -17,19 +17,29 @@ final class UserRepositoryViewController: UIViewController {
 
     let loadingView = LoadingView()
 
-    let viewModel: UserRepositoryViewModelType
+    let action: UserRepositoryActionType
+    let store: UserRepositoryStoreType
     let dataSource: UserRepositoryViewDataSource
 
-    private let makeRepositoryViewModel: (Repository) -> RepositoryViewModelType
+    private let makeRepositoryAction: (Repository) -> RepositoryActionType
+    private let makeRepositoryStore: (Repository) -> RepositoryStoreType
     private var cacellables = Set<AnyCancellable>()
 
     init(
-        viewModel: UserRepositoryViewModelType,
-        makeRepositoryViewModel: @escaping (Repository) -> RepositoryViewModelType
+        action: UserRepositoryActionType,
+        store: UserRepositoryStoreType,
+        makeRepositoryAction: @escaping (Repository) -> RepositoryActionType,
+        makeRepositoryStore: @escaping (Repository) -> RepositoryStoreType
+
     ) {
-        self.makeRepositoryViewModel = makeRepositoryViewModel
-        self.viewModel = viewModel
-        self.dataSource = UserRepositoryViewDataSource(viewModel: viewModel)
+        self.action = action
+        self.store = store
+        self.makeRepositoryAction = makeRepositoryAction
+        self.makeRepositoryStore = makeRepositoryStore
+        self.dataSource = UserRepositoryViewDataSource(
+            action: action,
+            store: store
+        )
         super.init(nibName: UserRepositoryViewController.className, bundle: nil)
         hidesBottomBarWhenPushed = true
     }
@@ -41,32 +51,33 @@ final class UserRepositoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = viewModel.output.title
+        title = store.title
 
         dataSource.configure(with: tableView)
 
-        viewModel.output.showRepository
+        store.selectedRepository
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: showRepository)
             .store(in: &cacellables)
 
-        viewModel.output.reloadData
+        store.reloadData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: reloadData)
             .store(in: &cacellables)
 
-        viewModel.output.countString
+        store.countStringPublisher
             .map(Optional.some)
             .receive(on: DispatchQueue.main)
             .assign(to: \.text, on: totalCountLabel)
             .store(in: &cacellables)
 
-        viewModel.output.updateLoadingView
+        store.updateLoadingView
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: updateLoadingView)
             .store(in: &cacellables)
 
-        viewModel.input.fetchRepositories()
+        action.load()
+        action.fetchRepositories()
     }
 
     private var showRepository: (Repository) -> Void {
@@ -74,8 +85,10 @@ final class UserRepositoryViewController: UIViewController {
             guard let me = self else {
                 return
             }
-            let vm = me.makeRepositoryViewModel(repository)
-            let vc = RepositoryViewController(viewModel: vm)
+            let vc = RepositoryViewController(
+                action: me.makeRepositoryAction(repository),
+                store: me.makeRepositoryStore(repository)
+            )
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }

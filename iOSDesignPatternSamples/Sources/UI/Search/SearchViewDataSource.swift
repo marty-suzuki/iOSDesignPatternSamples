@@ -6,22 +6,27 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
+import Combine
 import Foundation
 import GithubKit
 import UIKit
 
 final class SearchViewDataSource: NSObject {
+    private let action: SearchActionType
+    private let store: SearchStoreType
 
-    private let viewModel: SearchViewModelType
-
-    init(viewModel: SearchViewModelType) {
-        self.viewModel = viewModel
+    init(
+        action: SearchActionType,
+        store: SearchStoreType
+    ) {
+        self.action = action
+        self.store = store
     }
-    
+
     func configure(with tableView: UITableView) {
         tableView.dataSource = self
         tableView.delegate = self
-        
+
         tableView.register(UserViewCell.self)
         tableView.register(UITableViewHeaderFooterView.self,
                            forHeaderFooterViewReuseIdentifier: UITableViewHeaderFooterView.className)
@@ -30,25 +35,25 @@ final class SearchViewDataSource: NSObject {
 
 extension SearchViewDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.output.users.count
+        return store.users.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(UserViewCell.self, for: indexPath)
-        let user = viewModel.output.users[indexPath.row]
+        let user = store.users[indexPath.row]
         cell.configure(with: user)
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         return nil
     }
-    
+
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         guard let view = tableView.dequeueReusableHeaderFooterView(withIdentifier: UITableViewHeaderFooterView.className) else {
             return nil
         }
-        viewModel.input.headerFooterView(view)
+        action.headerFooterView(view)
         return view
     }
 }
@@ -56,24 +61,24 @@ extension SearchViewDataSource: UITableViewDataSource {
 extension SearchViewDataSource: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        viewModel.input.selectedIndexPath(indexPath)
+        action.setlect(from: store.users, at: indexPath)
     }
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let user = viewModel.output.users[indexPath.row]
+        let user = store.users[indexPath.row]
         return UserViewCell.calculateHeight(with: user, and: tableView)
     }
-    
+
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return .leastNormalMagnitude
     }
-    
+
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return viewModel.output.isFetchingUsers ? LoadingView.defaultHeight : .leastNormalMagnitude
+        return store.isFetchingUsers ? LoadingView.defaultHeight : .leastNormalMagnitude
     }
-    
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let maxScrollDistance = max(0, scrollView.contentSize.height - scrollView.bounds.size.height)
-        viewModel.input.isReachedBottom(maxScrollDistance <= scrollView.contentOffset.y)
+        action.isViewAppearing(maxScrollDistance <= scrollView.contentOffset.y)
     }
 }

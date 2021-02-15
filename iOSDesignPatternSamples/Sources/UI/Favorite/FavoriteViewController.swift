@@ -13,19 +13,27 @@ import UIKit
 final class FavoriteViewController: UIViewController {
     @IBOutlet private(set) weak var tableView: UITableView!
 
-    let viewModel: FavoriteViewModelType
+    let action: FavoriteActionType
+    let store: FavoriteStoreType
     let dataSource: FavoriteViewDataSource
-
-    private let makeRepositoryViewModel: (Repository) -> RepositoryViewModelType
+    private let makeRepositoryAction: (Repository) -> RepositoryActionType
+    private let makeRepositoryStore: (Repository) -> RepositoryStoreType
     private var cancellables = Set<AnyCancellable>()
 
     init(
-        viewModel: FavoriteViewModelType,
-        makeRepositoryViewModel: @escaping (Repository) -> RepositoryViewModelType
+        action: FavoriteActionType,
+        store: FavoriteStoreType,
+        makeRepositoryAction: @escaping (Repository) -> RepositoryActionType,
+        makeRepositoryStore: @escaping (Repository) -> RepositoryStoreType
     ) {
-        self.makeRepositoryViewModel = makeRepositoryViewModel
-        self.viewModel = viewModel
-        self.dataSource = FavoriteViewDataSource(viewModel: viewModel)
+        self.action = action
+        self.store = store
+        self.dataSource = FavoriteViewDataSource(
+            action: action,
+            store: store
+        )
+        self.makeRepositoryAction = makeRepositoryAction
+        self.makeRepositoryStore = makeRepositoryStore
         super.init(nibName: FavoriteViewController.className, bundle: nil)
     }
 
@@ -37,18 +45,19 @@ final class FavoriteViewController: UIViewController {
         super.viewDidLoad()
 
         title = "On Memory Favorite"
-
         dataSource.configure(with: tableView)
 
-        viewModel.output.selectedRepository
+        store.selectedRepository
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: showRepository)
             .store(in: &cancellables)
 
-        viewModel.output.relaodData
+        store.reloadData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: reloadData)
             .store(in: &cancellables)
+
+        action.load()
     }
 
     private var showRepository: (Repository) -> Void {
@@ -56,8 +65,11 @@ final class FavoriteViewController: UIViewController {
             guard let me = self else {
                 return
             }
-            let vm = me.makeRepositoryViewModel(repository)
-            let vc = RepositoryViewController(viewModel: vm)
+
+            let vc = RepositoryViewController(
+                action: me.makeRepositoryAction(repository),
+                store: me.makeRepositoryStore(repository)
+            )
             me.navigationController?.pushViewController(vc, animated: true)
         }
     }

@@ -13,11 +13,18 @@ import UIKit
 
 final class RepositoryViewController: SFSafariViewController {
     private var cancellables = Set<AnyCancellable>()
-    private let viewModel: RepositoryViewModelType
+    private let action: RepositoryActionType
+    private let store: RepositoryStoreType
 
-    init(viewModel: RepositoryViewModelType) {
-        self.viewModel = viewModel
-        super.init(url: viewModel.output.url, configuration: .init())
+    private let _favoriteButtonTap = PassthroughSubject<Void, Never>()
+
+    init(
+        action: RepositoryActionType,
+        store: RepositoryStoreType
+    ) {
+        self.action = action
+        self.store = store
+        super.init(url: store.repository.url, configuration: .init())
         hidesBottomBarWhenPushed = true
     }
 
@@ -32,14 +39,16 @@ final class RepositoryViewController: SFSafariViewController {
         )
         navigationItem.rightBarButtonItem = favoriteButtonItem
 
-        viewModel.output.favoriteButtonTitle
+        store.favoriteButtonTitlePublisher
             .map(Optional.some)
             .receive(on: DispatchQueue.main)
             .assign(to: \.title, on: favoriteButtonItem)
             .store(in: &cancellables)
+
+        action.load()
     }
 
     @objc private func favoriteButtonTap(_: UIBarButtonItem) {
-        viewModel.input.favoriteButtonTap()
+        action.toggleFavorite()
     }
 }
