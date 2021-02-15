@@ -6,8 +6,9 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
+import Combine
 import GithubKit
+import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -22,24 +23,76 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             for value in viewControllers.enumerated() {
                 switch value {
                 case let (0, nc as UINavigationController):
+                    let repositoryDispatcher = RepositoryDispatcher()
+                    let searchDispatcher = SearchDispatcher()
+                    let userRepositoryDispatcher = UserRepositoryDispatcher()
                     let searchVC = SearchViewController(
-                        searchModel: SearchModel(
-                            sendRequest: ApiSession.shared.send,
-                            asyncAfter: { DispatchQueue.global().asyncAfter(deadline: $0, execute: $1) },
-                            mainAsync: { work in DispatchQueue.main.async { work() } }
-                        ),
-                        makeFavoriteModel: { [favoriteModel] in favoriteModel },
-                        makeRepositoryModel: {
-                            RepositoryModel(
-                                user: $0,
+                        action: SearchAction(
+                            notificationCenter: .default,
+                            dispatcher: searchDispatcher,
+                            searchModel: SearchModel(
                                 sendRequest: ApiSession.shared.send
+                            )
+                        ),
+                        store: SearchStore(
+                            dispatcher: searchDispatcher
+                        ),
+                        makeUserRepositoryAction: { user in
+                            UserRepositoryAction(
+                                dispatcher: userRepositoryDispatcher,
+                                repositoryModel: RepositoryModel(
+                                    user: user,
+                                    sendRequest: ApiSession.shared.send
+                                )
+                            )
+                        },
+                        makeUserRepositoryStore: { user in
+                            UserRepositoryStore(
+                                user: user,
+                                dispatcher: userRepositoryDispatcher
+                            )
+                        },
+                        makeRepositoryAction: { [favoriteModel] repository in
+                            RepositoryAction(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher,
+                                favoriteModel: favoriteModel
+                            )
+                        },
+                        makeRepositoryStore: { repository in
+                            RepositoryStore(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher
                             )
                         }
                     )
                     nc.setViewControllers([searchVC], animated: false)
 
                 case let (1, nc as UINavigationController):
-                    let favoriteVC = FavoriteViewController(favoriteModel: favoriteModel)
+                    let favoriteDispatcher = FavoriteDispatcher()
+                    let repositoryDispatcher = RepositoryDispatcher()
+                    let favoriteVC = FavoriteViewController(
+                        action: FavoriteAction(
+                            dispatcher: favoriteDispatcher,
+                            favoriteModel: favoriteModel
+                        ),
+                        store: FavoriteStore(
+                            dispatcher: favoriteDispatcher
+                        ),
+                        makeRepositoryAction: { [favoriteModel] repository in
+                            RepositoryAction(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher,
+                                favoriteModel: favoriteModel
+                            )
+                        },
+                        makeRepositoryStore: { repository in
+                            RepositoryStore(
+                                repository: repository,
+                                dispatcher: repositoryDispatcher
+                            )
+                        }
+                    )
                     nc.setViewControllers([favoriteVC], animated: false)
 
                 default:
@@ -51,4 +104,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 }
-

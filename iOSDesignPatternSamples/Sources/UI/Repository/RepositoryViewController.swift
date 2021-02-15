@@ -6,44 +6,49 @@
 //  Copyright © 2017年 marty-suzuki. All rights reserved.
 //
 
-import UIKit
-import SafariServices
+import Combine
 import GithubKit
+import SafariServices
+import UIKit
 
 final class RepositoryViewController: SFSafariViewController {
-    private(set) lazy var favoriteButtonItem: UIBarButtonItem = {
-        let favorites = self.favoriteModel.favorites
-        let title = favorites.contains(where: { $0.url == self.repository.url }) ? "Remove" : "Add"
-        return UIBarButtonItem(title: title,
-                               style: .plain,
-                               target: self,
-                               action: #selector(RepositoryViewController.favoriteButtonTap(_:)))
-    }()
-    
-    let repository: Repository
-    let favoriteModel: FavoriteModelType
-    
-    init(repository: Repository, favoriteModel: FavoriteModelType) {
-        self.repository = repository
-        self.favoriteModel = favoriteModel
+    private var cancellables = Set<AnyCancellable>()
+    private let action: RepositoryActionType
+    private let store: RepositoryStoreType
 
-        super.init(url: repository.url, configuration: .init())
+    private let _favoriteButtonTap = PassthroughSubject<Void, Never>()
+
+    init(
+        action: RepositoryActionType,
+        store: RepositoryStoreType
+    ) {
+        self.action = action
+        self.store = store
+        super.init(url: store.repository.url, configuration: .init())
         hidesBottomBarWhenPushed = true
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        let favoriteButtonItem = UIBarButtonItem(
+            title: nil,
+            style: .plain,
+            target: self,
+            action: #selector(self.favoriteButtonTap(_:))
+        )
         navigationItem.rightBarButtonItem = favoriteButtonItem
+
+        store.favoriteButtonTitlePublisher
+            .map(Optional.some)
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.title, on: favoriteButtonItem)
+            .store(in: &cancellables)
+
+        action.load()
     }
-    
-    @objc private func favoriteButtonTap(_ sender: UIBarButtonItem) {
-        if favoriteModel.favorites.first(where: { $0.url == repository.url }) == nil {
-            favoriteModel.addFavorite(repository)
-            favoriteButtonItem.title = "Remove"
-        } else {
-            favoriteModel.removeFavorite(repository)
-            favoriteButtonItem.title = "Add"
-        }
+
+    @objc private func favoriteButtonTap(_: UIBarButtonItem) {
+        action.toggleFavorite()
     }
 }

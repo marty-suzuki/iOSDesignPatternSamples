@@ -1,6 +1,6 @@
-# iOSDesignPatternSamples (MVC)
+# iOSDesignPatternSamples (Flux)
 
-This is Github user search demo app that made with MVC design pattern.
+This is Github user search demo app that made with Flux design pattern.
 
 ## Application Structure
 
@@ -8,14 +8,45 @@ This is Github user search demo app that made with MVC design pattern.
 
 ## ViewControllers
 
-- [SearchViewController](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewController.swift) -> Search Github user and show user result list
-- [FavoriteViewController](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewController.swift) -> Show local on memory favorite repositories
-- [UserRepositoryViewController](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewController.swift) -> Show Github user's repositories
-- [RepositoryViewController](./iOSDesignPatternSamples/Sources/UI/Repository/RepositoryViewController.swift) -> Show a repository and add / remove local on memory favorites
+### [SearchViewController](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewController.swift)
+Search Github user and show user result list
+
+![](./Images/search.png)
+
+- [SearchViewDataSource](./iOSDesignPatternSamples/Sources/UI/Search/SearchViewDataSource.swift) <- Adapt UITableViewDataSource and UITableViewDelegate
+- [SearchAction](./iOSDesignPatternSamples/Sources/UI/Search/Flux/SearchAction.swift)
+- [SearchStore](./iOSDesignPatternSamples/Sources/UI/Search/Flux/SearchStore.swift)
+
+### [FavoriteViewController](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewController.swift)
+Show local on memory favorite repositories
+
+![](./Images/favorite.png)
+
+- [FavoriteViewDataSource](./iOSDesignPatternSamples/Sources/UI/Favorite/FavoriteViewDataSource.swift) <- Adapt UITableViewDataSource and UITableViewDelegate
+- [FavoriteAction](./iOSDesignPatternSamples/Sources/UI/Favorite/Flux/FavoriteAction.swift)
+- [FavoriteStore](./iOSDesignPatternSamples/Sources/UI/Favorite/Flux/FavoriteStore.swift)
+
+### [UserRepositoryViewController](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewController.swift)
+Show Github user's repositories
+
+![](./Images/user_repository.png)
+
+- [UserRepositoryViewDataSource](./iOSDesignPatternSamples/Sources/UI/UserRepository/UserRepositoryViewDataSource.swift) <- Adapt UITableViewDataSource and UITableViewDelegate
+- [UserRepositoryAction](./iOSDesignPatternSamples/Sources/UI/UserRepository/Flux/UserRepositoryAction.swift)
+- [UserRepositoryStore](./iOSDesignPatternSamples/Sources/UI/UserRepository/Flux/UserRepositoryStore.swift)
+
+### [RepositoryViewController](./iOSDesignPatternSamples/Sources/UI/Repository/RepositoryViewController.swift)
+Show a repository and add / remove local on memory favorites
+
+![](./Images/repository.png)
+
+- [RepositoryAction](./iOSDesignPatternSamples/Sources/UI/Repository/Flux/RepositoryAction.swift)
+- [RepositoryStore](./iOSDesignPatternSamples/Sources/UI/Repository/Flux/RepositoryStore.swift)
+
 
 ## How to add / remove favorites
 
-You can add / remove favorite repositories in RepositoryViewController, but an Array of favorite repository is hold by FavoriteViewController.
+You can add / remove favorite repositories in RepositoryViewController. Array of favorite repository is hold by FavoriteModel that injected to each actions, therefore you can use its reference everywhere!
 
 ## Run
 

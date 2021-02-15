@@ -9,17 +9,10 @@
 import Combine
 import GithubKit
 
-protocol RepositoryModelDelegate: AnyObject {
-    func repositoryModel(_ repositoryModel: RepositoryModel, didChange isFetchingRepositories: Bool)
-    func repositoryModel(_ repositoryModel: RepositoryModel, didChange repositories: [Repository])
-    func repositoryModel(_ repositoryModel: RepositoryModel, didChange totalCount: Int)
-}
-
 protocol RepositoryModelType: AnyObject {
-    var user: User { get }
-    var delegate: RepositoryModelDelegate? { get set }
-    var query: String { get }
-    var totalCount: Int { get }
+    var repositoriesPublisher: Published<[Repository]>.Publisher { get }
+    var isFetchingRepositoriesPublisher: Published<Bool>.Publisher { get }
+    var totalCountPublisher: Published<Int>.Publisher { get }
     var repositories: [Repository] { get }
     var isFetchingRepositories: Bool { get }
     func fetchRepositories()
@@ -27,60 +20,88 @@ protocol RepositoryModelType: AnyObject {
 
 final class RepositoryModel: RepositoryModelType {
 
-    let user: User
-    weak var delegate: RepositoryModelDelegate?
-
-    private(set) var query: String = ""
-    private(set) var totalCount: Int = 0 {
-        didSet {
-            delegate?.repositoryModel(self, didChange: totalCount)
-        }
+    var repositoriesPublisher: Published<[Repository]>.Publisher {
+        $repositories
     }
-    private(set) var repositories: [Repository] = [] {
-        didSet {
-            delegate?.repositoryModel(self, didChange: repositories)
-        }
+    var isFetchingRepositoriesPublisher: Published<Bool>.Publisher {
+        $isFetchingRepositories
     }
-    private(set) var isFetchingRepositories = false {
-        didSet {
-            delegate?.repositoryModel(self, didChange: isFetchingRepositories)
-        }
+    var totalCountPublisher: Published<Int>.Publisher {
+        $totalCount
     }
 
+    @Published
+    private(set) var repositories: [Repository] = []
+    @Published
+    private(set) var isFetchingRepositories = false
+    @Published
+    private var totalCount = 0
+    @Published
     private var pageInfo: PageInfo?
-    private var cancellable: AnyCancellable?
-    private let sendRequest: SendRequest<UserNodeRequest>
+
+    private var cancellables = Set<AnyCancellable>()
+
+    private let _fetchRepositories = PassthroughSubject<Void, Never>()
 
     init(
         user: User,
         sendRequest: @escaping SendRequest<UserNodeRequest>
     ) {
-        self.user = user
-        self.sendRequest = sendRequest
+        let requestTrigger = $pageInfo
+            .map { (user, $0) }
+
+        let initialLoadRequest = _fetchRepositories
+            .flatMap { _ in
+                requestTrigger
+                    .prefix(1)
+            }
+            .filter { $1 == nil }
+
+        let loadMoreRequest = _fetchRepositories
+            .flatMap { _ in
+                requestTrigger
+                    .prefix(1)
+            }
+            .filter { $1 != nil }
+
+        let willStartRequest = initialLoadRequest
+            .merge(with: loadMoreRequest)
+            .flatMap { user, pageInfo -> AnyPublisher<UserNodeRequest, Never> in
+                if let pageInfo = pageInfo, !pageInfo.hasNextPage {
+                    return Empty().eraseToAnyPublisher()
+                }
+                let request = UserNodeRequest(id: user.id, after: pageInfo?.endCursor)
+                return Just(request).eraseToAnyPublisher()
+            }
+            .removeDuplicates { $0.id == $1.id && $0.after == $1.after }
+
+        willStartRequest
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isFetchingRepositories = true
+            })
+            .flatMap { request -> AnyPublisher<Response<Repository>, Never> in
+                sendRequest(request)
+                    .catch { _ -> AnyPublisher<Response<Repository>, Never> in
+                        Empty().eraseToAnyPublisher()
+                    }
+                    .prefix(1)
+                    .eraseToAnyPublisher()
+            }
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isFetchingRepositories = false
+            })
+            .sink { [weak self] response in
+                guard let me = self else {
+                    return
+                }
+                me.pageInfo = response.pageInfo
+                me.repositories = me.repositories + response.nodes
+                me.totalCount = response.totalCount
+            }
+            .store(in: &cancellables)
     }
 
     func fetchRepositories() {
-        if cancellable != nil { return }
-        if let pageInfo = pageInfo, !pageInfo.hasNextPage || pageInfo.endCursor == nil { return }
-        isFetchingRepositories = true
-        let request = UserNodeRequest(id: user.id, after: pageInfo?.endCursor)
-        self.cancellable = sendRequest(request) { [weak self] in
-            guard let me = self else {
-                return
-            }
-
-            switch $0 {
-            case .success(let value):
-                me.pageInfo = value.pageInfo
-                me.repositories.append(contentsOf: value.nodes)
-                me.totalCount = value.totalCount
-
-            case .failure(let error):
-                print(error)
-            }
-
-            me.isFetchingRepositories = false
-            me.cancellable = nil
-        }
+        _fetchRepositories.send()
     }
 }
